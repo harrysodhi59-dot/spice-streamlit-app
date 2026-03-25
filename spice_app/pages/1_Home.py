@@ -277,30 +277,15 @@ with left_hero:
     """, unsafe_allow_html=True)
 
 with right_hero:
-    st.markdown('<div class="image-card">', unsafe_allow_html=True)
-
     if os.path.exists(image_path):
         st.image(image_path, use_container_width=True)
-    else:
         st.markdown("""
-        <div style="
-            width:100%;
-            padding:3rem 1rem;
-            text-align:center;
-            color:#CBD5E1;
-            font-size:1rem;
-        ">
-            Image not found.<br>
-            Save your file as <strong>solar_image.png</strong> in the same folder as this page.
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("""
         <div class="image-caption">
             Real-world solar installation context aligned with SPICE stakeholder communication.
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+    else:
+        st.error("Image not found")
 
 # -----------------------------
 # PROBLEM + PURPOSE
