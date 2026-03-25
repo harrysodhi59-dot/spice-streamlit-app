@@ -1,19 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import os
-import streamlit as st
-import pandas as pd
 import io
-
-def shared_uploader():
-    uploaded_file = st.sidebar.file_uploader("Upload CSV", type=["csv"], key="shared_csv_uploader")
-    if uploaded_file is not None:
-        df = pd.read_csv(uploaded_file)
-        st.session_state["df"] = df
-        st.session_state["uploaded_data"] = df
-        st.session_state["uploaded_file_bytes"] = uploaded_file.getvalue()
-        st.session_state["uploaded_file_name"] = uploaded_file.name
 
 st.set_page_config(page_title="Real Site Validation", layout="wide")
 
@@ -23,47 +11,47 @@ st.set_page_config(page_title="Real Site Validation", layout="wide")
 st.markdown("""
 <style>
 .main-title {
-    font-size: 2.3rem;
+    font-size: 2.6rem;
     font-weight: 800;
     color: #16325B;
     margin-bottom: 0.2rem;
 }
 .sub-text {
-    font-size: 1rem;
+    font-size: 1.05rem;
     color: #4F647A;
     margin-bottom: 1.5rem;
 }
 .section-title {
-    font-size: 1.3rem;
+    font-size: 1.35rem;
     font-weight: 700;
     color: #16325B;
-    margin-top: 1.2rem;
+    margin-top: 1.4rem;
     margin-bottom: 0.8rem;
-}
-.info-card {
-    background: linear-gradient(135deg, #F8FBFF, #EEF5FF);
-    padding: 18px;
-    border-radius: 16px;
-    border: 1px solid #D7E6F5;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
-    margin-bottom: 12px;
 }
 .metric-card {
     background: white;
     padding: 18px;
     border-radius: 16px;
     border: 1px solid #E2E8F0;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
     text-align: center;
 }
 .metric-value {
-    font-size: 1.6rem;
+    font-size: 1.7rem;
     font-weight: 800;
     color: #16325B;
 }
 .metric-label {
     font-size: 0.95rem;
     color: #5B6B7A;
+}
+.info-card {
+    background: linear-gradient(135deg, #F8FBFF, #EEF5FF);
+    padding: 18px;
+    border-radius: 16px;
+    border: 1px solid #D7E6F5;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    margin-bottom: 12px;
 }
 .recommend-box {
     background: #F9FCFF;
@@ -76,36 +64,21 @@ st.markdown("""
 .footer-box {
     background: linear-gradient(135deg, #16325B, #2E8BC0);
     color: white;
-    padding: 20px;
+    padding: 22px;
     border-radius: 18px;
-    margin-top: 20px;
+    margin-top: 18px;
 }
 .small-note {
     color: #6B7280;
     font-size: 0.9rem;
+    margin-top: 10px;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # =========================
-# HEADER
-# =========================
-st.markdown('<div class="main-title">Page 7 — Real Site Validation</div>', unsafe_allow_html=True)
-st.markdown(
-    '<div class="sub-text">This page validates uploaded solar project data and highlights performance, financial, and environmental insights for the SPICE project.</div>',
-    unsafe_allow_html=True
-)
-
-# =========================
 # LOAD DATA
 # =========================
-@st.cache_data
-def load_csv_file(path):
-    return pd.read_csv(path)
-import streamlit as st
-import pandas as pd
-import io
-
 def load_data():
     if "df" in st.session_state and st.session_state["df"] is not None:
         return st.session_state["df"]
@@ -117,48 +90,25 @@ def load_data():
         try:
             return pd.read_csv(io.BytesIO(st.session_state["uploaded_file_bytes"]))
         except Exception:
-            return None
+            pass
 
     return None
 
 df = load_data()
 
+# =========================
+# HEADER
+# =========================
+st.markdown('<div class="main-title">Page 7 — Real Site Validation</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="sub-text">This page validates uploaded solar project data and highlights performance, financial, and environmental insights for the SPICE project.</div>',
+    unsafe_allow_html=True
+)
+
 if df is None:
     st.warning("No dataset is currently available. Please upload your CSV on the Home page first.")
-    st.info("Tip: upload on Home page, then open this page in the same app session.")
+    st.info("After uploading, open this page in the same app session without refreshing the whole app.")
     st.write("Current session keys:", list(st.session_state.keys()))
-    st.stop()
-
-def load_data():
-    if "df" in st.session_state and st.session_state["df"] is not None:
-        return st.session_state["df"]
-
-    if "uploaded_data" in st.session_state and st.session_state["uploaded_data"] is not None:
-        return st.session_state["uploaded_data"]
-
-    if "uploaded_file_path" in st.session_state:
-        file_path = st.session_state["uploaded_file_path"]
-        if os.path.exists(file_path):
-            return load_csv_file(file_path)
-
-    possible_files = [
-        "uploaded_dataset.csv",
-        "data.csv",
-        "dataset.csv",
-        "solar_data.csv"
-    ]
-
-    for file in possible_files:
-        if os.path.exists(file):
-            return load_csv_file(file)
-
-    return None
-
-df = load_data()
-
-if df is None:
-    st.warning("No dataset is currently available. Please upload your CSV on the Home page first.")
-    st.info("Tip: save uploaded data using st.session_state['df'] = df on the Home page.")
     st.stop()
 
 df = df.copy()
@@ -180,7 +130,7 @@ co2_col = find_column(["co2", "carbon", "emission"])
 tilt_col = find_column(["tilt"])
 azimuth_col = find_column(["azimuth", "orientation"])
 loss_col = find_column(["loss"])
-size_col = find_column(["system_size", "size", "capacity", "kw"])
+size_col = find_column(["system_size", "capacity", "kw", "size"])
 
 for col in [generation_col, revenue_col, co2_col, tilt_col, azimuth_col, loss_col, size_col]:
     if col is not None:
@@ -191,9 +141,9 @@ for col in [generation_col, revenue_col, co2_col, tilt_col, azimuth_col, loss_co
 # =========================
 st.markdown('<div class="section-title">Uploaded Dataset Overview</div>', unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns(3)
+c1, c2, c3 = st.columns(3)
 
-with col1:
+with c1:
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{df.shape[0]:,}</div>
@@ -201,7 +151,7 @@ with col1:
     </div>
     """, unsafe_allow_html=True)
 
-with col2:
+with c2:
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{df.shape[1]:,}</div>
@@ -209,11 +159,11 @@ with col2:
     </div>
     """, unsafe_allow_html=True)
 
-with col3:
+with c3:
     st.markdown(f"""
     <div class="metric-card">
-        <div class="metric-value">{df.isnull().sum().sum():,}</div>
-        <div class="metric-label">Total Missing Values</div>
+        <div class="metric-value">{int(df.isnull().sum().sum()):,}</div>
+        <div class="metric-label">Missing Values</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -278,13 +228,14 @@ insights = []
 if generation_col:
     min_gen = df[generation_col].min()
     max_gen = df[generation_col].max()
-    insights.append(
-        f"The dataset includes <b>{generation_col}</b>, with values ranging from <b>{min_gen:,.2f}</b> to <b>{max_gen:,.2f}</b>. This helps validate solar production performance."
-    )
+    if not pd.isna(min_gen) and not pd.isna(max_gen):
+        insights.append(
+            f"The dataset includes <b>{generation_col}</b>, with values ranging from <b>{min_gen:,.2f}</b> to <b>{max_gen:,.2f}</b>. This helps validate solar production performance."
+        )
 
 if revenue_col:
     insights.append(
-        f"The <b>{revenue_col}</b> column supports financial validation and helps compare system performance with expected economic return."
+        f"The <b>{revenue_col}</b> column supports financial validation and helps compare technical performance with expected economic return."
     )
 
 if co2_col:
@@ -294,7 +245,7 @@ if co2_col:
 
 if tilt_col or azimuth_col:
     insights.append(
-        "Panel tilt and orientation data are available, which helps validate whether system design choices are affecting output."
+        "Panel tilt and orientation data are available, which helps validate whether design choices are influencing output."
     )
 
 if loss_col:
@@ -306,32 +257,32 @@ if generation_col and revenue_col:
     corr = df[[generation_col, revenue_col]].corr().iloc[0, 1]
     if not pd.isna(corr):
         insights.append(
-            f"The correlation between energy output and revenue is <b>{corr:.2f}</b>, which gives a useful signal for business-side validation."
+            f"The correlation between energy output and revenue is <b>{corr:.2f}</b>, giving a useful signal for business-side validation."
         )
 
 if not insights:
     insights.append(
-        "The dataset loaded successfully, but expected solar-related columns were not clearly detected. You may need to rename columns for stronger analysis."
+        "The dataset loaded successfully, but expected solar-related columns were not clearly detected. Rename the columns if you want deeper analysis on this page."
     )
 
 for item in insights:
     st.markdown(f'<div class="info-card">{item}</div>', unsafe_allow_html=True)
 
 # =========================
-# MISSING VALUES
+# DATA QUALITY CHECK
 # =========================
 st.markdown('<div class="section-title">Data Quality Check</div>', unsafe_allow_html=True)
 
 missing_summary = df.isnull().sum()
 missing_summary = missing_summary[missing_summary > 0].sort_values(ascending=False)
 
-left, right = st.columns([1.2, 1])
+left, right = st.columns([1.25, 1])
 
 with left:
     st.markdown("""
     <div class="info-card">
     <b>Why this validation matters:</b><br><br>
-    This page checks whether the uploaded dataset is clean enough and complete enough to support real analysis.
+    This page checks whether the uploaded dataset is complete enough and clean enough to support real analysis.
     It also helps confirm whether the data can be used for performance tracking, financial estimation, and environmental reporting.
     </div>
     """, unsafe_allow_html=True)
@@ -352,14 +303,14 @@ st.markdown('<div class="section-title">Recommendations</div>', unsafe_allow_htm
 st.markdown("""
 <div class="recommend-box">
 <b>1. Standardize uploaded data structure</b><br>
-Keep column names consistent across all uploaded solar datasets so every page in the Streamlit app can read and analyze the file properly.
+Keep column names consistent across datasets so every page in the Streamlit app can read and analyze the file properly.
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="recommend-box">
-<b>2. Save uploaded dataset in session state</b><br>
-On the Home page, store the uploaded dataframe using <code>st.session_state['df'] = df</code> so this page can access it directly.
+<b>2. Keep the upload active in the same session</b><br>
+Upload the file on the Home page and open this page in the same app session so the dataframe stays available.
 </div>
 """, unsafe_allow_html=True)
 
@@ -380,7 +331,7 @@ This page should not only validate the dataset, but also explain why the data ma
 st.markdown("""
 <div class="recommend-box">
 <b>5. Prepare for predictive modeling</b><br>
-Once the dataset structure is stable, this validation page can support the next phase of the project by feeding clean data into machine learning models.
+Once the dataset structure is stable, this validation page can support the next phase of the project by feeding cleaner data into machine learning models.
 </div>
 """, unsafe_allow_html=True)
 
@@ -394,7 +345,7 @@ st.markdown("""
     <h4 style="margin-top:0;">Data Alchemists — SPICE Project</h4>
     <p style="margin-bottom:0;">
         This page confirms whether the uploaded dataset is usable for analysis and helps translate raw solar records into meaningful project insights.
-        With proper file handling and consistent session state management, this becomes a strong final validation page in the application.
+        With proper file handling and a stable upload session, this becomes a strong final validation page in the application.
     </p>
 </div>
 """, unsafe_allow_html=True)
