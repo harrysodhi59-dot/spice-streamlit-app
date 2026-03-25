@@ -1,28 +1,57 @@
-df = shared_uploader()
-import streamlit as st
-import pandas as pd
-import io
-
-def shared_uploader():
-    uploaded_file = st.sidebar.file_uploader("Upload CSV", type=["csv"], key="global_uploader")
-
-    if uploaded_file is not None:
-        df = pd.read_csv(uploaded_file)
-
-        st.session_state["df"] = df
-        st.session_state["uploaded_data"] = df
-        st.session_state["uploaded_file_bytes"] = uploaded_file.getvalue()
-        st.session_state["uploaded_file_name"] = uploaded_file.name
-
-        return df
-
-    return None
 import streamlit as st
 import pandas as pd
 import numpy as np
 import io
 
 st.set_page_config(page_title="Real Site Validation", layout="wide")
+
+# =========================
+# SHARED SIDEBAR UPLOADER
+# =========================
+def shared_uploader():
+    st.sidebar.markdown("### Dataset Upload")
+    uploaded_file = st.sidebar.file_uploader(
+        "Upload CSV",
+        type=["csv"],
+        key="global_uploader"
+    )
+
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+        st.session_state["df"] = df
+        st.session_state["uploaded_data"] = df
+        st.session_state["uploaded_file_bytes"] = uploaded_file.getvalue()
+        st.session_state["uploaded_file_name"] = uploaded_file.name
+        st.sidebar.success("Dataset Loaded ✅")
+        return df
+
+    return None
+
+# Run sidebar uploader
+uploaded_df = shared_uploader()
+
+# =========================
+# LOAD DATA
+# =========================
+def load_data():
+    if uploaded_df is not None:
+        return uploaded_df
+
+    if "df" in st.session_state and st.session_state["df"] is not None:
+        return st.session_state["df"]
+
+    if "uploaded_data" in st.session_state and st.session_state["uploaded_data"] is not None:
+        return st.session_state["uploaded_data"]
+
+    if "uploaded_file_bytes" in st.session_state:
+        try:
+            return pd.read_csv(io.BytesIO(st.session_state["uploaded_file_bytes"]))
+        except Exception:
+            pass
+
+    return None
+
+df = load_data()
 
 # =========================
 # PAGE STYLING
@@ -96,26 +125,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================
-# LOAD DATA
-# =========================
-def load_data():
-    if "df" in st.session_state and st.session_state["df"] is not None:
-        return st.session_state["df"]
-
-    if "uploaded_data" in st.session_state and st.session_state["uploaded_data"] is not None:
-        return st.session_state["uploaded_data"]
-
-    if "uploaded_file_bytes" in st.session_state:
-        try:
-            return pd.read_csv(io.BytesIO(st.session_state["uploaded_file_bytes"]))
-        except Exception:
-            pass
-
-    return None
-
-df = load_data()
-
-# =========================
 # HEADER
 # =========================
 st.markdown('<div class="main-title">Page 7 — Real Site Validation</div>', unsafe_allow_html=True)
@@ -125,10 +134,8 @@ st.markdown(
 )
 
 if df is None:
-    if "df" in st.session_state:
-        df = st.session_state["df"]
-if df is None:
-    st.warning("No dataset available. Upload using sidebar.")
+    st.warning("No dataset is currently available. Upload your CSV using the sidebar uploader.")
+    st.info("Once the file is uploaded from the sidebar, this page will load the dataset automatically.")
     st.stop()
 
 df = df.copy()
@@ -329,8 +336,8 @@ Keep column names consistent across datasets so every page in the Streamlit app 
 
 st.markdown("""
 <div class="recommend-box">
-<b>2. Keep the upload active in the same session</b><br>
-Upload the file on the Home page and open this page in the same app session so the dataframe stays available.
+<b>2. Use the sidebar uploader for reliable access</b><br>
+This page includes its own uploader so the dataset can be loaded even if the Home page was not opened first.
 </div>
 """, unsafe_allow_html=True)
 
@@ -365,7 +372,7 @@ st.markdown("""
     <h4 style="margin-top:0;">Data Alchemists — SPICE Project</h4>
     <p style="margin-bottom:0;">
         This page confirms whether the uploaded dataset is usable for analysis and helps translate raw solar records into meaningful project insights.
-        With proper file handling and a stable upload session, this becomes a strong final validation page in the application.
+        With a built-in sidebar uploader, this page becomes more reliable and easier to use across the app.
     </p>
 </div>
 """, unsafe_allow_html=True)
