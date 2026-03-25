@@ -1,3 +1,22 @@
+df = shared_uploader()
+import streamlit as st
+import pandas as pd
+import io
+
+def shared_uploader():
+    uploaded_file = st.sidebar.file_uploader("Upload CSV", type=["csv"], key="global_uploader")
+
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+
+        st.session_state["df"] = df
+        st.session_state["uploaded_data"] = df
+        st.session_state["uploaded_file_bytes"] = uploaded_file.getvalue()
+        st.session_state["uploaded_file_name"] = uploaded_file.name
+
+        return df
+
+    return None
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -106,9 +125,10 @@ st.markdown(
 )
 
 if df is None:
-    st.warning("No dataset is currently available. Please upload your CSV on the Home page first.")
-    st.info("After uploading, open this page in the same app session without refreshing the whole app.")
-    st.write("Current session keys:", list(st.session_state.keys()))
+    if "df" in st.session_state:
+        df = st.session_state["df"]
+if df is None:
+    st.warning("No dataset available. Upload using sidebar.")
     st.stop()
 
 df = df.copy()
