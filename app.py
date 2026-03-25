@@ -2,6 +2,10 @@ import streamlit as st
 import base64
 from pathlib import Path
 
+import streamlit as st
+st.title("TESTING CURRENT FILE")
+st.stop()
+
 st.set_page_config(
     page_title="SPICE Solar Analytics Dashboard",
     page_icon="☀️",
