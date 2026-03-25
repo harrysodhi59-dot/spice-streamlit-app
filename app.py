@@ -240,4 +240,3 @@ st.markdown("""
 <b>Next step:</b> Use sidebar to explore full dashboard pages.
 </div>
 """, unsafe_allow_html=True)
-```
