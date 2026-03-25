@@ -1,7 +1,8 @@
-```python
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import base64
+from pathlib import Path
 
 st.set_page_config(
     page_title="Solar Simulation",
@@ -10,10 +11,16 @@ st.set_page_config(
 )
 
 # -----------------------------
-# Banner Image (NorQuest)
+# Helper: convert local image to base64
 # -----------------------------
-st.image("images/norquest_banner.png", use_container_width=True)
-st.markdown("<br>", unsafe_allow_html=True)
+def get_base64_image(image_path):
+    path = Path(image_path)
+    if not path.exists():
+        return None
+    with open(path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode()
+
+banner_base64 = get_base64_image("images/norquest_banner.png")
 
 # -----------------------------
 # Styling
@@ -25,7 +32,7 @@ html, body, [class*="css"] {
 }
 
 .block-container {
-    padding-top: 2rem;
+    padding-top: 1.5rem;
     padding-bottom: 2rem;
     padding-left: 3rem;
     padding-right: 3rem;
@@ -105,8 +112,112 @@ html, body, [class*="css"] {
     color: #234;
     margin-top: 1rem;
 }
+
+.banner-fallback {
+    background: linear-gradient(135deg, #0B3C5D, #1E6F5C);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    color: white;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 16px 36px rgba(0,0,0,0.18);
+}
+
+.banner-fallback h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 0.6rem;
+}
+
+.banner-fallback p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 850px;
+}
+
+.banner-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.16);
+    color: #ffffff;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    margin-bottom: 1rem;
+}
 </style>
 """, unsafe_allow_html=True)
+
+# -----------------------------
+# Premium banner section
+# -----------------------------
+if banner_base64:
+    st.markdown(
+        f"""
+        <div style="
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            min-height: 360px;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.18);
+            background-image:
+                linear-gradient(90deg, rgba(11,60,93,0.88) 0%, rgba(30,111,92,0.78) 55%, rgba(11,60,93,0.52) 100%),
+                url('data:image/png;base64,{banner_base64}');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+        ">
+            <div style="padding: 2.8rem 3rem; max-width: 760px; color: white;">
+                <div style="
+                    display: inline-block;
+                    background: rgba(255,255,255,0.16);
+                    padding: 0.45rem 0.85rem;
+                    border-radius: 999px;
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    margin-bottom: 1rem;
+                    letter-spacing: 0.4px;
+                ">
+                    NORQUEST COLLEGE • TEAM DATA ALCHEMISTS
+                </div>
+                <h1 style="
+                    font-size: 3rem;
+                    font-weight: 800;
+                    margin-bottom: 0.75rem;
+                    line-height: 1.15;
+                ">
+                    SPICE Solar Simulation Dashboard
+                </h1>
+                <p style="
+                    font-size: 1.08rem;
+                    line-height: 1.75;
+                    margin-bottom: 0;
+                    max-width: 700px;
+                ">
+                    Explore how system size, tilt, and azimuth influence projected solar output.
+                    This simulation page supports scenario-based energy analysis for data-driven
+                    solar planning, investment communication, and sustainability reporting.
+                </p>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+else:
+    st.markdown("""
+    <div class="banner-fallback">
+        <div class="banner-tag">NORQUEST COLLEGE • TEAM DATA ALCHEMISTS</div>
+        <h1>SPICE Solar Simulation Dashboard</h1>
+        <p>
+            Explore how system size, tilt, and azimuth influence projected solar output.
+            This simulation page supports scenario-based energy analysis for data-driven
+            solar planning, investment communication, and sustainability reporting.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    st.warning("Banner image not found at: images/norquest_banner.png")
 
 # -----------------------------
 # Data loading
@@ -387,4 +498,3 @@ st.markdown("""
     projected output into savings, payback, and project value.
 </div>
 """, unsafe_allow_html=True)
-```
