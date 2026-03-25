@@ -1,9 +1,7 @@
 import streamlit as st
 
-st.title("My First SPICE App")
+st.set_page_config(page_title="SPICE Solar Impact Dashboard", layout="wide")
 
-st.write("Hello 👋 This is my solar dashboard")
-
-system_size = st.slider("System Size (kW)", 1, 100, 10)
-
-st.write("You selected:", system_size)
+st.title("SPICE Solar Impact Dashboard")
+st.write("Use the sidebar to open the project pages.")
+st.success("Start with the Home page in the sidebar."))
