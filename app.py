@@ -1,26 +1,16 @@
 import streamlit as st
-import base64
-from pathlib import Path
-
-import streamlit as st
-st.title("TESTING CURRENT FILE")
-st.stop()
+import pandas as pd
+import plotly.express as px
 
 st.set_page_config(
-    page_title="SPICE Solar Analytics Dashboard",
+    page_title="Solar Simulation",
     page_icon="☀️",
     layout="wide"
 )
 
-def get_base64_image(image_path):
-    path = Path(image_path)
-    if not path.exists():
-        return None
-    with open(path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode()
-
-banner_base64 = get_base64_image("images/norquest_banner.png")
-
+# -----------------------------
+# Styling
+# -----------------------------
 st.markdown("""
 <style>
 html, body, [class*="css"] {
@@ -34,169 +24,359 @@ html, body, [class*="css"] {
     padding-right: 3rem;
 }
 
-.section-card {
-    background-color: white;
-    padding: 1.2rem;
-    border-radius: 18px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+.hero {
+    background: linear-gradient(90deg, #1E6F5C, #0B3C5D);
+    padding: 2.5rem;
+    border-radius: 22px;
+    color: white;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 16px 36px rgba(0,0,0,0.14);
+}
+
+.hero h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 0.6rem;
+}
+
+.hero p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 900px;
+}
+
+.card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.08);
     margin-bottom: 1rem;
 }
 
-.feature-card {
-    background-color: white;
-    padding: 1rem;
+.kpi-card {
+    background: white;
     border-radius: 18px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    padding: 1.2rem;
     text-align: center;
-    min-height: 180px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.08);
 }
 
-.small-text {
-    color: #475569;
-    font-size: 16px;
-    line-height: 1.7;
+.kpi-title {
+    color: #0B3C5D;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.kpi-value {
+    color: #1E6F5C;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-top: 0.35rem;
+}
+
+.section-title {
+    color: #0B3C5D;
+    font-size: 1.55rem;
+    font-weight: 800;
+    margin-top: 0.6rem;
+    margin-bottom: 0.8rem;
+}
+
+.sub-label {
+    color: #1E6F5C;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.4rem;
+}
+
+.footer-note {
+    background: #EEF5F3;
+    border-radius: 16px;
+    padding: 1rem 1.2rem;
+    color: #234;
+    margin-top: 1rem;
 }
 </style>
 """, unsafe_allow_html=True)
 
-if banner_base64:
-    st.markdown(
-        f"""
-        <div style="
-            position: relative;
-            border-radius: 24px;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-            min-height: 320px;
-            box-shadow: 0 16px 36px rgba(0,0,0,0.18);
-            background-image:
-                linear-gradient(90deg, rgba(11,60,93,0.88) 0%, rgba(30,111,92,0.78) 55%, rgba(11,60,93,0.52) 100%),
-                url('data:image/png;base64,{banner_base64}');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-        ">
-            <div style="padding: 2.8rem 3rem; max-width: 760px; color: white;">
-                <div style="
-                    display: inline-block;
-                    background: rgba(255,255,255,0.16);
-                    padding: 0.45rem 0.85rem;
-                    border-radius: 999px;
-                    font-size: 0.85rem;
-                    font-weight: 700;
-                    margin-bottom: 1rem;
-                    letter-spacing: 0.4px;
-                ">
-                    NORQUEST COLLEGE • TEAM DATA ALCHEMISTS
-                </div>
-                <h1 style="
-                    font-size: 3rem;
-                    font-weight: 800;
-                    margin-bottom: 0.75rem;
-                    line-height: 1.15;
-                ">
-                    SPICE Solar Analytics Dashboard
-                </h1>
-                <p style="
-                    font-size: 1.08rem;
-                    line-height: 1.75;
-                    margin-bottom: 0;
-                    max-width: 700px;
-                ">
-                    A data-driven platform developed by Team Data Alchemists to analyze solar energy
-                    performance, financial return, and environmental impact.
-                </p>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+# -----------------------------
+# Data loading
+# -----------------------------
+@st.cache_data
+def load_main_data():
+    return pd.read_excel("data/sample_250000.xlsx")
+
+@st.cache_data
+def load_scenario_data():
+    return pd.read_csv("data/St_Augustine_combined_simulated_monthly.csv")
+
+try:
+    df = load_main_data()
+except Exception as e:
+    st.error(f"Could not load sample_250000.xlsx: {e}")
+    st.stop()
+
+try:
+    scenario_df = load_scenario_data()
+except Exception as e:
+    st.error(f"Could not load St_Augustine_combined_simulated_monthly.csv: {e}")
+    st.stop()
+
+# -----------------------------
+# Clean columns
+# -----------------------------
+df.columns = [str(c).strip() for c in df.columns]
+scenario_df.columns = [str(c).strip() for c in scenario_df.columns]
+
+# -----------------------------
+# Prepare month fields
+# -----------------------------
+if "datetime" in df.columns:
+    df["datetime"] = pd.to_datetime(df["datetime"], errors="coerce")
+    df["month_num"] = df["datetime"].dt.month
+    df["month_name"] = df["datetime"].dt.strftime("%b")
 else:
-    st.error("Banner image not found. Make sure this file exists: images/norquest_banner.png")
+    st.error("The file sample_250000.xlsx must contain a 'datetime' column.")
+    st.write("Columns found:", list(df.columns))
+    st.stop()
 
-st.markdown("## Project Overview")
+# -----------------------------
+# Detect target column
+# -----------------------------
+target_col = None
+for col in ["power_per_kw", "power", "energy_per_kw", "P"]:
+    if col in df.columns:
+        target_col = col
+        break
 
-col1, col2 = st.columns([1.1, 1])
+if target_col is None:
+    st.error("No expected power column found.")
+    st.write("Expected one of: power_per_kw, power, energy_per_kw, P")
+    st.write("Columns found:", list(df.columns))
+    st.stop()
 
-with col1:
-    st.markdown("""
-        <div class="section-card">
-            <h3>About the Project</h3>
-            <p class="small-text">
-                The SPICE Solar Analytics Dashboard is designed to help users understand how
-                different solar system configurations affect energy generation, revenue, and
-                carbon reduction. It transforms raw data into meaningful insights that can
-                support investors, stakeholders, and decision-makers.
-            </p>
-            <p class="small-text">
-                The project combines exploratory data analysis, system performance metrics,
-                financial indicators, and sustainability-focused reporting in one unified platform.
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    st.markdown("""
-        <div class="section-card">
-            <h3>Institutional Context</h3>
-            <p class="small-text">
-                This dashboard is being developed at NorQuest College as part of the SPICE
-                Energy Conservation and Data Analytics initiative, with a focus on practical
-                machine learning, simulation, and stakeholder communication.
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("## Key Highlights")
-
-c1, c2, c3 = st.columns(3)
-
-with c1:
-    st.markdown("""
-        <div class="feature-card">
-            <h4>Energy Analytics</h4>
-            <p class="small-text">
-                Explore solar output, generation trends, and performance behaviour across
-                different system settings.
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
-
-with c2:
-    st.markdown("""
-        <div class="feature-card">
-            <h4>Financial Insights</h4>
-            <p class="small-text">
-                Evaluate estimated revenue, cost efficiency, and investment-related indicators
-                using interactive visuals.
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
-
-with c3:
-    st.markdown("""
-        <div class="feature-card">
-            <h4>Environmental Impact</h4>
-            <p class="small-text">
-                Understand how solar adoption contributes to carbon reduction and supports
-                sustainability goals.
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("## Team Data Alchemists")
-
+# -----------------------------
+# Hero
+# -----------------------------
 st.markdown("""
-<div class="section-card">
-    <p class="small-text">
-        This project is being developed by Team Data Alchemists as part of the SPICE
-        Energy Conservation and Data Analytics initiative. The dashboard reflects an
-        applied machine learning and analytics approach to solving real-world renewable
-        energy challenges.
+<div class="hero">
+    <div class="sub-label">Simulation & Design Analysis</div>
+    <h1>Solar Simulation</h1>
+    <p>
+        This page explores how system size, tilt, and azimuth relate to projected
+        solar output using the simulation dataset and scenario-based monthly reference data.
     </p>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("---")
-st.caption("SPICE Solar Analytics Dashboard | Developed by Team Data Alchemists")
+# -----------------------------
+# Sidebar controls
+# -----------------------------
+st.sidebar.header("Simulation Controls")
+
+system_size = st.sidebar.slider("System Size (kW)", 1, 100, 10)
+tilt = st.sidebar.slider("Tilt (degrees)", 0, 60, 30)
+azimuth = st.sidebar.slider("Azimuth (degrees)", -180, 180, 0)
+
+# -----------------------------
+# Filtering
+# -----------------------------
+filtered = df.copy()
+
+if "tilt" in filtered.columns:
+    filtered = filtered[filtered["tilt"].between(tilt - 5, tilt + 5)]
+
+if "azimuth" in filtered.columns:
+    filtered = filtered[filtered["azimuth"].between(azimuth - 15, azimuth + 15)]
+
+if filtered.empty:
+    filtered = df.copy()
+
+# -----------------------------
+# Monthly summary
+# -----------------------------
+monthly_summary = (
+    filtered.groupby(["month_num", "month_name"])[target_col]
+    .mean()
+    .reset_index()
+    .sort_values("month_num")
+)
+
+monthly_summary["estimated_kwh"] = (
+    monthly_summary[target_col] / 1000 * system_size * 24 * 30.4
+)
+
+annual_energy = monthly_summary["estimated_kwh"].sum()
+low_energy = annual_energy * 0.85
+avg_energy = annual_energy
+high_energy = annual_energy * 1.15
+
+# -----------------------------
+# KPI row
+# -----------------------------
+st.markdown("## Simulation Summary")
+
+k1, k2, k3, k4 = st.columns(4)
+
+with k1:
+    st.markdown(f"""
+    <div class="kpi-card">
+        <div class="kpi-title">Selected Size</div>
+        <div class="kpi-value">{system_size} kW</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with k2:
+    st.markdown(f"""
+    <div class="kpi-card">
+        <div class="kpi-title">Tilt</div>
+        <div class="kpi-value">{tilt}°</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with k3:
+    st.markdown(f"""
+    <div class="kpi-card">
+        <div class="kpi-title">Azimuth</div>
+        <div class="kpi-value">{azimuth}°</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with k4:
+    st.markdown(f"""
+    <div class="kpi-card">
+        <div class="kpi-title">Estimated Annual Output</div>
+        <div class="kpi-value">{annual_energy:,.0f} kWh</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# -----------------------------
+# Range
+# -----------------------------
+st.markdown("## Production Range")
+
+c1, c2, c3 = st.columns(3)
+c1.metric("Low Scenario", f"{low_energy:,.0f} kWh")
+c2.metric("Average Scenario", f"{avg_energy:,.0f} kWh")
+c3.metric("High Scenario", f"{high_energy:,.0f} kWh")
+
+# -----------------------------
+# Charts
+# -----------------------------
+left, right = st.columns(2)
+
+with left:
+    st.markdown("""
+    <div class="card">
+        <div class="sub-label">Seasonal Output</div>
+        <div class="section-title">Estimated Monthly Energy Production</div>
+    """, unsafe_allow_html=True)
+
+    fig_monthly = px.bar(
+        monthly_summary,
+        x="month_name",
+        y="estimated_kwh",
+        labels={"month_name": "Month", "estimated_kwh": "Estimated Energy (kWh)"}
+    )
+    fig_monthly.update_layout(
+        xaxis_title="Month",
+        yaxis_title="Estimated Energy (kWh)",
+        plot_bgcolor="white"
+    )
+    st.plotly_chart(fig_monthly, use_container_width=True)
+
+    st.markdown("""
+        <p>
+            This chart shows the projected monthly production pattern based on the selected
+            system configuration and filtered simulation records.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with right:
+    st.markdown("""
+    <div class="card">
+        <div class="sub-label">Scenario Framing</div>
+        <div class="section-title">Low / Average / High Annual Output</div>
+    """, unsafe_allow_html=True)
+
+    scenario_chart = pd.DataFrame({
+        "Scenario": ["Low", "Average", "High"],
+        "Annual Energy (kWh)": [low_energy, avg_energy, high_energy]
+    })
+
+    fig_range = px.bar(
+        scenario_chart,
+        x="Scenario",
+        y="Annual Energy (kWh)"
+    )
+    fig_range.update_layout(
+        xaxis_title="Scenario",
+        yaxis_title="Annual Energy (kWh)",
+        plot_bgcolor="white"
+    )
+    st.plotly_chart(fig_range, use_container_width=True)
+
+    st.markdown("""
+        <p>
+            These scenario bands provide a simple planning range rather than a single fixed estimate.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# -----------------------------
+# Scenario reference
+# -----------------------------
+st.markdown("## Scenario Comparison Reference")
+
+st.markdown("""
+<div class="card">
+    <div class="sub-label">Scenario Dataset</div>
+    <div class="section-title">St. Augustine Monthly Simulation Reference</div>
+""", unsafe_allow_html=True)
+
+month_col = None
+for col in ["month", "Month", "month_name", "month_num"]:
+    if col in scenario_df.columns:
+        month_col = col
+        break
+
+energy_col = None
+for col in ["monthly_kwh", "energy_kwh", "kwh", "Energy", "energy"]:
+    if col in scenario_df.columns:
+        energy_col = col
+        break
+
+if month_col and energy_col:
+    fig_sa = px.line(
+        scenario_df,
+        x=month_col,
+        y=energy_col,
+        markers=True
+    )
+    fig_sa.update_layout(
+        xaxis_title="Month",
+        yaxis_title="Monthly Energy",
+        plot_bgcolor="white"
+    )
+    st.plotly_chart(fig_sa, use_container_width=True)
+else:
+    st.dataframe(scenario_df.head(10), use_container_width=True)
+    st.info("The scenario dataset loaded, but automatic charting columns were not found.")
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+# -----------------------------
+# Preview
+# -----------------------------
+st.markdown("## Filtered Data Preview")
+st.dataframe(filtered.head(15), use_container_width=True)
+
+st.markdown("""
+<div class="footer-note">
+    <strong>Next step:</strong> Continue to the Financial Impact page to translate
+    projected output into savings, payback, and project value.
+</div>
+""", unsafe_allow_html=True)
