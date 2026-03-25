@@ -6,7 +6,6 @@ st.set_page_config(
     page_icon="🏠",
     layout="wide"
 )
-
 image_path = "spice_app/pages/solar_image.png"
 
 st.markdown("""
