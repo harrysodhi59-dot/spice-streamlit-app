@@ -1,0 +1,13 @@
+Year,Grid_Intensity_kg_CO2e_per_kWh,Coal_Generation_Pct,Natural_Gas_Pct,Renewable_Pct,Coal_Phased_Out,Source
+2015,0.8,55,40,5,FALSE,Alberta Env
+2016,0.75,50,42,8,FALSE,Alberta Env
+2017,0.71,45,45,10,FALSE,Alberta Env
+2018,0.68,40,48,12,FALSE,AESO
+2019,0.65,37,53,10,FALSE,AESO
+2020,0.6,37,58,5,FALSE,AESO
+2021,0.55,30,63,7,FALSE,AESO
+2022,0.51,22,68,10,FALSE,AESO
+2023,0.47,10,80,10,FALSE,Alberta Env
+2024,0.42,0,85,15,TRUE,Federal Est
+2025,0.4,0,83,17,TRUE,Federal Proj
+2026,0.39,0,81,19,TRUE,Federal Proj
