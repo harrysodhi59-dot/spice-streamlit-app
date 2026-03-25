@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import os
 
-st.set_page_config(page_title="Insights & Recommendations", layout="wide")
+st.set_page_config(page_title="Real Site Validation", layout="wide")
 
 # =========================
 # PAGE STYLING
@@ -10,7 +11,7 @@ st.set_page_config(page_title="Insights & Recommendations", layout="wide")
 st.markdown("""
 <style>
 .main-title {
-    font-size: 2.2rem;
+    font-size: 2.3rem;
     font-weight: 800;
     color: #16325B;
     margin-bottom: 0.2rem;
@@ -21,7 +22,7 @@ st.markdown("""
     margin-bottom: 1.5rem;
 }
 .section-title {
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: #16325B;
     margin-top: 1.2rem;
@@ -44,7 +45,7 @@ st.markdown("""
     text-align: center;
 }
 .metric-value {
-    font-size: 1.7rem;
+    font-size: 1.6rem;
     font-weight: 800;
     color: #16325B;
 }
@@ -77,31 +78,58 @@ st.markdown("""
 # =========================
 # HEADER
 # =========================
-st.markdown('<div class="main-title">Page 7 — Insights & Recommendations</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">Page 7 — Real Site Validation</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="sub-text">This page summarizes key findings from the uploaded solar dataset and provides practical recommendations for planning, optimization, and decision-making.</div>',
+    '<div class="sub-text">This page validates uploaded solar project data and highlights performance, financial, and environmental insights for the SPICE project.</div>',
     unsafe_allow_html=True
 )
 
 # =========================
 # LOAD DATA
 # =========================
-df = None
+@st.cache_data
+def load_csv_file(path):
+    return pd.read_csv(path)
 
-if "df" in st.session_state:
-    df = st.session_state["df"]
-elif "uploaded_data" in st.session_state:
-    df = st.session_state["uploaded_data"]
+def load_data():
+    # 1. session state
+    if "df" in st.session_state and st.session_state["df"] is not None:
+        return st.session_state["df"]
+
+    if "uploaded_data" in st.session_state and st.session_state["uploaded_data"] is not None:
+        return st.session_state["uploaded_data"]
+
+    # 2. saved csv path from home page
+    if "uploaded_file_path" in st.session_state:
+        file_path = st.session_state["uploaded_file_path"]
+        if os.path.exists(file_path):
+            return load_csv_file(file_path)
+
+    # 3. fallback common file names
+    possible_files = [
+        "data.csv",
+        "dataset.csv",
+        "solar_data.csv",
+        "uploaded_dataset.csv"
+    ]
+
+    for file in possible_files:
+        if os.path.exists(file):
+            return load_csv_file(file)
+
+    return None
+
+df = load_data()
 
 if df is None:
-    st.warning("No dataset found in session state. Please upload your dataset on the earlier pages first.")
+    st.warning("No dataset is currently available. Please upload your CSV on the Home page first.")
+    st.info("Tip: after uploading the file on Home page, save it into session state using `st.session_state['df'] = df`.")
     st.stop()
 
-# Make a copy
 df = df.copy()
 
 # =========================
-# COLUMN DETECTION HELPERS
+# HELPER FUNCTION
 # =========================
 def find_column(possible_names):
     for col in df.columns:
@@ -118,44 +146,65 @@ tilt_col = find_column(["tilt"])
 azimuth_col = find_column(["azimuth", "orientation"])
 loss_col = find_column(["loss"])
 size_col = find_column(["system_size", "size", "capacity", "kw"])
-date_col = find_column(["date", "time", "month", "year"])
 
-# Convert likely numeric columns
+# Convert numeric columns
 for col in [generation_col, revenue_col, co2_col, tilt_col, azimuth_col, loss_col, size_col]:
     if col is not None:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
 # =========================
-# QUICK SUMMARY METRICS
+# DATA PREVIEW
 # =========================
-st.markdown('<div class="section-title">Project Summary</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Uploaded Dataset Overview</div>', unsafe_allow_html=True)
 
-total_records = len(df)
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-value">{df.shape[0]:,}</div>
+        <div class="metric-label">Rows</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-value">{df.shape[1]:,}</div>
+        <div class="metric-label">Columns</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-value">{df.isnull().sum().sum():,}</div>
+        <div class="metric-label">Total Missing Values</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.dataframe(df.head(10), use_container_width=True)
+
+# =========================
+# KEY METRICS
+# =========================
+st.markdown('<div class="section-title">Performance Summary</div>', unsafe_allow_html=True)
 
 avg_generation = df[generation_col].mean() if generation_col else np.nan
 avg_revenue = df[revenue_col].mean() if revenue_col else np.nan
 avg_co2 = df[co2_col].mean() if co2_col else np.nan
+avg_loss = df[loss_col].mean() if loss_col else np.nan
 
-c1, c2, c3, c4 = st.columns(4)
+m1, m2, m3, m4 = st.columns(4)
 
-with c1:
+with m1:
     st.markdown(f"""
     <div class="metric-card">
-        <div class="metric-value">{total_records:,}</div>
-        <div class="metric-label">Total Records</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with c2:
-    value = f"{avg_generation:,.2f}" if not pd.isna(avg_generation) else "N/A"
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-value">{value}</div>
+        <div class="metric-value">{avg_generation:,.2f}" if not pd.isna(avg_generation) else "N/A"}</div>
         <div class="metric-label">Average Energy Output</div>
     </div>
     """, unsafe_allow_html=True)
 
-with c3:
+with m2:
     value = f"${avg_revenue:,.2f}" if not pd.isna(avg_revenue) else "N/A"
     st.markdown(f"""
     <div class="metric-card">
@@ -164,7 +213,7 @@ with c3:
     </div>
     """, unsafe_allow_html=True)
 
-with c4:
+with m3:
     value = f"{avg_co2:,.2f}" if not pd.isna(avg_co2) else "N/A"
     st.markdown(f"""
     <div class="metric-card">
@@ -173,144 +222,75 @@ with c4:
     </div>
     """, unsafe_allow_html=True)
 
-# =========================
-# KEY OBSERVATIONS
-# =========================
-st.markdown('<div class="section-title">Key Observations</div>', unsafe_allow_html=True)
-
-observations = []
-
-if generation_col:
-    max_gen = df[generation_col].max()
-    min_gen = df[generation_col].min()
-    observations.append(
-        f"The dataset shows a wide variation in **{generation_col}**, ranging from **{min_gen:,.2f}** to **{max_gen:,.2f}**. This suggests that system performance is influenced by design and operating conditions."
-    )
-
-if revenue_col and generation_col:
-    corr = df[[generation_col, revenue_col]].corr().iloc[0, 1]
-    if not pd.isna(corr):
-        observations.append(
-            f"There is a measurable relationship between **energy output** and **revenue**, with a correlation of **{corr:.2f}**. This indicates that stronger production generally supports better financial return."
-        )
-
-if co2_col and generation_col:
-    corr = df[[generation_col, co2_col]].corr().iloc[0, 1]
-    if not pd.isna(corr):
-        observations.append(
-            f"The relationship between **energy generation** and **CO₂ reduction** is **{corr:.2f}**, showing that higher-performing systems also tend to deliver stronger environmental value."
-        )
-
-if loss_col:
-    avg_loss = df[loss_col].mean()
-    observations.append(
-        f"The average system loss in the dataset is **{avg_loss:,.2f}**. Lowering avoidable losses could improve both technical performance and long-term project value."
-    )
-
-if tilt_col:
-    observations.append(
-        f"The **{tilt_col}** values suggest that panel angle should be treated as an important planning variable, since system tilt directly affects solar exposure and total output."
-    )
-
-if azimuth_col:
-    observations.append(
-        f"The **{azimuth_col}** field provides useful insight into orientation effects. This can help compare how different panel directions influence energy generation."
-    )
-
-if not observations:
-    observations.append(
-        "The uploaded dataset was loaded successfully, but the column names do not fully match the expected solar performance fields. You may rename columns or adjust the detection logic for more detailed insights."
-    )
-
-for obs in observations[:6]:
-    st.markdown(f'<div class="info-card">{obs}</div>', unsafe_allow_html=True)
-
-# =========================
-# STRATEGIC RECOMMENDATIONS
-# =========================
-st.markdown('<div class="section-title">Strategic Recommendations</div>', unsafe_allow_html=True)
-
-recommendations = []
-
-if generation_col and revenue_col:
-    recommendations.append("""
-    <div class="recommend-box">
-        <b>1. Prioritize high-performing system configurations</b><br>
-        The team should identify which combinations of system size, tilt, orientation, and losses are associated with stronger energy output and revenue. These configurations can be highlighted in the dashboard for investors and decision-makers.
-    </div>
-    """)
-
-if loss_col:
-    recommendations.append("""
-    <div class="recommend-box">
-        <b>2. Reduce controllable system losses</b><br>
-        Even small reductions in system losses may improve overall project performance. This can strengthen both operational efficiency and projected return on investment.
-    </div>
-    """)
-
-if tilt_col or azimuth_col:
-    recommendations.append("""
-    <div class="recommend-box">
-        <b>3. Use tilt and orientation as planning levers</b><br>
-        Panel tilt and azimuth should be included in scenario analysis because they directly affect solar capture. A comparison view in the app can help users understand which setup provides better expected outcomes.
-    </div>
-    """)
-
-if co2_col:
-    recommendations.append("""
-    <div class="recommend-box">
-        <b>4. Communicate environmental value alongside financial return</b><br>
-        Stakeholders may be more engaged when they can see both profitability and sustainability outcomes together. Showing CO₂ reduction next to revenue can make the dashboard more persuasive.
-    </div>
-    """)
-
-recommendations.append("""
-<div class="recommend-box">
-    <b>5. Strengthen the app with predictive analytics</b><br>
-    As the project grows, the next step should be adding machine learning models that estimate generation, revenue, and carbon savings based on system design inputs. This would turn the dashboard from descriptive to predictive.
-</div>
-""")
-
-recommendations.append("""
-<div class="recommend-box">
-    <b>6. Support decision-making with interactive filtering</b><br>
-    Users should be able to compare scenarios by changing key parameters such as system size, tilt, azimuth, and losses. This would make the application more practical for real project planning.
-</div>
-""")
-
-for rec in recommendations:
-    st.markdown(rec, unsafe_allow_html=True)
-
-# =========================
-# DATA QUALITY / NEXT STEPS
-# =========================
-st.markdown('<div class="section-title">Data Quality & Next Steps</div>', unsafe_allow_html=True)
-
-missing_summary = df.isnull().sum()
-missing_summary = missing_summary[missing_summary > 0].sort_values(ascending=False)
-
-left, right = st.columns([1.15, 1])
-
-with left:
-    st.markdown("""
-    <div class="info-card">
-    <b>Recommended next steps for the Data Alchemists team:</b><br><br>
-    • Improve column consistency and naming conventions across uploaded datasets.<br>
-    • Handle missing values before advanced analytics or machine learning modeling.<br>
-    • Add visual comparison tools for energy output, revenue, and CO₂ reduction.<br>
-    • Introduce predictive models for investor-facing scenario planning.<br>
-    • Expand the dashboard so it can clearly support both technical and non-technical stakeholders.
+with m4:
+    value = f"{avg_loss:,.2f}" if not pd.isna(avg_loss) else "N/A"
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-value">{value}</div>
+        <div class="metric-label">Average System Loss</div>
     </div>
     """, unsafe_allow_html=True)
 
-with right:
-    st.markdown('<div class="info-card"><b>Missing Values Snapshot</b></div>', unsafe_allow_html=True)
-    if len(missing_summary) > 0:
-        missing_df = missing_summary.reset_index()
-        missing_df.columns = ["Column", "Missing Values"]
-        st.dataframe(missing_df, use_container_width=True, hide_index=True)
-    else:
-        st.success("No missing values were detected in the uploaded dataset.")
+# =========================
+# OBSERVATIONS
+# =========================
+st.markdown('<div class="section-title">Validation Insights</div>', unsafe_allow_html=True)
+
+insights = []
+
+if generation_col:
+    insights.append(f"The dataset includes **{generation_col}**, which helps validate solar production performance across uploaded records.")
+
+if revenue_col:
+    insights.append(f"The **{revenue_col}** column supports financial validation and allows comparison between energy generation and expected return.")
+
+if co2_col:
+    insights.append(f"The **{co2_col}** field is useful for evaluating environmental benefit and sustainability impact.")
+
+if tilt_col or azimuth_col:
+    insights.append("Panel tilt and orientation values are available, which helps validate whether system design factors are influencing performance.")
+
+if loss_col:
+    insights.append("System loss information is available, which can support operational analysis and optimization planning.")
+
+if not insights:
+    insights.append("The dataset was loaded successfully, but the expected solar-related columns were not clearly detected. You may need to rename the columns for better analysis.")
+
+for item in insights:
+    st.markdown(f'<div class="info-card">{item}</div>', unsafe_allow_html=True)
+
+# =========================
+# RECOMMENDATIONS
+# =========================
+st.markdown('<div class="section-title">Recommendations</div>', unsafe_allow_html=True)
+
+st.markdown("""
+<div class="recommend-box">
+<b>1. Standardize uploaded data structure</b><br>
+Keep column names consistent across all uploaded solar datasets so that every page in the Streamlit app works smoothly.
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div class="recommend-box">
+<b>2. Save uploaded dataset in session state</b><br>
+The Home page should store the dataframe using <code>st.session_state['df'] = df</code> right after upload so all pages can access it.
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div class="recommend-box">
+<b>3. Improve validation with real-world filters</b><br>
+Add filters for site, season, system size, tilt, and azimuth so users can compare results more clearly.
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div class="recommend-box">
+<b>4. Use this page as a final decision-support layer</b><br>
+This page should connect technical findings with business value, showing why the dataset matters for planning and investment decisions.
+</div>
+""", unsafe_allow_html=True)
 
 # =========================
 # FINAL TAKEAWAY
@@ -319,16 +299,15 @@ st.markdown('<div class="section-title">Final Takeaway</div>', unsafe_allow_html
 
 st.markdown("""
 <div class="footer-box">
-    <h4 style="margin-top:0;">Why this page matters</h4>
+    <h4 style="margin-top:0;">Data Alchemists - SPICE Project</h4>
     <p style="margin-bottom:0;">
-        This page brings together the most important findings from the dataset and translates them into clear action points.
-        Instead of only showing charts, it helps users understand what the results mean and what should be done next.
-        For the SPICE project, this makes the application more useful, more professional, and more aligned with real decision-making.
+        This page confirms whether the uploaded dataset is usable for analysis and helps translate raw solar records into meaningful project insights.
+        With correct file handling and consistent session state management, this section becomes a strong final validation page in the application.
     </p>
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown(
-    '<p class="small-note">Developed by <b>Data Alchemists</b> for the SPICE Energy Conservation & Data Analytics Project.</p>',
+    '<p class="small-note">Developed by <b>Data Alchemists</b> for SPICE Energy Conservation & Data Analytics Project.</p>',
     unsafe_allow_html=True
 )
