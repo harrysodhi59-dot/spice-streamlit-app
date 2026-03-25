@@ -7,7 +7,7 @@ st.set_page_config(
     layout="wide"
 )
 
-image_path = "solar_image.png"
+image_path = "spice_app/pages/solar_image.png"
 
 st.markdown("""
 <style>
