@@ -1,9 +1,5 @@
 import streamlit as st
 
-st.title("Home")
-st.write("Sidebar page is working.")
-import streamlit as st
-
 st.set_page_config(page_title="SPICE Solar Impact Dashboard", layout="wide")
 
 # -----------------------------
@@ -80,9 +76,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# Header / Hero
-# -----------------------------
 st.markdown("""
 <div class="hero">
     <div class="subheading">CMPT 3835 · SPICE Project</div>
@@ -95,9 +88,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# Problem + Client Need
-# -----------------------------
 col1, col2 = st.columns([1.3, 1])
 
 with col1:
@@ -143,9 +133,6 @@ with col2:
     </div>
     """, unsafe_allow_html=True)
 
-# -----------------------------
-# KPI Row
-# -----------------------------
 st.markdown("### Project Highlights")
 
 k1, k2, k3, k4 = st.columns(4)
@@ -182,9 +169,6 @@ with k4:
     </div>
     """, unsafe_allow_html=True)
 
-# -----------------------------
-# Navigation / What pages will show
-# -----------------------------
 st.markdown("### What this dashboard includes")
 
 left, right = st.columns(2)
@@ -215,9 +199,6 @@ with right:
     </div>
     """, unsafe_allow_html=True)
 
-# -----------------------------
-# Footer note
-# -----------------------------
 st.info(
     "This dashboard is being developed as a university-level decision-support tool for the SPICE project in CMPT 3835."
 )
