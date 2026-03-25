@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import io
-from sklearn.linear_model import LinearRegression
 
 st.set_page_config(page_title="Predictive Modeling", layout="wide")
 
@@ -121,7 +120,7 @@ st.markdown("""
 # =========================
 st.markdown('<div class="main-title">Page 8 — Predictive Modeling</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="sub-text">This page uses a simple machine learning model to estimate solar energy output, revenue, and CO₂ reduction based on system design inputs.</div>',
+    '<div class="sub-text">This page estimates solar energy output, revenue, and CO₂ reduction based on system design inputs using a lightweight predictive approach.</div>',
     unsafe_allow_html=True
 )
 
@@ -150,9 +149,6 @@ azimuth_col = find_column(["azimuth", "orientation"])
 loss_col = find_column(["loss"])
 size_col = find_column(["system_size", "capacity", "kw", "size"])
 
-required_features = [size_col, tilt_col, azimuth_col, loss_col]
-
-# Convert numeric columns
 for col in [generation_col, revenue_col, co2_col, tilt_col, azimuth_col, loss_col, size_col]:
     if col is not None:
         df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -172,7 +168,7 @@ if azimuth_col is None:
 if loss_col is None:
     missing_requirements.append("loss")
 if generation_col is None:
-    missing_requirements.append("energy output / generation target")
+    missing_requirements.append("energy output / generation")
 
 if missing_requirements:
     st.error("This dataset is missing some columns needed for predictive modeling.")
@@ -182,24 +178,50 @@ if missing_requirements:
 
 model_df = df[[size_col, tilt_col, azimuth_col, loss_col, generation_col]].dropna()
 
-if len(model_df) < 10:
-    st.warning("There are not enough clean rows to train the model properly. Try a larger dataset.")
+if len(model_df) < 5:
+    st.warning("There are not enough clean rows to generate predictions. Try a larger dataset.")
     st.stop()
 
-st.success("The dataset has the required columns for a simple prediction model.")
+st.success("The dataset has the required columns for lightweight predictive analysis.")
 
 # =========================
-# TRAIN MODEL
+# SIMPLE COEFFICIENT ESTIMATION
 # =========================
-X = model_df[[size_col, tilt_col, azimuth_col, loss_col]]
-y = model_df[generation_col]
+# This is a lightweight approximation approach without sklearn.
+size_mean = model_df[size_col].mean()
+tilt_mean = model_df[tilt_col].mean()
+azimuth_mean = model_df[azimuth_col].mean()
+loss_mean = model_df[loss_col].mean()
+generation_mean = model_df[generation_col].mean()
 
-model = LinearRegression()
-model.fit(X, y)
+def safe_ratio_impact(feature_col, target_col):
+    feature_std = feature_col.std()
+    target_std = target_col.std()
 
-r2_score = model.score(X, y)
+    if pd.isna(feature_std) or pd.isna(target_std) or feature_std == 0:
+        return 0.0
 
-# Revenue and CO2 simple rates
+    corr = feature_col.corr(target_col)
+    if pd.isna(corr):
+        return 0.0
+
+    return corr * (target_std / feature_std)
+
+coef_size = safe_ratio_impact(model_df[size_col], model_df[generation_col])
+coef_tilt = safe_ratio_impact(model_df[tilt_col], model_df[generation_col])
+coef_azimuth = safe_ratio_impact(model_df[azimuth_col], model_df[generation_col])
+coef_loss = safe_ratio_impact(model_df[loss_col], model_df[generation_col])
+
+# Basic pseudo-R2 using average absolute correlation
+corrs = []
+for c in [size_col, tilt_col, azimuth_col, loss_col]:
+    corr_val = model_df[c].corr(model_df[generation_col])
+    if not pd.isna(corr_val):
+        corrs.append(abs(corr_val))
+
+model_strength = np.mean(corrs) if len(corrs) > 0 else 0.0
+
+# Revenue and CO2 rates
 revenue_rate = None
 co2_rate = None
 
@@ -224,80 +246,76 @@ with m1:
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{len(model_df):,}</div>
-        <div class="metric-label">Training Rows</div>
+        <div class="metric-label">Usable Rows</div>
     </div>
     """, unsafe_allow_html=True)
 
 with m2:
     st.markdown(f"""
     <div class="metric-card">
-        <div class="metric-value">{r2_score:.2f}</div>
-        <div class="metric-label">Model R² Score</div>
+        <div class="metric-value">{model_strength:.2f}</div>
+        <div class="metric-label">Model Strength</div>
     </div>
     """, unsafe_allow_html=True)
 
 with m3:
-    target_name = generation_col if generation_col else "N/A"
     st.markdown(f"""
     <div class="metric-card">
-        <div class="metric-value">{target_name}</div>
+        <div class="metric-value">{generation_col}</div>
         <div class="metric-label">Prediction Target</div>
     </div>
     """, unsafe_allow_html=True)
 
 # =========================
-# USER INPUTS
+# SCENARIO INPUT
 # =========================
 st.markdown('<div class="section-title">Scenario Input</div>', unsafe_allow_html=True)
 
 c1, c2 = st.columns(2)
 
-size_min = float(model_df[size_col].min())
-size_max = float(model_df[size_col].max())
-size_mean = float(model_df[size_col].mean())
-
-tilt_min = float(model_df[tilt_col].min())
-tilt_max = float(model_df[tilt_col].max())
-tilt_mean = float(model_df[tilt_col].mean())
-
-azimuth_min = float(model_df[azimuth_col].min())
-azimuth_max = float(model_df[azimuth_col].max())
-azimuth_mean = float(model_df[azimuth_col].mean())
-
-loss_min = float(model_df[loss_col].min())
-loss_max = float(model_df[loss_col].max())
-loss_mean = float(model_df[loss_col].mean())
-
 with c1:
-    user_size = st.number_input("System Size", min_value=size_min, max_value=size_max, value=size_mean)
-    user_tilt = st.number_input("Tilt", min_value=tilt_min, max_value=tilt_max, value=tilt_mean)
+    user_size = st.number_input(
+        "System Size",
+        value=float(size_mean)
+    )
+    user_tilt = st.number_input(
+        "Tilt",
+        value=float(tilt_mean)
+    )
 
 with c2:
-    user_azimuth = st.number_input("Azimuth / Orientation", min_value=azimuth_min, max_value=azimuth_max, value=azimuth_mean)
-    user_loss = st.number_input("System Loss", min_value=loss_min, max_value=loss_max, value=loss_mean)
+    user_azimuth = st.number_input(
+        "Azimuth / Orientation",
+        value=float(azimuth_mean)
+    )
+    user_loss = st.number_input(
+        "System Loss",
+        value=float(loss_mean)
+    )
 
 # =========================
 # PREDICTION
 # =========================
 st.markdown('<div class="section-title">Prediction Results</div>', unsafe_allow_html=True)
 
-input_df = pd.DataFrame({
-    size_col: [user_size],
-    tilt_col: [user_tilt],
-    azimuth_col: [user_azimuth],
-    loss_col: [user_loss]
-})
+predicted_generation = (
+    generation_mean
+    + coef_size * (user_size - size_mean)
+    + coef_tilt * (user_tilt - tilt_mean)
+    + coef_azimuth * (user_azimuth - azimuth_mean)
+    + coef_loss * (user_loss - loss_mean)
+)
 
-predicted_generation = float(model.predict(input_df)[0])
+predicted_generation = max(predicted_generation, 0)
 
 predicted_revenue = predicted_generation * revenue_rate if revenue_rate is not None else None
 predicted_co2 = predicted_generation * co2_rate if co2_rate is not None else None
 
-p1, p2, p3 = st.columns(3)
-
 gen_text = f"{predicted_generation:,.2f}"
 rev_text = f"${predicted_revenue:,.2f}" if predicted_revenue is not None else "N/A"
 co2_text = f"{predicted_co2:,.2f}" if predicted_co2 is not None else "N/A"
+
+p1, p2, p3 = st.columns(3)
 
 with p1:
     st.markdown(f"""
@@ -328,37 +346,49 @@ with p3:
 # =========================
 st.markdown('<div class="section-title">Business Interpretation</div>', unsafe_allow_html=True)
 
-insights = []
+interpretation = []
 
-insights.append(
-    f"For the selected configuration, the model predicts an energy output of <b>{predicted_generation:,.2f}</b>."
+interpretation.append(
+    f"For the selected configuration, the estimated energy output is <b>{predicted_generation:,.2f}</b>."
 )
 
 if predicted_revenue is not None:
-    insights.append(
-        f"Based on the dataset pattern, this scenario may generate an estimated revenue of <b>${predicted_revenue:,.2f}</b>."
+    interpretation.append(
+        f"Based on the uploaded dataset pattern, this scenario may produce an estimated revenue of <b>${predicted_revenue:,.2f}</b>."
     )
 
 if predicted_co2 is not None:
-    insights.append(
-        f"The same configuration may also contribute an estimated <b>{predicted_co2:,.2f}</b> in CO₂ reduction."
+    interpretation.append(
+        f"This same setup may also contribute an estimated <b>{predicted_co2:,.2f}</b> in CO₂ reduction."
     )
 
-if r2_score >= 0.8:
-    insights.append(
-        "The model fit is strong, which means the selected variables explain the target reasonably well in this dataset."
+if model_strength >= 0.7:
+    interpretation.append(
+        "The variable relationships in this dataset look relatively strong, so this estimate can support early planning discussions."
     )
-elif r2_score >= 0.5:
-    insights.append(
-        "The model fit is moderate, so the prediction is useful for scenario exploration but should not be treated as exact."
+elif model_strength >= 0.4:
+    interpretation.append(
+        "The variable relationships are moderate, so this result is useful for scenario exploration but not as an exact forecast."
     )
 else:
-    insights.append(
-        "The model fit is weak, so this prediction should be used only as an early directional estimate."
+    interpretation.append(
+        "The variable relationships are weak, so the result should be treated as a rough directional estimate only."
     )
 
-for item in insights:
+for item in interpretation:
     st.markdown(f'<div class="info-card">{item}</div>', unsafe_allow_html=True)
+
+# =========================
+# FEATURE INFLUENCE
+# =========================
+st.markdown('<div class="section-title">Estimated Feature Influence</div>', unsafe_allow_html=True)
+
+influence_df = pd.DataFrame({
+    "Feature": [size_col, tilt_col, azimuth_col, loss_col],
+    "Estimated Influence": [coef_size, coef_tilt, coef_azimuth, coef_loss]
+})
+
+st.dataframe(influence_df, use_container_width=True, hide_index=True)
 
 # =========================
 # FINAL TAKEAWAY
@@ -369,8 +399,8 @@ st.markdown("""
 <div class="footer-box">
     <h4 style="margin-top:0;">Data Alchemists — SPICE Project</h4>
     <p style="margin-bottom:0;">
-        This page moves the dashboard from descriptive analytics to predictive analytics. It helps users test system design choices
-        and understand how those choices may affect future energy output, revenue, and environmental value.
+        This page moves the dashboard from descriptive analytics toward predictive analytics. It gives users a practical way
+        to test solar design scenarios and understand how those inputs may influence energy output, revenue, and environmental value.
     </p>
 </div>
 """, unsafe_allow_html=True)
