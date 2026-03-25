@@ -1,6 +1,6 @@
 import streamlit as st
-from PIL import Image
-import os
+import base64
+from pathlib import Path
 
 st.set_page_config(
     page_title="SPICE Solar Analytics Dashboard",
@@ -8,96 +8,114 @@ st.set_page_config(
     layout="wide"
 )
 
-# -----------------------------
-# Helper function to load image
-# -----------------------------
-def load_image(path):
-    if os.path.exists(path):
-        return Image.open(path)
-    return None
+def get_base64_image(image_path):
+    path = Path(image_path)
+    if not path.exists():
+        return None
+    with open(path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode()
 
-# -----------------------------
-# Image paths
-# Put these images in your project folder
-# -----------------------------
-banner_img = load_image("images/solar_banner.jpg")
-img1 = load_image("images/panel1.jpg")
-img2 = load_image("images/dashboard.jpg")
-img3 = load_image("images/environment.jpg")
+banner_base64 = get_base64_image("images/norquest_banner.png")
 
-# -----------------------------
-# Custom CSS
-# -----------------------------
 st.markdown("""
-    <style>
-    .main {
-        background-color: #f8fafc;
-    }
-    .hero-box {
-        background: linear-gradient(135deg, #0f172a, #1e3a8a);
-        padding: 2.5rem;
-        border-radius: 20px;
-        color: white;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    }
-    .section-card {
-        background-color: white;
-        padding: 1.2rem;
-        border-radius: 18px;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-        margin-bottom: 1rem;
-    }
-    .feature-card {
-        background-color: white;
-        padding: 1rem;
-        border-radius: 18px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        text-align: center;
-        min-height: 180px;
-    }
-    .small-text {
-        color: #475569;
-        font-size: 16px;
-    }
-    </style>
+<style>
+html, body, [class*="css"] {
+    font-family: "Segoe UI", sans-serif;
+}
+
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    padding-left: 3rem;
+    padding-right: 3rem;
+}
+
+.section-card {
+    background-color: white;
+    padding: 1.2rem;
+    border-radius: 18px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    margin-bottom: 1rem;
+}
+
+.feature-card {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center;
+    min-height: 180px;
+}
+
+.small-text {
+    color: #475569;
+    font-size: 16px;
+    line-height: 1.7;
+}
+</style>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# Hero Section
-# -----------------------------
-col1, col2 = st.columns([1.4, 1])
-
-with col1:
-    st.markdown("""
-        <div class="hero-box">
-            <h1>SPICE Solar Analytics Dashboard</h1>
-            <p style="font-size:18px;">
-                A data-driven platform developed by <b>Team Data Alchemists</b> to analyze
-                solar energy performance, financial return, and environmental impact.
-            </p>
-            <p style="font-size:16px;">
-                This dashboard supports smarter solar investment decisions for Edmonton-based
-                energy projects through interactive analytics, predictive modeling, and
-                visual storytelling.
-            </p>
+if banner_base64:
+    st.markdown(
+        f"""
+        <div style="
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            min-height: 320px;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.18);
+            background-image:
+                linear-gradient(90deg, rgba(11,60,93,0.88) 0%, rgba(30,111,92,0.78) 55%, rgba(11,60,93,0.52) 100%),
+                url('data:image/png;base64,{banner_base64}');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+        ">
+            <div style="padding: 2.8rem 3rem; max-width: 760px; color: white;">
+                <div style="
+                    display: inline-block;
+                    background: rgba(255,255,255,0.16);
+                    padding: 0.45rem 0.85rem;
+                    border-radius: 999px;
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    margin-bottom: 1rem;
+                    letter-spacing: 0.4px;
+                ">
+                    NORQUEST COLLEGE • TEAM DATA ALCHEMISTS
+                </div>
+                <h1 style="
+                    font-size: 3rem;
+                    font-weight: 800;
+                    margin-bottom: 0.75rem;
+                    line-height: 1.15;
+                ">
+                    SPICE Solar Analytics Dashboard
+                </h1>
+                <p style="
+                    font-size: 1.08rem;
+                    line-height: 1.75;
+                    margin-bottom: 0;
+                    max-width: 700px;
+                ">
+                    A data-driven platform developed by Team Data Alchemists to analyze solar energy
+                    performance, financial return, and environmental impact.
+                </p>
+            </div>
         </div>
-    """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True
+    )
+else:
+    st.error("Banner image not found. Make sure this file exists: images/norquest_banner.png")
 
-with col2:
-    if banner_img:
-        st.image(banner_img, use_container_width=True)
-    else:
-        st.info("Add a banner image at: images/solar_banner.jpg")
-
-# -----------------------------
-# Project Overview
-# -----------------------------
 st.markdown("## Project Overview")
 
-col3, col4 = st.columns([1.1, 1])
+col1, col2 = st.columns([1.1, 1])
 
-with col3:
+with col1:
     st.markdown("""
         <div class="section-card">
             <h3>About the Project</h3>
@@ -114,15 +132,18 @@ with col3:
         </div>
     """, unsafe_allow_html=True)
 
-with col4:
-    if img1:
-        st.image(img1, use_container_width=True)
-    else:
-        st.info("Add image at: images/panel1.jpg")
+with col2:
+    st.markdown("""
+        <div class="section-card">
+            <h3>Institutional Context</h3>
+            <p class="small-text">
+                This dashboard is being developed at NorQuest College as part of the SPICE
+                Energy Conservation and Data Analytics initiative, with a focus on practical
+                machine learning, simulation, and stakeholder communication.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
 
-# -----------------------------
-# Key Highlights
-# -----------------------------
 st.markdown("## Key Highlights")
 
 c1, c2, c3 = st.columns(3)
@@ -160,42 +181,18 @@ with c3:
         </div>
     """, unsafe_allow_html=True)
 
-# -----------------------------
-# Visual Section
-# -----------------------------
-st.markdown("## Dashboard Vision")
-
-col5, col6 = st.columns(2)
-
-with col5:
-    if img2:
-        st.image(img2, caption="Solar dashboard and analytics interface", use_container_width=True)
-    else:
-        st.info("Add image at: images/dashboard.jpg")
-
-with col6:
-    if img3:
-        st.image(img3, caption="Environmental and sustainability perspective", use_container_width=True)
-    else:
-        st.info("Add image at: images/environment.jpg")
-
-# -----------------------------
-# Team Section
-# -----------------------------
 st.markdown("## Team Data Alchemists")
 
 st.markdown("""
 <div class="section-card">
     <p class="small-text">
-        This project is being developed by <b>Team Data Alchemists</b> as part of the SPICE
-        Energy Conservation and Data Analytics initiative. The dashboard reflects an applied
-        machine learning and analytics approach to solving real-world renewable energy challenges.
+        This project is being developed by Team Data Alchemists as part of the SPICE
+        Energy Conservation and Data Analytics initiative. The dashboard reflects an
+        applied machine learning and analytics approach to solving real-world renewable
+        energy challenges.
     </p>
 </div>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# Footer
-# -----------------------------
 st.markdown("---")
 st.caption("SPICE Solar Analytics Dashboard | Developed by Team Data Alchemists")
