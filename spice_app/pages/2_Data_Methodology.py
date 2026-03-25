@@ -13,6 +13,7 @@ html, body, [class*="css"] {
     font-family: "Segoe UI", sans-serif;
 }
 
+/* Main layout */
 .block-container {
     padding-top: 2rem;
     padding-bottom: 2rem;
@@ -20,6 +21,7 @@ html, body, [class*="css"] {
     padding-right: 3rem;
 }
 
+/* Hero */
 .hero {
     background: linear-gradient(90deg, #1E6F5C, #0B3C5D);
     padding: 2.5rem;
@@ -33,45 +35,67 @@ html, body, [class*="css"] {
     font-size: 2.8rem;
     font-weight: 800;
     margin-bottom: 0.6rem;
+    color: white !important;
 }
 
 .hero p {
     font-size: 1.05rem;
     line-height: 1.7;
     max-width: 900px;
+    color: #F4F8F7 !important;
 }
 
+/* Common card */
 .card {
-    background: white;
+    background: #FFFFFF;
     border-radius: 20px;
     padding: 1.5rem;
     box-shadow: 0 10px 26px rgba(0,0,0,0.08);
     margin-bottom: 1rem;
+    border: 1px solid rgba(0,0,0,0.06);
 }
 
+.card p,
+.card li,
+.card span,
+.card div,
+.card h3,
+.card h4 {
+    color: #1F2937 !important;
+}
+
+/* KPI cards */
 .kpi-card {
-    background: white;
+    background: #FFFFFF;
     border-radius: 18px;
     padding: 1.2rem;
     text-align: center;
     box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.06);
+}
+
+.kpi-card div,
+.kpi-card span,
+.kpi-card p {
+    color: #1F2937 !important;
 }
 
 .kpi-title {
-    color: #0B3C5D;
+    color: #0B3C5D !important;
     font-size: 0.95rem;
     font-weight: 700;
 }
 
 .kpi-value {
-    color: #1E6F5C;
+    color: #1E6F5C !important;
     font-size: 1.6rem;
     font-weight: 800;
     margin-top: 0.35rem;
 }
 
+/* Section headings inside HTML */
 .section-title {
-    color: #0B3C5D;
+    color: #0B3C5D !important;
     font-size: 1.55rem;
     font-weight: 800;
     margin-top: 0.6rem;
@@ -79,7 +103,7 @@ html, body, [class*="css"] {
 }
 
 .sub-label {
-    color: #1E6F5C;
+    color: #1E6F5C !important;
     font-size: 0.9rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -87,31 +111,59 @@ html, body, [class*="css"] {
     margin-bottom: 0.4rem;
 }
 
+/* Feature boxes */
 .feature-box {
     background: #F7F9F9;
     border-left: 6px solid #FDB813;
     padding: 1rem 1rem 1rem 1.1rem;
     border-radius: 12px;
     margin-bottom: 0.8rem;
+    border: 1px solid rgba(0,0,0,0.05);
 }
 
 .feature-box h4 {
-    color: #0B3C5D;
+    color: #0B3C5D !important;
     margin-bottom: 0.4rem;
 }
 
-.feature-box p {
+.feature-box p,
+.feature-box div,
+.feature-box span {
     margin-bottom: 0;
-    color: #333333;
+    color: #333333 !important;
     line-height: 1.6;
 }
 
+/* Footer note */
 .footer-note {
     background: #EEF5F3;
     border-radius: 16px;
     padding: 1rem 1.2rem;
-    color: #234;
+    color: #1F2937 !important;
     margin-top: 1rem;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.footer-note strong {
+    color: #0B3C5D !important;
+}
+
+/* Streamlit headings */
+h2, h3 {
+    color: #F8FAFC !important;
+    font-weight: 800 !important;
+}
+
+/* Dataframe wrapper area */
+[data-testid="stDataFrame"] {
+    background: transparent;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    border-right: 1px solid rgba(255,255,255,0.06);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -121,7 +173,7 @@ html, body, [class*="css"] {
 # -----------------------------
 st.markdown("""
 <div class="hero">
-    <div class="sub-label">Data Architecture</div>
+    <div class="sub-label" style="color:#B8E0D2 !important;">Data Architecture</div>
     <h1>Data & Methodology</h1>
     <p>
         This dashboard combines solar simulation data, weather context, financial
