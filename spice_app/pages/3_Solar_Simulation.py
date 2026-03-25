@@ -106,36 +106,29 @@ html, body, [class*="css"] {
 # -----------------------------
 @st.cache_data
 def load_main_data():
-    # IMPORTANT:
-    # Change this filename only if your uploaded reduced file has a different name
-    df = pd.read_excel("data/sample_250000.xlsx")")
-    return df
+    return pd.read_excel("data/sample_250000.xlsx")
 
 @st.cache_data
 def load_scenario_data():
-    df = pd.read_excel("data/St_Augustine_combined_simulated_monthly.xlsx")
-    return df
+    return pd.read_csv("data/St_Augustine_combined_simulated_monthly.csv")
 
 try:
     df = load_main_data()
-except FileNotFoundError:
-    st.error(
-        "Main simulation file not found. Make sure your reduced file is uploaded in the data folder "
-        "and update the filename in load_main_data()."
-    )
+except Exception as e:
+    st.error(f"Could not load sample_250000.xlsx: {e}")
     st.stop()
 
 try:
     scenario_df = load_scenario_data()
-except FileNotFoundError:
-    st.error("St_Augustine_combined_simulated_monthly.csv was not found in the data folder.")
+except Exception as e:
+    st.error(f"Could not load St_Augustine_combined_simulated_monthly.csv: {e}")
     st.stop()
 
 # -----------------------------
 # Clean columns
 # -----------------------------
-df.columns = [c.strip() for c in df.columns]
-scenario_df.columns = [c.strip() for c in scenario_df.columns]
+df.columns = [str(c).strip() for c in df.columns]
+scenario_df.columns = [str(c).strip() for c in scenario_df.columns]
 
 # -----------------------------
 # Prepare month fields
@@ -144,16 +137,10 @@ if "datetime" in df.columns:
     df["datetime"] = pd.to_datetime(df["datetime"], errors="coerce")
     df["month_num"] = df["datetime"].dt.month
     df["month_name"] = df["datetime"].dt.strftime("%b")
-elif "month" in df.columns:
-    df["month_num"] = pd.to_numeric(df["month"], errors="coerce")
-    month_map = {
-        1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun",
-        7: "Jul", 8: "Aug", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"
-    }
-    df["month_name"] = df["month_num"].map(month_map)
 else:
-    df["month_num"] = 1
-    df["month_name"] = "Jan"
+    st.error("The file sample_250000.xlsx must contain a 'datetime' column.")
+    st.write("Columns found:", list(df.columns))
+    st.stop()
 
 # -----------------------------
 # Detect target column
@@ -165,12 +152,9 @@ for col in ["power_per_kw", "power", "energy_per_kw", "P"]:
         break
 
 if target_col is None:
-    st.error(
-        "No expected power column was found in your reduced file. "
-        "Expected one of: power_per_kw, power, energy_per_kw, P"
-    )
-    st.write("Columns found in file:")
-    st.write(list(df.columns))
+    st.error("No expected power column found.")
+    st.write("Expected one of: power_per_kw, power, energy_per_kw, P")
+    st.write("Columns found:", list(df.columns))
     st.stop()
 
 # -----------------------------
@@ -181,9 +165,8 @@ st.markdown("""
     <div class="sub-label">Simulation & Design Analysis</div>
     <h1>Solar Simulation</h1>
     <p>
-        This page explores how design variables such as system size, tilt, and azimuth
-        relate to projected solar output. It combines the reduced simulation dataset
-        with scenario-based monthly reference data to support system comparison.
+        This page explores how system size, tilt, and azimuth relate to projected
+        solar output using the simulation dataset and scenario-based monthly reference data.
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -215,16 +198,12 @@ if filtered.empty:
 # Monthly summary
 # -----------------------------
 monthly_summary = (
-    filtered.groupby(["month_num", "month_name"], dropna=False)[target_col]
+    filtered.groupby(["month_num", "month_name"])[target_col]
     .mean()
     .reset_index()
     .sort_values("month_num")
 )
 
-monthly_summary = monthly_summary.dropna(subset=["month_num"])
-monthly_summary["month_num"] = monthly_summary["month_num"].astype(int)
-
-# approximate monthly kWh from power_per_kw-style values
 monthly_summary["estimated_kwh"] = (
     monthly_summary[target_col] / 1000 * system_size * 24 * 30.4
 )
@@ -311,7 +290,7 @@ with left:
     st.markdown("""
         <p>
             This chart shows the projected monthly production pattern based on the selected
-            system configuration. Seasonal peaks are expected in months with stronger solar conditions.
+            system configuration and filtered simulation records.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -331,8 +310,7 @@ with right:
     fig_range = px.bar(
         scenario_chart,
         x="Scenario",
-        y="Annual Energy (kWh)",
-        labels={"Annual Energy (kWh)": "Annual Energy (kWh)"}
+        y="Annual Energy (kWh)"
     )
     fig_range.update_layout(
         xaxis_title="Scenario",
@@ -343,14 +321,13 @@ with right:
 
     st.markdown("""
         <p>
-            These scenario bands provide a simple planning range rather than a single fixed estimate,
-            which makes the results more useful for discussion and decision-making.
+            These scenario bands provide a simple planning range rather than a single fixed estimate.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
 # -----------------------------
-# St. Augustine scenario dataset
+# Scenario reference
 # -----------------------------
 st.markdown("## Scenario Comparison Reference")
 
@@ -385,26 +362,14 @@ if month_col and energy_col:
         plot_bgcolor="white"
     )
     st.plotly_chart(fig_sa, use_container_width=True)
-
-    st.markdown("""
-        <p>
-            This reference scenario adds another layer of comparison for understanding
-            how different systems may perform across months.
-        </p>
-    """, unsafe_allow_html=True)
 else:
     st.dataframe(scenario_df.head(10), use_container_width=True)
-    st.markdown("""
-        <p>
-            The dataset loaded successfully, but expected month or energy columns were not found
-            for automatic charting.
-        </p>
-    """, unsafe_allow_html=True)
+    st.info("The scenario dataset loaded, but automatic charting columns were not found.")
 
 st.markdown("</div>", unsafe_allow_html=True)
 
 # -----------------------------
-# Data preview
+# Preview
 # -----------------------------
 st.markdown("## Filtered Data Preview")
 st.dataframe(filtered.head(15), use_container_width=True)
