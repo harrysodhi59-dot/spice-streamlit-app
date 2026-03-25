@@ -1,5 +1,9 @@
 import streamlit as st
 
+st.title("Home")
+st.write("Sidebar page is working.")
+import streamlit as st
+
 st.set_page_config(page_title="SPICE Solar Impact Dashboard", layout="wide")
 
 # -----------------------------
