@@ -2,6 +2,18 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import os
+import streamlit as st
+import pandas as pd
+import io
+
+def shared_uploader():
+    uploaded_file = st.sidebar.file_uploader("Upload CSV", type=["csv"], key="shared_csv_uploader")
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+        st.session_state["df"] = df
+        st.session_state["uploaded_data"] = df
+        st.session_state["uploaded_file_bytes"] = uploaded_file.getvalue()
+        st.session_state["uploaded_file_name"] = uploaded_file.name
 
 st.set_page_config(page_title="Real Site Validation", layout="wide")
 
