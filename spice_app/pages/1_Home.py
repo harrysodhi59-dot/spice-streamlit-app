@@ -6,7 +6,9 @@ st.set_page_config(
     page_icon="🏠",
     layout="wide"
 )
-image_path = "spice_app/pages/solar_image.png"
+
+# Correct image path for Streamlit pages
+image_path = os.path.join(os.path.dirname(__file__), "solar_image.png")
 
 st.markdown("""
 <style>
@@ -109,24 +111,12 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 8px 18px rgba(0,0,0,0.18);
 }
 
-/* Hero image card */
-.image-card {
-    background: linear-gradient(180deg, #111827 0%, #0F172A 100%);
-    border-radius: 26px;
-    padding: 0.8rem;
-    box-shadow: 0 18px 40px rgba(0,0,0,0.30);
-    border: 1px solid rgba(255,255,255,0.06);
-    min-height: 420px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .image-caption {
     color: #CBD5E1 !important;
     text-align: center;
     font-size: 0.92rem;
-    margin-top: 0.65rem;
+    margin-top: 0.75rem;
+    line-height: 1.5;
 }
 
 /* Cards */
@@ -227,8 +217,9 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Image styling */
 [data-testid="stImage"] img {
-    border-radius: 20px;
-    box-shadow: 0 16px 34px rgba(0,0,0,0.30);
+    border-radius: 24px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.30);
+    border: 1px solid rgba(255,255,255,0.08);
     width: 100%;
     object-fit: cover;
 }
@@ -239,9 +230,6 @@ h1, h2, h3, h4, h5, h6 {
         font-size: 2.3rem;
     }
     .hero-box {
-        min-height: auto;
-    }
-    .image-card {
         min-height: auto;
     }
 }
