@@ -1,0 +1,333 @@
+import streamlit as st
+import pandas as pd
+
+st.set_page_config(
+    page_title="Data & Methodology",
+    page_icon="🧠",
+    layout="wide"
+)
+
+st.markdown("""
+<style>
+html, body, [class*="css"] {
+    font-family: "Segoe UI", sans-serif;
+}
+
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    padding-left: 3rem;
+    padding-right: 3rem;
+}
+
+.hero {
+    background: linear-gradient(90deg, #1E6F5C, #0B3C5D);
+    padding: 2.5rem;
+    border-radius: 22px;
+    color: white;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 16px 36px rgba(0,0,0,0.14);
+}
+
+.hero h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 0.6rem;
+}
+
+.hero p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 900px;
+}
+
+.card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.08);
+    margin-bottom: 1rem;
+}
+
+.kpi-card {
+    background: white;
+    border-radius: 18px;
+    padding: 1.2rem;
+    text-align: center;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+}
+
+.kpi-title {
+    color: #0B3C5D;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.kpi-value {
+    color: #1E6F5C;
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-top: 0.35rem;
+}
+
+.section-title {
+    color: #0B3C5D;
+    font-size: 1.55rem;
+    font-weight: 800;
+    margin-top: 0.6rem;
+    margin-bottom: 0.8rem;
+}
+
+.sub-label {
+    color: #1E6F5C;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.4rem;
+}
+
+.feature-box {
+    background: #F7F9F9;
+    border-left: 6px solid #FDB813;
+    padding: 1rem 1rem 1rem 1.1rem;
+    border-radius: 12px;
+    margin-bottom: 0.8rem;
+}
+
+.feature-box h4 {
+    color: #0B3C5D;
+    margin-bottom: 0.4rem;
+}
+
+.feature-box p {
+    margin-bottom: 0;
+    color: #333333;
+    line-height: 1.6;
+}
+
+.footer-note {
+    background: #EEF5F3;
+    border-radius: 16px;
+    padding: 1rem 1.2rem;
+    color: #234;
+    margin-top: 1rem;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# -----------------------------
+# HERO
+# -----------------------------
+st.markdown("""
+<div class="hero">
+    <div class="sub-label">Data Architecture</div>
+    <h1>Data & Methodology</h1>
+    <p>
+        This dashboard combines solar simulation data, weather context, financial
+        benchmarks, environmental indicators, and real-site production records to
+        support practical decision-making for SPICE.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# -----------------------------
+# OVERVIEW
+# -----------------------------
+left, right = st.columns([1.2, 1])
+
+with left:
+    st.markdown("""
+    <div class="card">
+        <div class="sub-label">Methodological Approach</div>
+        <div class="section-title">How the platform is structured</div>
+        <p>
+            The system is designed as a layered analytics platform. It starts with
+            solar production logic, adds contextual data such as weather and pricing,
+            and then translates technical outputs into business and environmental
+            insights.
+        </p>
+        <p>
+            This makes the platform more useful than a basic solar calculator because
+            it connects design decisions to real-world value.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with right:
+    st.markdown("""
+    <div class="card">
+        <div class="sub-label">Why this matters</div>
+        <div class="section-title">Decision support for SPICE</div>
+        <p>
+            SPICE needs a way to explain how solar system design choices influence
+            energy generation, project savings, emissions reduction, and stakeholder
+            confidence. This platform is built to support that communication.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# -----------------------------
+# KPI ROW
+# -----------------------------
+st.markdown("## Data Snapshot")
+
+k1, k2, k3, k4 = st.columns(4)
+
+with k1:
+    st.markdown("""
+    <div class="kpi-card">
+        <div class="kpi-title">Datasets</div>
+        <div class="kpi-value">9</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with k2:
+    st.markdown("""
+    <div class="kpi-card">
+        <div class="kpi-title">Context Layers</div>
+        <div class="kpi-value">Technical + Business</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with k3:
+    st.markdown("""
+    <div class="kpi-card">
+        <div class="kpi-title">Validation Inputs</div>
+        <div class="kpi-value">Real SPICE Sites</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with k4:
+    st.markdown("""
+    <div class="kpi-card">
+        <div class="kpi-title">Team</div>
+        <div class="kpi-value">Data Alchemists</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# -----------------------------
+# DATASETS
+# -----------------------------
+st.markdown("## Datasets used in the platform")
+
+datasets = pd.DataFrame({
+    "Dataset": [
+        "sample_250000.csv",
+        "edmonton_weather_snow_2018_2025_clean.csv",
+        "epcor_historical_rates.csv",
+        "alberta_grid_emission_factors.csv",
+        "federal_carbon_pricing.csv",
+        "spice_actual_project_costs.csv",
+        "bissell_daily_clean_long.csv",
+        "visser_daily_clean_long_v2.csv",
+        "St_Augustine_combined_simulated_monthly.csv"
+    ],
+    "Purpose": [
+        "Core solar simulation and modeling dataset",
+        "Weather and seasonal context for Edmonton",
+        "Electricity pricing for savings analysis",
+        "Grid emissions intensity for CO₂ impact",
+        "Carbon pricing reference for policy value",
+        "Project cost and financing benchmarks",
+        "Observed production data for Bissell validation",
+        "Observed production data for Visser validation",
+        "Scenario-based monthly simulation comparison"
+    ],
+    "Role in Dashboard": [
+        "Simulation and analytics foundation",
+        "Weather and seasonality page",
+        "Financial impact page",
+        "Environmental impact page",
+        "Environmental and carbon value page",
+        "Financial impact and project comparison",
+        "Real-site validation page",
+        "Real-site validation page",
+        "Scenario explorer page"
+    ]
+})
+
+st.dataframe(datasets, use_container_width=True, hide_index=True)
+
+# -----------------------------
+# PIPELINE
+# -----------------------------
+st.markdown("## System pipeline")
+
+c1, c2 = st.columns(2)
+
+with c1:
+    st.markdown("""
+    <div class="feature-box">
+        <h4>1. Simulation Layer</h4>
+        <p>Solar generation logic is used to estimate system output based on design variables such as tilt, azimuth, and system size.</p>
+    </div>
+
+    <div class="feature-box">
+        <h4>2. Data Context Layer</h4>
+        <p>Weather, seasonality, pricing, emissions, and project cost data enrich the technical outputs with real-world context.</p>
+    </div>
+
+    <div class="feature-box">
+        <h4>3. Impact Layer</h4>
+        <p>Energy outputs are translated into savings, payback, avoided emissions, and carbon value.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with c2:
+    st.markdown("""
+    <div class="feature-box">
+        <h4>4. Validation Layer</h4>
+        <p>Observed production data from real SPICE sites is used to compare and ground the project in operational reality.</p>
+    </div>
+
+    <div class="feature-box">
+        <h4>5. Scenario Comparison Layer</h4>
+        <p>Alternative design cases can be compared to support more informed planning and stakeholder discussions.</p>
+    </div>
+
+    <div class="feature-box">
+        <h4>6. Dashboard Layer</h4>
+        <p>All results are presented in an interactive format designed to support communication, exploration, and decision-making.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# -----------------------------
+# KEY IDEA
+# -----------------------------
+st.markdown("## Core idea behind the dashboard")
+
+a, b = st.columns(2)
+
+with a:
+    st.markdown("""
+    <div class="card">
+        <div class="sub-label">Beyond prediction</div>
+        <div class="section-title">Not just energy output</div>
+        <p>
+            The goal is not only to estimate solar energy production. The dashboard
+            is built to translate system design decisions into clear business and
+            environmental outcomes that matter to SPICE and its stakeholders.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with b:
+    st.markdown("""
+    <div class="card">
+        <div class="sub-label">Applied value</div>
+        <div class="section-title">From data to action</div>
+        <p>
+            By combining simulation, context data, and interpretation, the platform
+            supports a more complete understanding of solar projects and helps turn
+            analysis into actionable insight.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("""
+<div class="footer-note">
+    <strong>Next step:</strong> Move to the Solar Simulation page to explore how
+    design choices influence projected energy production.
+</div>
+""", unsafe_allow_html=True)
