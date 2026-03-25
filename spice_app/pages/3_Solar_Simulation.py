@@ -108,12 +108,12 @@ html, body, [class*="css"] {
 def load_main_data():
     # IMPORTANT:
     # Change this filename only if your uploaded reduced file has a different name
-    df = pd.read_csv("data/sample_reduced.csv")
+    df = pd.read_excel("data/sample_250000.xlsx")")
     return df
 
 @st.cache_data
 def load_scenario_data():
-    df = pd.read_csv("data/St_Augustine_combined_simulated_monthly.csv")
+    df = pd.read_excel("data/St_Augustine_combined_simulated_monthly.xlsx")
     return df
 
 try:
