@@ -90,6 +90,32 @@ st.markdown(
 @st.cache_data
 def load_csv_file(path):
     return pd.read_csv(path)
+import streamlit as st
+import pandas as pd
+import io
+
+def load_data():
+    if "df" in st.session_state and st.session_state["df"] is not None:
+        return st.session_state["df"]
+
+    if "uploaded_data" in st.session_state and st.session_state["uploaded_data"] is not None:
+        return st.session_state["uploaded_data"]
+
+    if "uploaded_file_bytes" in st.session_state:
+        try:
+            return pd.read_csv(io.BytesIO(st.session_state["uploaded_file_bytes"]))
+        except Exception:
+            return None
+
+    return None
+
+df = load_data()
+
+if df is None:
+    st.warning("No dataset is currently available. Please upload your CSV on the Home page first.")
+    st.info("Tip: upload on Home page, then open this page in the same app session.")
+    st.write("Current session keys:", list(st.session_state.keys()))
+    st.stop()
 
 def load_data():
     if "df" in st.session_state and st.session_state["df"] is not None:
