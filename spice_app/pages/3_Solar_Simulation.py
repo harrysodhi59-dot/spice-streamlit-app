@@ -98,6 +98,12 @@ html, body, [class*="css"] {
     color: #234;
     margin-top: 1rem;
 }
+
+.small-note {
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -114,37 +120,24 @@ def load_scenario_data():
 
 try:
     df = load_main_data()
-except Exception as e:
-    st.error(f"Could not load sample_250000.xlsx: {e}")
-    st.stop()
-
-try:
     scenario_df = load_scenario_data()
 except Exception as e:
-    st.error(f"Could not load St_Augustine_combined_simulated_monthly.csv: {e}")
+    st.error(f"Could not load simulation datasets: {e}")
     st.stop()
 
-# -----------------------------
-# Clean columns
-# -----------------------------
 df.columns = [str(c).strip() for c in df.columns]
 scenario_df.columns = [str(c).strip() for c in scenario_df.columns]
 
 # -----------------------------
-# Prepare month fields
+# Validate required columns
 # -----------------------------
-if "datetime" in df.columns:
-    df["datetime"] = pd.to_datetime(df["datetime"], errors="coerce")
-    df["month_num"] = df["datetime"].dt.month
-    df["month_name"] = df["datetime"].dt.strftime("%b")
-else:
-    st.error("The file sample_250000.xlsx must contain a 'datetime' column.")
+required_main = ["datetime", "tilt", "azimuth"]
+missing_main = [c for c in required_main if c not in df.columns]
+if missing_main:
+    st.error(f"Missing required columns in sample_250000.xlsx: {missing_main}")
     st.write("Columns found:", list(df.columns))
     st.stop()
 
-# -----------------------------
-# Detect target column
-# -----------------------------
 target_col = None
 for col in ["power_per_kw", "power", "energy_per_kw", "P"]:
     if col in df.columns:
@@ -158,6 +151,14 @@ if target_col is None:
     st.stop()
 
 # -----------------------------
+# Prepare fields
+# -----------------------------
+df["datetime"] = pd.to_datetime(df["datetime"], errors="coerce")
+df = df.dropna(subset=["datetime"]).copy()
+df["month_num"] = df["datetime"].dt.month
+df["month_name"] = df["datetime"].dt.strftime("%b")
+
+# -----------------------------
 # Hero
 # -----------------------------
 st.markdown("""
@@ -165,8 +166,9 @@ st.markdown("""
     <div class="sub-label">Simulation & Design Analysis</div>
     <h1>Solar Simulation</h1>
     <p>
-        This page explores how system size, tilt, and azimuth relate to projected
-        solar output using the simulation dataset and scenario-based monthly reference data.
+        This page explores how system size, tilt, and azimuth influence projected solar
+        output. It is designed to support comparison between design choices rather than
+        showing a single static estimate.
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -180,38 +182,51 @@ system_size = st.sidebar.slider("System Size (kW)", 1, 100, 10)
 tilt = st.sidebar.slider("Tilt (degrees)", 0, 60, 30)
 azimuth = st.sidebar.slider("Azimuth (degrees)", -180, 180, 0)
 
-# -----------------------------
-# Filtering
-# -----------------------------
-filtered = df.copy()
-
-if "tilt" in filtered.columns:
-    filtered = filtered[filtered["tilt"].between(tilt - 5, tilt + 5)]
-
-if "azimuth" in filtered.columns:
-    filtered = filtered[filtered["azimuth"].between(azimuth - 15, azimuth + 15)]
-
-if filtered.empty:
-    filtered = df.copy()
+baseline_tilt = st.sidebar.slider("Baseline Tilt (comparison)", 0, 60, 20)
+baseline_azimuth = st.sidebar.slider("Baseline Azimuth (comparison)", -180, 180, 0)
 
 # -----------------------------
-# Monthly summary
+# Helper
 # -----------------------------
-monthly_summary = (
-    filtered.groupby(["month_num", "month_name"])[target_col]
-    .mean()
-    .reset_index()
-    .sort_values("month_num")
+def get_design_summary(dataframe, chosen_tilt, chosen_azimuth, size_kw):
+    subset = dataframe.copy()
+
+    subset = subset[
+        subset["tilt"].between(chosen_tilt - 5, chosen_tilt + 5) &
+        subset["azimuth"].between(chosen_azimuth - 15, chosen_azimuth + 15)
+    ].copy()
+
+    if subset.empty:
+        subset = dataframe.copy()
+
+    monthly = (
+        subset.groupby(["month_num", "month_name"])[target_col]
+        .mean()
+        .reset_index()
+        .sort_values("month_num")
+    )
+
+    monthly["estimated_kwh"] = monthly[target_col] / 1000 * size_kw * 24 * 30.4
+    annual = monthly["estimated_kwh"].sum()
+
+    return subset, monthly, annual
+
+# Selected design
+filtered_selected, monthly_selected, annual_selected = get_design_summary(
+    df, tilt, azimuth, system_size
 )
 
-monthly_summary["estimated_kwh"] = (
-    monthly_summary[target_col] / 1000 * system_size * 24 * 30.4
+# Baseline design
+filtered_baseline, monthly_baseline, annual_baseline = get_design_summary(
+    df, baseline_tilt, baseline_azimuth, system_size
 )
 
-annual_energy = monthly_summary["estimated_kwh"].sum()
-low_energy = annual_energy * 0.85
-avg_energy = annual_energy
-high_energy = annual_energy * 1.15
+low_energy = annual_selected * 0.85
+avg_energy = annual_selected
+high_energy = annual_selected * 1.15
+
+annual_difference = annual_selected - annual_baseline
+pct_difference = (annual_difference / annual_baseline * 100) if annual_baseline != 0 else 0
 
 # -----------------------------
 # KPI row
@@ -231,24 +246,24 @@ with k1:
 with k2:
     st.markdown(f"""
     <div class="kpi-card">
-        <div class="kpi-title">Tilt</div>
-        <div class="kpi-value">{tilt}°</div>
+        <div class="kpi-title">Selected Tilt / Azimuth</div>
+        <div class="kpi-value">{tilt}° / {azimuth}°</div>
     </div>
     """, unsafe_allow_html=True)
 
 with k3:
     st.markdown(f"""
     <div class="kpi-card">
-        <div class="kpi-title">Azimuth</div>
-        <div class="kpi-value">{azimuth}°</div>
+        <div class="kpi-title">Annual Output</div>
+        <div class="kpi-value">{annual_selected:,.0f} kWh</div>
     </div>
     """, unsafe_allow_html=True)
 
 with k4:
     st.markdown(f"""
     <div class="kpi-card">
-        <div class="kpi-title">Estimated Annual Output</div>
-        <div class="kpi-value">{annual_energy:,.0f} kWh</div>
+        <div class="kpi-title">Vs Baseline</div>
+        <div class="kpi-value">{pct_difference:+.1f}%</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -263,22 +278,36 @@ c2.metric("Average Scenario", f"{avg_energy:,.0f} kWh")
 c3.metric("High Scenario", f"{high_energy:,.0f} kWh")
 
 # -----------------------------
-# Charts
+# Monthly comparison
 # -----------------------------
+st.markdown("## Monthly design comparison")
+
+compare_monthly = monthly_selected[["month_num", "month_name", "estimated_kwh"]].copy()
+compare_monthly = compare_monthly.rename(columns={"estimated_kwh": "Selected Design"})
+compare_monthly["Baseline Design"] = monthly_baseline["estimated_kwh"].values
+
+compare_long = compare_monthly.melt(
+    id_vars=["month_num", "month_name"],
+    value_vars=["Selected Design", "Baseline Design"],
+    var_name="Design",
+    value_name="Estimated Energy (kWh)"
+)
+
 left, right = st.columns(2)
 
 with left:
     st.markdown("""
     <div class="card">
         <div class="sub-label">Seasonal Output</div>
-        <div class="section-title">Estimated Monthly Energy Production</div>
+        <div class="section-title">Selected vs Baseline Monthly Production</div>
     """, unsafe_allow_html=True)
 
-    fig_monthly = px.bar(
-        monthly_summary,
+    fig_monthly = px.line(
+        compare_long,
         x="month_name",
-        y="estimated_kwh",
-        labels={"month_name": "Month", "estimated_kwh": "Estimated Energy (kWh)"}
+        y="Estimated Energy (kWh)",
+        color="Design",
+        markers=True
     )
     fig_monthly.update_layout(
         xaxis_title="Month",
@@ -288,9 +317,10 @@ with left:
     st.plotly_chart(fig_monthly, use_container_width=True)
 
     st.markdown("""
-        <p>
-            This chart shows the projected monthly production pattern based on the selected
-            system configuration and filtered simulation records.
+        <p class="small-note">
+            This comparison shows how the selected design performs across the year
+            relative to a baseline configuration. It helps frame the value of changing
+            tilt or azimuth rather than looking at one configuration in isolation.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -298,38 +328,85 @@ with left:
 with right:
     st.markdown("""
     <div class="card">
-        <div class="sub-label">Scenario Framing</div>
-        <div class="section-title">Low / Average / High Annual Output</div>
+        <div class="sub-label">Annual Comparison</div>
+        <div class="section-title">Design Output Comparison</div>
     """, unsafe_allow_html=True)
 
-    scenario_chart = pd.DataFrame({
-        "Scenario": ["Low", "Average", "High"],
-        "Annual Energy (kWh)": [low_energy, avg_energy, high_energy]
+    annual_compare_df = pd.DataFrame({
+        "Design": ["Selected Design", "Baseline Design"],
+        "Annual Energy (kWh)": [annual_selected, annual_baseline]
     })
 
-    fig_range = px.bar(
-        scenario_chart,
-        x="Scenario",
-        y="Annual Energy (kWh)"
+    fig_annual = px.bar(
+        annual_compare_df,
+        x="Design",
+        y="Annual Energy (kWh)",
+        color="Design"
     )
-    fig_range.update_layout(
-        xaxis_title="Scenario",
+    fig_annual.update_layout(
+        xaxis_title="Design",
         yaxis_title="Annual Energy (kWh)",
-        plot_bgcolor="white"
+        plot_bgcolor="white",
+        showlegend=False
     )
-    st.plotly_chart(fig_range, use_container_width=True)
+    st.plotly_chart(fig_annual, use_container_width=True)
 
-    st.markdown("""
-        <p>
-            These scenario bands provide a simple planning range rather than a single fixed estimate.
+    st.markdown(f"""
+        <p class="small-note">
+            The selected configuration changes annual production by
+            <strong>{annual_difference:,.0f} kWh</strong> relative to the baseline design.
+            This makes the page more useful for design discussion and scenario evaluation.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
 # -----------------------------
+# Design surface summary
+# -----------------------------
+st.markdown("## Tilt and azimuth performance patterns")
+
+surface_df = (
+    df.groupby(["tilt", "azimuth"])[target_col]
+    .mean()
+    .reset_index()
+)
+
+surface_df["annual_kwh_est"] = surface_df[target_col] / 1000 * system_size * 24 * 365
+
+st.markdown("""
+<div class="card">
+    <div class="sub-label">Design Surface</div>
+    <div class="section-title">Estimated Annual Output Across Tilt and Azimuth</div>
+""", unsafe_allow_html=True)
+
+fig_surface = px.scatter(
+    surface_df,
+    x="azimuth",
+    y="tilt",
+    size="annual_kwh_est",
+    color="annual_kwh_est",
+    hover_data=["annual_kwh_est"],
+)
+fig_surface.update_layout(
+    xaxis_title="Azimuth (degrees)",
+    yaxis_title="Tilt (degrees)",
+    plot_bgcolor="white"
+)
+st.plotly_chart(fig_surface, use_container_width=True)
+
+st.markdown("""
+    <p class="small-note">
+        This view shows how projected annual output varies across different design
+        combinations in the simulation dataset. It helps identify which tilt and azimuth
+        regions tend to produce stronger results.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# -----------------------------
 # Scenario reference
 # -----------------------------
-st.markdown("## Scenario Comparison Reference")
+st.markdown("## Scenario comparison reference")
 
 st.markdown("""
 <div class="card">
@@ -372,7 +449,7 @@ st.markdown("</div>", unsafe_allow_html=True)
 # Preview
 # -----------------------------
 st.markdown("## Filtered Data Preview")
-st.dataframe(filtered.head(15), use_container_width=True)
+st.dataframe(filtered_selected.head(15), use_container_width=True)
 
 st.markdown("""
 <div class="footer-note">
