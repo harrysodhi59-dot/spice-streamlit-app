@@ -1,177 +1,201 @@
 import streamlit as st
+from PIL import Image
+import os
 
 st.set_page_config(
-    page_title="SPICE Solar Impact Dashboard",
+    page_title="SPICE Solar Analytics Dashboard",
     page_icon="☀️",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="wide"
 )
 
+# -----------------------------
+# Helper function to load image
+# -----------------------------
+def load_image(path):
+    if os.path.exists(path):
+        return Image.open(path)
+    return None
+
+# -----------------------------
+# Image paths
+# Put these images in your project folder
+# -----------------------------
+banner_img = load_image("images/solar_banner.jpg")
+img1 = load_image("images/panel1.jpg")
+img2 = load_image("images/dashboard.jpg")
+img3 = load_image("images/environment.jpg")
+
+# -----------------------------
+# Custom CSS
+# -----------------------------
 st.markdown("""
-<style>
-html, body, [class*="css"] {
-    font-family: "Segoe UI", sans-serif;
-}
-
-.block-container {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-    padding-left: 3rem;
-    padding-right: 3rem;
-}
-
-.hero {
-    background: linear-gradient(90deg, #1E6F5C, #0B3C5D);
-    padding: 2.7rem;
-    border-radius: 22px;
-    color: white;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 14px 30px rgba(0,0,0,0.12);
-}
-
-.hero h1 {
-    font-size: 3rem;
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-}
-
-.hero p {
-    font-size: 1.08rem;
-    line-height: 1.75;
-    margin-bottom: 0;
-    max-width: 900px;
-}
-
-.info-card {
-    background: white;
-    border-radius: 18px;
-    padding: 1.4rem;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-}
-
-.kpi-card {
-    background: white;
-    border-radius: 18px;
-    padding: 1.2rem;
-    text-align: center;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-}
-
-.kpi-title {
-    color: #0B3C5D;
-    font-size: 0.95rem;
-    font-weight: 600;
-}
-
-.kpi-value {
-    color: #1E6F5C;
-    font-size: 1.7rem;
-    font-weight: 800;
-    margin-top: 0.35rem;
-}
-
-.section-title {
-    color: #0B3C5D;
-    font-weight: 800;
-    margin-top: 0.6rem;
-    margin-bottom: 0.8rem;
-}
-
-.team-badge {
-    display: inline-block;
-    background-color: #FDB813;
-    color: #1A1A1A;
-    font-weight: 700;
-    padding: 0.4rem 0.8rem;
-    border-radius: 999px;
-    margin-top: 0.8rem;
-}
-
-.sidebar-note {
-    font-size: 0.95rem;
-    color: #444444;
-}
-</style>
+    <style>
+    .main {
+        background-color: #f8fafc;
+    }
+    .hero-box {
+        background: linear-gradient(135deg, #0f172a, #1e3a8a);
+        padding: 2.5rem;
+        border-radius: 20px;
+        color: white;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    .section-card {
+        background-color: white;
+        padding: 1.2rem;
+        border-radius: 18px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+        margin-bottom: 1rem;
+    }
+    .feature-card {
+        background-color: white;
+        padding: 1rem;
+        border-radius: 18px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        text-align: center;
+        min-height: 180px;
+    }
+    .small-text {
+        color: #475569;
+        font-size: 16px;
+    }
+    </style>
 """, unsafe_allow_html=True)
 
+# -----------------------------
+# Hero Section
+# -----------------------------
+col1, col2 = st.columns([1.4, 1])
+
+with col1:
+    st.markdown("""
+        <div class="hero-box">
+            <h1>SPICE Solar Analytics Dashboard</h1>
+            <p style="font-size:18px;">
+                A data-driven platform developed by <b>Team Data Alchemists</b> to analyze
+                solar energy performance, financial return, and environmental impact.
+            </p>
+            <p style="font-size:16px;">
+                This dashboard supports smarter solar investment decisions for Edmonton-based
+                energy projects through interactive analytics, predictive modeling, and
+                visual storytelling.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    if banner_img:
+        st.image(banner_img, use_container_width=True)
+    else:
+        st.info("Add a banner image at: images/solar_banner.jpg")
+
+# -----------------------------
+# Project Overview
+# -----------------------------
+st.markdown("## Project Overview")
+
+col3, col4 = st.columns([1.1, 1])
+
+with col3:
+    st.markdown("""
+        <div class="section-card">
+            <h3>About the Project</h3>
+            <p class="small-text">
+                The SPICE Solar Analytics Dashboard is designed to help users understand how
+                different solar system configurations affect energy generation, revenue, and
+                carbon reduction. It transforms raw data into meaningful insights that can
+                support investors, stakeholders, and decision-makers.
+            </p>
+            <p class="small-text">
+                The project combines exploratory data analysis, system performance metrics,
+                financial indicators, and sustainability-focused reporting in one unified platform.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+
+with col4:
+    if img1:
+        st.image(img1, use_container_width=True)
+    else:
+        st.info("Add image at: images/panel1.jpg")
+
+# -----------------------------
+# Key Highlights
+# -----------------------------
+st.markdown("## Key Highlights")
+
+c1, c2, c3 = st.columns(3)
+
+with c1:
+    st.markdown("""
+        <div class="feature-card">
+            <h4>Energy Analytics</h4>
+            <p class="small-text">
+                Explore solar output, generation trends, and performance behaviour across
+                different system settings.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+
+with c2:
+    st.markdown("""
+        <div class="feature-card">
+            <h4>Financial Insights</h4>
+            <p class="small-text">
+                Evaluate estimated revenue, cost efficiency, and investment-related indicators
+                using interactive visuals.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+
+with c3:
+    st.markdown("""
+        <div class="feature-card">
+            <h4>Environmental Impact</h4>
+            <p class="small-text">
+                Understand how solar adoption contributes to carbon reduction and supports
+                sustainability goals.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+
+# -----------------------------
+# Visual Section
+# -----------------------------
+st.markdown("## Dashboard Vision")
+
+col5, col6 = st.columns(2)
+
+with col5:
+    if img2:
+        st.image(img2, caption="Solar dashboard and analytics interface", use_container_width=True)
+    else:
+        st.info("Add image at: images/dashboard.jpg")
+
+with col6:
+    if img3:
+        st.image(img3, caption="Environmental and sustainability perspective", use_container_width=True)
+    else:
+        st.info("Add image at: images/environment.jpg")
+
+# -----------------------------
+# Team Section
+# -----------------------------
+st.markdown("## Team Data Alchemists")
+
 st.markdown("""
-<div class="hero">
-    <h1>SPICE Solar Impact Dashboard</h1>
-    <p>
-        A solar analytics and decision-support platform developed to help the
-        Solar Power Investment Cooperative of Edmonton (SPICE) evaluate solar
-        design choices, estimate project impact, and communicate technical,
-        financial, and environmental value to stakeholders.
+<div class="section-card">
+    <p class="small-text">
+        This project is being developed by <b>Team Data Alchemists</b> as part of the SPICE
+        Energy Conservation and Data Analytics initiative. The dashboard reflects an applied
+        machine learning and analytics approach to solving real-world renewable energy challenges.
     </p>
-    <div class="team-badge">Developed by Data Alchemists</div>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-<div class="info-card">
-    <h3 class="section-title">Welcome</h3>
-    <p>
-        This dashboard brings together simulation logic, weather context,
-        financial analysis, environmental metrics, and real project data
-        to support better solar planning and decision-making.
-    </p>
-    <p>
-        Use the sidebar to explore the project pages, including methodology,
-        solar simulation, financial impact, environmental analysis,
-        weather and seasonality, site validation, and scenario comparison.
-    </p>
-</div>
-""", unsafe_allow_html=True)
-
-k1, k2, k3, k4 = st.columns(4)
-
-with k1:
-    st.markdown("""
-    <div class="kpi-card">
-        <div class="kpi-title">Client</div>
-        <div class="kpi-value">SPICE</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with k2:
-    st.markdown("""
-    <div class="kpi-card">
-        <div class="kpi-title">Team</div>
-        <div class="kpi-value">Data Alchemists</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with k3:
-    st.markdown("""
-    <div class="kpi-card">
-        <div class="kpi-title">Datasets</div>
-        <div class="kpi-value">9</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with k4:
-    st.markdown("""
-    <div class="kpi-card">
-        <div class="kpi-title">Focus</div>
-        <div class="kpi-value">Energy · Finance · Impact</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("""
-<div class="info-card">
-    <h3 class="section-title">Platform Scope</h3>
-    <p>
-        The dashboard is designed to translate solar system design decisions into
-        clear and practical outcomes, including expected energy production,
-        financial savings, carbon reduction, and project comparison insights.
-    </p>
-    <p>
-        It supports communication with building owners, investors, and community
-        stakeholders by connecting technical analysis to real-world value.
-    </p>
-</div>
-""", unsafe_allow_html=True)
-
-st.success("Open the sidebar to begin with the Home page.")
+# -----------------------------
+# Footer
+# -----------------------------
+st.markdown("---")
+st.caption("SPICE Solar Analytics Dashboard | Developed by Team Data Alchemists")
