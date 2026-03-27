@@ -390,24 +390,24 @@ if len(summary) == 2:
     leader = "Bissell" if b_val > v_val else "Visser"
     gap_pct = abs((b_val - v_val) / min(b_val, v_val) * 100) if min(b_val, v_val) > 0 else 0
 
-    insight_text = f"""
-    <strong>Validation Insight:</strong> Across the selected years, <strong>{leader}</strong>
-    delivers the stronger overall production profile. The difference between the two sites is
-    approximately <strong>{gap_pct:.1f}%</strong>, which helps show how site conditions and
-    operational variability can influence long-term solar output. Converting production into
-    revenue also makes the comparison more meaningful for SPICE from a business perspective.
+    insight_html = f"""
+    <div class="insight-box">
+        <strong>Validation Insight:</strong> Across the selected years, <strong>{leader}</strong>
+        delivers the stronger overall production profile. The difference between the two sites is
+        approximately <strong>{gap_pct:.1f}%</strong>, which helps show how site conditions and
+        operational variability can influence long-term solar output. Converting production into
+        revenue also makes the comparison more meaningful for SPICE from a business perspective.
+    </div>
     """
 else:
-    insight_text = """
-    <strong>Validation Insight:</strong> This view helps compare selected real-world sites on production,
-    electricity offset, and estimated revenue across the chosen time window.
+    insight_html = """
+    <div class="insight-box">
+        <strong>Validation Insight:</strong> This view helps compare selected real-world sites on
+        production, electricity offset, and estimated revenue across the chosen time window.
+    </div>
     """
 
-st.markdown(f"""
-<div class="insight-box">
-    {insight_text}
-</div>
-""", unsafe_allow_html=True)
+st.markdown(insight_html, unsafe_allow_html=True)
 
 # ---------------------------------------------------
 # KPI strips
