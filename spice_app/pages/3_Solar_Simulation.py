@@ -440,8 +440,8 @@ chart_type = st.sidebar.selectbox(
     ["Line", "Bar", "Area"]
 )
 
-show_distribution = st.sidebar.checkbox("Show output distribution", value=True)
-show_top_designs = st.sidebar.checkbox("Show top design combinations", value=True)
+baseline_tilt = st.sidebar.slider("Baseline Tilt (comparison)", 0, 60, 20)
+baseline_azimuth = st.sidebar.slider("Baseline Azimuth (comparison)", -180, 180, 20)
 
 # =========================================================
 # Main calculations
@@ -456,6 +456,19 @@ monthly_selected = monthly_selected[
 ].copy()
 
 annual_selected_filtered = monthly_selected["estimated_kwh"].sum()
+
+_, monthly_baseline, annual_baseline = get_design_summary(
+    df, baseline_tilt, baseline_azimuth, system_size, target_col, tilt_col, azimuth_col
+)
+
+monthly_baseline = monthly_baseline[
+    monthly_baseline["month_num"].between(month_range[0], month_range[1]) &
+    monthly_baseline["quarter"].isin(quarter_filter)
+].copy()
+
+annual_baseline_filtered = monthly_baseline["estimated_kwh"].sum()
+comparison_gap = annual_selected_filtered - annual_baseline_filtered
+comparison_pct = (comparison_gap / annual_baseline_filtered * 100) if annual_baseline_filtered != 0 else 0
 
 low_energy = annual_selected_filtered * 0.85
 avg_energy = annual_selected_filtered
@@ -693,7 +706,7 @@ with right:
     """, unsafe_allow_html=True)
 
 # =========================================================
-# Annual output + distribution
+# Annual output + comparison
 # =========================================================
 st.markdown('<div class="section-heading">System Evaluation</div>', unsafe_allow_html=True)
 
@@ -738,37 +751,49 @@ with a1:
 with a2:
     st.markdown("""
     <div class="card">
-        <div class="card-label">Distribution</div>
-        <div class="card-title">Output Distribution for Selected Design Space</div>
+        <div class="card-label">Design Comparison</div>
+        <div class="card-title">Selected vs Baseline Annual Output</div>
     """, unsafe_allow_html=True)
 
-    if show_distribution and not filtered_selected.empty:
-        filtered_selected = filtered_selected.copy()
-        filtered_selected["estimated_output_kwh"] = filtered_selected[target_col] / 1000 * system_size * 24
+    compare_df = pd.DataFrame({
+        "Design": ["Selected Design", "Baseline Design"],
+        "Annual Energy (kWh)": [annual_selected_filtered, annual_baseline_filtered]
+    })
 
-        fig_hist = px.histogram(
-            filtered_selected,
-            x="estimated_output_kwh",
-            nbins=30
-        )
-        fig_hist.update_layout(
-            xaxis_title="Estimated Daily Energy Proxy (kWh)",
-            yaxis_title="Count"
-        )
-        apply_plot_style(fig_hist)
-        st.plotly_chart(fig_hist, use_container_width=True)
-    else:
-        st.info("Distribution chart hidden from sidebar.")
+    fig_compare = px.bar(
+        compare_df,
+        x="Design",
+        y="Annual Energy (kWh)",
+        color="Design",
+        text="Annual Energy (kWh)",
+        color_discrete_map={
+            "Selected Design": "#1E6F5C",
+            "Baseline Design": "#FDB813"
+        }
+    )
+    fig_compare.update_traces(
+        texttemplate="%{text:,.0f}",
+        textposition="outside"
+    )
+    fig_compare.update_layout(
+        xaxis_title="",
+        yaxis_title="Annual Energy (kWh)",
+        showlegend=False
+    )
+    apply_plot_style(fig_compare)
+    st.plotly_chart(fig_compare, use_container_width=True)
 
-    st.markdown("""
+    st.markdown(f"""
         <p class="small-note">
-            This distribution shows how output values are spread within the selected tilt and azimuth design window.
+            The selected design produces <strong>{annual_selected_filtered:,.0f} kWh</strong>, while the baseline design
+            produces <strong>{annual_baseline_filtered:,.0f} kWh</strong>. That is a difference of
+            <strong>{comparison_gap:,.0f} kWh</strong> ({comparison_pct:,.1f}%).
         </p>
     </div>
     """, unsafe_allow_html=True)
 
 # =========================================================
-# Heatmap + top combinations
+# Heatmap + tilt line
 # =========================================================
 st.markdown('<div class="section-heading">Tilt and Azimuth Performance Patterns</div>', unsafe_allow_html=True)
 
@@ -807,41 +832,57 @@ with h1:
 with h2:
     st.markdown("""
     <div class="card">
-        <div class="card-label">Top Designs</div>
-        <div class="card-title">Best Performing Tilt / Azimuth Combinations</div>
+        <div class="card-label">Tilt Analysis</div>
+        <div class="card-title">Tilt vs Annual Energy Output</div>
     """, unsafe_allow_html=True)
 
-    if show_top_designs:
-        top_designs = surface_df.sort_values("annual_kwh_est", ascending=False).head(10).copy()
-        top_designs["design_label"] = (
-            "T" + top_designs[tilt_col].astype(str) +
-            " / A" + top_designs[azimuth_col].astype(str)
+    tilt_df = surface_df[
+        surface_df[azimuth_col].between(azimuth - 15, azimuth + 15)
+    ].copy()
+
+    tilt_summary = (
+        tilt_df.groupby(tilt_col, as_index=False)["annual_kwh_est"]
+        .mean()
+        .sort_values(tilt_col)
+    )
+
+    if not tilt_summary.empty:
+        fig_tilt = px.line(
+            tilt_summary,
+            x=tilt_col,
+            y="annual_kwh_est",
+            markers=True
         )
 
-        fig_top = px.bar(
-            top_designs,
-            x="annual_kwh_est",
-            y="design_label",
-            orientation="h",
-            color="annual_kwh_est",
-            color_continuous_scale="YlGn"
+        fig_tilt.update_layout(
+            xaxis_title="Tilt (degrees)",
+            yaxis_title="Estimated Annual Energy (kWh)"
         )
-        fig_top.update_layout(
-            xaxis_title="Estimated Annual Energy (kWh)",
-            yaxis_title="Design Combination",
-            coloraxis_showscale=False
-        )
-        apply_plot_style(fig_top)
-        st.plotly_chart(fig_top, use_container_width=True)
+
+        apply_plot_style(fig_tilt)
+        st.plotly_chart(fig_tilt, use_container_width=True)
+
+        best_tilt = tilt_summary.loc[
+            tilt_summary["annual_kwh_est"].idxmax(), tilt_col
+        ]
+        best_energy = tilt_summary["annual_kwh_est"].max()
+
+        st.markdown(f"""
+            <p class="small-note">
+                This graph shows how annual energy output changes with tilt for the selected azimuth range.
+                The optimal tilt is approximately <strong>{best_tilt}°</strong>, producing around
+                <strong>{best_energy:,.0f} kWh</strong>.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
     else:
-        st.info("Top design chart hidden from sidebar.")
-
-    st.markdown("""
-        <p class="small-note">
-            This ranking helps benchmark where the selected system sits within the broader simulation space.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+        st.info("No tilt data available for the selected azimuth range.")
+        st.markdown("""
+            <p class="small-note">
+                Adjust the azimuth value to explore how tilt affects annual output under a different design window.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
 # =========================================================
 # Data preview
