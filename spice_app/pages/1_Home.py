@@ -1,47 +1,7 @@
 import pandas as pd
 import os
 import streamlit as st
-# -----------------------------
-# DATA UPLOAD SECTION
-# -----------------------------
-st.markdown('<div class="section-heading">Upload Dataset</div>', unsafe_allow_html=True)
-st.markdown(
-    '<div class="section-subtext">Upload the project CSV file here so all dashboard pages can use the same dataset.</div>',
-    unsafe_allow_html=True
-)
 
-uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
-
-if uploaded_file is not None:
-    try:
-        df = pd.read_csv(uploaded_file)
-
-        # Save dataframe in session state
-        st.session_state["df"] = df
-        st.session_state["uploaded_data"] = df
-
-        # Save file locally so all pages can reload it
-        save_path = "uploaded_dataset.csv"
-        with open(save_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
-
-        st.session_state["uploaded_file_path"] = save_path
-
-        st.success("Dataset uploaded successfully and is now available across all pages.")
-        st.dataframe(df.head(10), use_container_width=True)
-
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Rows", len(df))
-        with col2:
-            st.metric("Columns", len(df.columns))
-        with col3:
-            st.metric("File Saved", "Yes")
-
-    except Exception as e:
-        st.error(f"Error reading file: {e}")
-else:
-    st.info("Upload your CSV here before opening Solar Simulation, Financial Impact, or Final Recommendation pages.")
 st.set_page_config(
     page_title="Home",
     page_icon="🏠",
