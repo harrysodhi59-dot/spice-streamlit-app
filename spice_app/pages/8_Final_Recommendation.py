@@ -7,7 +7,10 @@ import plotly.express as px
 # -------------------------------------------------------
 # PAGE CONFIG
 # -------------------------------------------------------
-st.set_page_config(page_title="Final Recommendation & Decision Support", layout="wide")
+st.set_page_config(
+    page_title="Final Recommendation & Decision Support",
+    layout="wide"
+)
 
 # -------------------------------------------------------
 # CUSTOM CSS
@@ -15,26 +18,28 @@ st.set_page_config(page_title="Final Recommendation & Decision Support", layout=
 st.markdown("""
 <style>
 .main {
-    background-color: #0f1117;
+    background-color: #0b1220;
     color: white;
 }
 .block-container {
     padding-top: 2rem;
     padding-bottom: 2rem;
+    max-width: 1400px;
 }
 h1, h2, h3, h4 {
     color: white;
 }
 .metric-card {
     background: linear-gradient(135deg, rgba(163,230,53,0.12), rgba(250,204,21,0.10));
-    border: 1px solid rgba(163,230,53,0.25);
+    border: 1px solid rgba(163,230,53,0.20);
     border-radius: 18px;
     padding: 18px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.28);
     text-align: center;
+    min-height: 135px;
 }
 .metric-title {
-    font-size: 15px;
+    font-size: 14px;
     color: #d1d5db;
     margin-bottom: 8px;
 }
@@ -42,29 +47,44 @@ h1, h2, h3, h4 {
     font-size: 28px;
     font-weight: 700;
     color: #ffffff;
+    line-height: 1.2;
 }
 .metric-sub {
     font-size: 13px;
     color: #a3e635;
-    margin-top: 6px;
+    margin-top: 8px;
 }
 .section-box {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 18px;
-    padding: 20px;
-    margin-top: 12px;
-    margin-bottom: 12px;
+    padding: 22px;
+    margin-top: 10px;
+    margin-bottom: 14px;
 }
 .highlight-box {
     background: linear-gradient(135deg, rgba(163,230,53,0.10), rgba(250,204,21,0.08));
+    border: 1px solid rgba(163,230,53,0.20);
     border-left: 5px solid #a3e635;
     border-radius: 16px;
-    padding: 20px;
+    padding: 22px;
 }
 .small-note {
     color: #d1d5db;
     font-size: 14px;
+}
+.badge-box {
+    background: rgba(250,204,21,0.10);
+    border: 1px solid rgba(250,204,21,0.20);
+    color: #fde68a;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 14px;
+    margin-top: 8px;
+}
+div[data-testid="stDataFrame"] {
+    border-radius: 14px;
+    overflow: hidden;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -74,7 +94,10 @@ h1, h2, h3, h4 {
 # -------------------------------------------------------
 def load_data():
     """
-    Try loading from session state first, then from uploaded_dataset.csv
+    Load dataset from:
+    1. session_state["df"]
+    2. session_state["uploaded_data"]
+    3. uploaded_dataset.csv
     """
     if "df" in st.session_state and st.session_state["df"] is not None:
         return st.session_state["df"]
@@ -82,22 +105,30 @@ def load_data():
     if "uploaded_data" in st.session_state and st.session_state["uploaded_data"] is not None:
         return st.session_state["uploaded_data"]
 
+    if "uploaded_file_path" in st.session_state:
+        saved_path = st.session_state["uploaded_file_path"]
+        if saved_path and os.path.exists(saved_path):
+            try:
+                return pd.read_csv(saved_path)
+            except Exception:
+                pass
+
     if os.path.exists("uploaded_dataset.csv"):
-        return pd.read_csv("uploaded_dataset.csv")
+        try:
+            return pd.read_csv("uploaded_dataset.csv")
+        except Exception:
+            pass
 
     return None
 
 
 def find_column(df, possible_names):
-    """
-    Find a matching column from a list of possible names
-    """
     df_cols_lower = {col.lower(): col for col in df.columns}
+
     for name in possible_names:
         if name.lower() in df_cols_lower:
             return df_cols_lower[name.lower()]
 
-    # partial match fallback
     for col in df.columns:
         col_lower = col.lower()
         for name in possible_names:
@@ -107,11 +138,11 @@ def find_column(df, possible_names):
 
 
 def normalize_series(s):
-    s = pd.to_numeric(s, errors="coerce")
-    if s.isna().all():
-        return pd.Series([0] * len(s), index=s.index)
+    s = pd.to_numeric(s, errors="coerce").fillna(0)
+    if len(s) == 0:
+        return s
     if s.max() == s.min():
-        return pd.Series([1] * len(s), index=s.index)
+        return pd.Series([1.0] * len(s), index=s.index)
     return (s - s.min()) / (s.max() - s.min())
 
 
@@ -121,74 +152,79 @@ def safe_numeric(df, colname, default=0):
     return pd.Series([default] * len(df), index=df.index)
 
 
-# -------------------------------------------------------
-# LOAD DATA
-# -------------------------------------------------------
-df = load_data()
+def pct_improvement(new, old):
+    if old == 0:
+        return 0
+    return ((new - old) / old) * 100
+
 
 # -------------------------------------------------------
 # HEADER
 # -------------------------------------------------------
 st.markdown("""
 <div class="section-box">
-    <h1>Final Recommendation & Decision Support</h1>
-    <p class="small-note">
+    <h1 style="margin-bottom: 10px;">Final Recommendation & Decision Support</h1>
+    <p class="small-note" style="font-size:18px;">
         Data-driven evaluation of solar design scenarios for SPICE, combining
         energy production, financial return, and environmental benefit into one final recommendation.
     </p>
 </div>
 """, unsafe_allow_html=True)
 
+# -------------------------------------------------------
+# LOAD DATA
+# -------------------------------------------------------
+df = load_data()
+
 if df is None:
-    st.error("No dataset found. Please upload your CSV file from the main page first.")
+    st.error("No dataset found. Please upload your CSV file from the Home page first.")
+    st.info("Go to the Home page, upload your dataset, then return to this page.")
     st.stop()
+
+# Keep a clean copy
+data = df.copy()
 
 # -------------------------------------------------------
 # COLUMN DETECTION
 # -------------------------------------------------------
-scenario_col = find_column(df, ["scenario", "scenario_name", "design", "design_name", "configuration", "case"])
-tilt_col = find_column(df, ["tilt", "tilt_angle"])
-azimuth_col = find_column(df, ["azimuth", "orientation"])
-size_col = find_column(df, ["system_size", "size_kw", "capacity_kw", "installed_capacity", "kw"])
-energy_col = find_column(df, ["energy", "annual_energy", "production", "energy_kwh", "annual_production", "kwh"])
-revenue_col = find_column(df, ["revenue", "annual_revenue", "financial_return", "value_cad", "cad_revenue", "profit"])
-co2_col = find_column(df, ["co2", "carbon", "co2_reduction", "carbon_reduction", "co2_saved", "emissions_avoided"])
-baseline_flag_col = find_column(df, ["baseline", "is_baseline", "base_case"])
-
-# Make a copy
-data = df.copy()
+scenario_col = find_column(data, ["scenario", "scenario_name", "design", "design_name", "configuration", "case"])
+tilt_col = find_column(data, ["tilt", "tilt_angle"])
+azimuth_col = find_column(data, ["azimuth", "orientation"])
+size_col = find_column(data, ["system_size", "size_kw", "capacity_kw", "installed_capacity", "kw"])
+energy_col = find_column(data, ["energy", "annual_energy", "production", "energy_kwh", "annual_production", "kwh"])
+revenue_col = find_column(data, ["revenue", "annual_revenue", "financial_return", "value_cad", "cad_revenue", "profit"])
+co2_col = find_column(data, ["co2", "carbon", "co2_reduction", "carbon_reduction", "co2_saved", "emissions_avoided"])
+baseline_flag_col = find_column(data, ["baseline", "is_baseline", "base_case"])
 
 # -------------------------------------------------------
-# CREATE FALLBACK SCENARIO NAMES
+# CREATE FALLBACK SCENARIO NAME
 # -------------------------------------------------------
 if scenario_col is None:
     data["Scenario"] = [f"Scenario {i+1}" for i in range(len(data))]
     scenario_col = "Scenario"
 
 # -------------------------------------------------------
-# CREATE REQUIRED METRIC COLUMNS
+# CREATE REQUIRED NUMERIC METRICS
 # -------------------------------------------------------
 data["Energy_Value"] = safe_numeric(data, energy_col, 0)
 data["Revenue_Value"] = safe_numeric(data, revenue_col, 0)
 data["CO2_Value"] = safe_numeric(data, co2_col, 0)
 
-# fallback if some columns missing
+# fallback estimates if revenue or co2 columns missing
 if data["Revenue_Value"].sum() == 0 and data["Energy_Value"].sum() > 0:
-    # rough estimate just for display if no revenue column exists
     data["Revenue_Value"] = data["Energy_Value"] * 0.12
 
 if data["CO2_Value"].sum() == 0 and data["Energy_Value"].sum() > 0:
-    # rough estimate just for display if no carbon column exists
     data["CO2_Value"] = data["Energy_Value"] * 0.0005
 
 # -------------------------------------------------------
-# SIDEBAR CONTROLS
+# SIDEBAR SETTINGS
 # -------------------------------------------------------
 st.sidebar.header("Decision Settings")
 
-energy_weight = st.sidebar.slider("Energy Weight", 0.0, 1.0, 0.4, 0.05)
-revenue_weight = st.sidebar.slider("Revenue Weight", 0.0, 1.0, 0.3, 0.05)
-co2_weight = st.sidebar.slider("CO₂ Weight", 0.0, 1.0, 0.3, 0.05)
+energy_weight = st.sidebar.slider("Energy Weight", 0.0, 1.0, 0.40, 0.05)
+revenue_weight = st.sidebar.slider("Revenue Weight", 0.0, 1.0, 0.30, 0.05)
+co2_weight = st.sidebar.slider("CO₂ Weight", 0.0, 1.0, 0.30, 0.05)
 
 weight_total = energy_weight + revenue_weight + co2_weight
 if weight_total == 0:
@@ -216,6 +252,10 @@ data["Decision_Score"] = (
 
 data = data.sort_values("Decision_Score", ascending=False).reset_index(drop=True)
 
+if data.empty:
+    st.error("The dataset is empty after processing.")
+    st.stop()
+
 best_row = data.iloc[0]
 
 # -------------------------------------------------------
@@ -234,22 +274,17 @@ if baseline_row is None:
         baseline_row = baseline_candidates.iloc[0]
 
 if baseline_row is None:
-    baseline_row = data.iloc[-1]  # fallback: lowest ranked scenario
+    baseline_row = data.iloc[-1]
 
 # -------------------------------------------------------
-# IMPROVEMENT CALCULATIONS
+# IMPROVEMENTS
 # -------------------------------------------------------
-def pct_improvement(new, old):
-    if old == 0:
-        return 0
-    return ((new - old) / old) * 100
-
 energy_improve = pct_improvement(best_row["Energy_Value"], baseline_row["Energy_Value"])
 revenue_improve = pct_improvement(best_row["Revenue_Value"], baseline_row["Revenue_Value"])
 co2_improve = pct_improvement(best_row["CO2_Value"], baseline_row["CO2_Value"])
 
 # -------------------------------------------------------
-# TOP KPI CARDS
+# KPI CARDS
 # -------------------------------------------------------
 c1, c2, c3, c4, c5 = st.columns(5)
 
@@ -276,7 +311,7 @@ with c3:
     <div class="metric-card">
         <div class="metric-title">Annual Revenue</div>
         <div class="metric-value">${best_row['Revenue_Value']:,.0f}</div>
-        <div class="metric-sub">estimated annual value</div>
+        <div class="metric-sub">Estimated annual value</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -294,11 +329,20 @@ with c5:
     <div class="metric-card">
         <div class="metric-title">Decision Score</div>
         <div class="metric-value">{best_row['Decision_Score']:.3f}</div>
-        <div class="metric-sub">weighted optimization score</div>
+        <div class="metric-sub">Weighted optimization</div>
     </div>
     """, unsafe_allow_html=True)
 
 st.markdown("---")
+
+# -------------------------------------------------------
+# DATA STATUS
+# -------------------------------------------------------
+st.markdown(f"""
+<div class="badge-box">
+<b>Dataset loaded successfully.</b> Rows: {len(data):,} | Columns: {len(data.columns):,}
+</div>
+""", unsafe_allow_html=True)
 
 # -------------------------------------------------------
 # BASELINE VS RECOMMENDED
@@ -324,7 +368,7 @@ comparison_df = pd.DataFrame({
     ]
 })
 
-col_a, col_b = st.columns([1.05, 1.2])
+col_a, col_b = st.columns([1.05, 1.3])
 
 with col_a:
     st.dataframe(
@@ -363,49 +407,7 @@ with col_b:
 st.markdown("---")
 
 # -------------------------------------------------------
-# TOP SCENARIOS TABLE
-# -------------------------------------------------------
-st.subheader("Scenario Ranking Table")
-
-display_cols = [scenario_col, "Energy_Value", "Revenue_Value", "CO2_Value", "Decision_Score"]
-rename_map = {
-    scenario_col: "Scenario",
-    "Energy_Value": "Energy (kWh)",
-    "Revenue_Value": "Revenue ($)",
-    "CO2_Value": "CO₂ Reduction (tonnes)",
-    "Decision_Score": "Score"
-}
-
-if tilt_col:
-    display_cols.insert(1, tilt_col)
-    rename_map[tilt_col] = "Tilt"
-if azimuth_col:
-    insert_pos = 2 if tilt_col else 1
-    display_cols.insert(insert_pos, azimuth_col)
-    rename_map[azimuth_col] = "Azimuth"
-if size_col:
-    insert_pos = 3 if tilt_col and azimuth_col else 2
-    display_cols.insert(insert_pos, size_col)
-    rename_map[size_col] = "System Size"
-
-ranking_df = data[display_cols].copy().rename(columns=rename_map)
-ranking_df.index = np.arange(1, len(ranking_df) + 1)
-
-st.dataframe(
-    ranking_df.style.format({
-        "Energy (kWh)": "{:,.0f}",
-        "Revenue ($)": "${:,.0f}",
-        "CO₂ Reduction (tonnes)": "{:,.2f}",
-        "Score": "{:.3f}"
-    }),
-    use_container_width=True,
-    height=380
-)
-
-st.markdown("---")
-
-# -------------------------------------------------------
-# TOP SCENARIO VISUAL COMPARISON
+# TOP SCENARIO COMPARISON CHART
 # -------------------------------------------------------
 st.subheader(f"Top {top_n} Scenario Comparison")
 
@@ -441,6 +443,96 @@ fig_top.update_layout(
     coloraxis_showscale=False
 )
 st.plotly_chart(fig_top, use_container_width=True)
+
+# -------------------------------------------------------
+# SCORE CONTRIBUTION DONUT
+# -------------------------------------------------------
+col_d1, col_d2 = st.columns([1, 1.2])
+
+with col_d1:
+    score_weights_df = pd.DataFrame({
+        "Metric": ["Energy", "Revenue", "CO₂"],
+        "Weight": [energy_weight, revenue_weight, co2_weight]
+    })
+
+    fig_donut = px.pie(
+        score_weights_df,
+        values="Weight",
+        names="Metric",
+        hole=0.58,
+        title="Decision Score Weight Distribution"
+    )
+    fig_donut.update_layout(template="plotly_dark")
+    st.plotly_chart(fig_donut, use_container_width=True)
+
+with col_d2:
+    st.markdown("""
+    <div class="section-box">
+        <h4 style="margin-top:0;">How the scoring works</h4>
+        <p class="small-note">
+            This page ranks each scenario using a weighted decision score. Instead of focusing
+            on only one output, the model combines:
+        </p>
+        <ul>
+            <li><b>Energy production</b> to measure system performance</li>
+            <li><b>Revenue</b> to reflect financial value</li>
+            <li><b>CO₂ reduction</b> to show environmental impact</li>
+        </ul>
+        <p class="small-note">
+            This gives a more balanced recommendation for SPICE and makes the final page more
+            useful for stakeholder-level decision support.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("---")
+
+# -------------------------------------------------------
+# SCENARIO RANKING TABLE
+# -------------------------------------------------------
+st.subheader("Scenario Ranking Table")
+
+display_cols = [scenario_col, "Energy_Value", "Revenue_Value", "CO2_Value", "Decision_Score"]
+rename_map = {
+    scenario_col: "Scenario",
+    "Energy_Value": "Energy (kWh)",
+    "Revenue_Value": "Revenue ($)",
+    "CO2_Value": "CO₂ Reduction (tonnes)",
+    "Decision_Score": "Score"
+}
+
+if tilt_col:
+    display_cols.insert(1, tilt_col)
+    rename_map[tilt_col] = "Tilt"
+
+if azimuth_col:
+    azimuth_insert_pos = 2 if tilt_col else 1
+    display_cols.insert(azimuth_insert_pos, azimuth_col)
+    rename_map[azimuth_col] = "Azimuth"
+
+if size_col:
+    if tilt_col and azimuth_col:
+        size_insert_pos = 3
+    elif tilt_col or azimuth_col:
+        size_insert_pos = 2
+    else:
+        size_insert_pos = 1
+    display_cols.insert(size_insert_pos, size_col)
+    rename_map[size_col] = "System Size"
+
+ranking_df = data[display_cols].copy().rename(columns=rename_map)
+ranking_df.index = np.arange(1, len(ranking_df) + 1)
+
+st.dataframe(
+    ranking_df.style.format({
+        "Energy (kWh)": "{:,.0f}",
+        "Revenue ($)": "${:,.0f}",
+        "CO₂ Reduction (tonnes)": "{:,.2f}",
+        "Score": "{:.3f}"
+    }),
+    use_container_width=True,
+    height=380
+)
 
 st.markdown("---")
 
@@ -487,12 +579,12 @@ insight_col1, insight_col2 = st.columns(2)
 with insight_col1:
     st.markdown("""
     <div class="section-box">
-        <h4>Strategic Interpretation</h4>
+        <h4 style="margin-top:0;">Strategic Interpretation</h4>
         <ul>
             <li>Higher-performing scenarios support clearer investor communication through measurable output and value.</li>
-            <li>Strong energy generation directly strengthens both financial return and environmental storytelling.</li>
-            <li>A weighted scoring approach helps avoid over-relying on one metric only, such as revenue or production alone.</li>
-            <li>This recommendation is better suited for decision-making than simple chart comparison.</li>
+            <li>Strong energy generation strengthens both financial return and environmental storytelling.</li>
+            <li>A weighted scoring approach avoids over-relying on a single metric.</li>
+            <li>This recommendation is more decision-ready than using charts alone.</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
@@ -500,12 +592,12 @@ with insight_col1:
 with insight_col2:
     st.markdown("""
     <div class="section-box">
-        <h4>Why This Matters for SPICE</h4>
+        <h4 style="margin-top:0;">Why This Matters for SPICE</h4>
         <ul>
-            <li>Supports evidence-based solar planning instead of manual assumption-based selection.</li>
+            <li>Supports evidence-based solar planning instead of manual selection.</li>
             <li>Improves the ability to explain benefits to stakeholders using business and sustainability language.</li>
-            <li>Creates a scalable framework that can later be applied to more sites and more design scenarios.</li>
-            <li>Connects technical system design to outcomes that matter: revenue, carbon reduction, and confidence.</li>
+            <li>Creates a scalable framework for future sites and new solar scenarios.</li>
+            <li>Connects technical design choices to revenue, carbon reduction, and investor confidence.</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
@@ -516,6 +608,18 @@ st.markdown("---")
 # EXECUTIVE SUMMARY
 # -------------------------------------------------------
 st.subheader("Executive Summary")
+
+summary_text = f"""
+The final analysis identifies {best_row[scenario_col]} as the strongest overall solar design scenario
+under the current decision framework.
+
+Compared with the baseline scenario {baseline_row[scenario_col]}, the recommended design shows:
+- {energy_improve:+.2f}% improvement in annual energy production
+- {revenue_improve:+.2f}% improvement in annual revenue
+- {co2_improve:+.2f}% improvement in carbon reduction impact
+
+This final recommendation helps SPICE convert raw technical outputs into a clear business-ready decision.
+"""
 
 st.markdown(f"""
 <div class="section-box">
@@ -540,7 +644,17 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # -------------------------------------------------------
-# OPTIONAL RAW DATA PREVIEW
+# DOWNLOAD SUMMARY
+# -------------------------------------------------------
+st.download_button(
+    label="Download Executive Summary",
+    data=summary_text,
+    file_name="spice_final_recommendation_summary.txt",
+    mime="text/plain"
+)
+
+# -------------------------------------------------------
+# OPTIONAL PROCESSED DATA
 # -------------------------------------------------------
 with st.expander("Show processed scoring data"):
     preview_cols = [scenario_col, "Energy_Value", "Revenue_Value", "CO2_Value",
