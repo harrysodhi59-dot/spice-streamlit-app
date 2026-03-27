@@ -265,61 +265,6 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.97rem;
 }
 
-/* STRATEGIC STRIP */
-.insight-strip {
-    background: linear-gradient(90deg, rgba(30,111,92,0.22), rgba(11,60,93,0.22));
-    border-left: 6px solid #FDB813;
-    border-radius: 20px;
-    padding: 1.05rem 1.2rem;
-    margin-top: 0.4rem;
-    margin-bottom: 1.2rem;
-    border: 1px solid rgba(255,255,255,0.06);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.16);
-}
-
-.insight-strip strong {
-    color: #FFFFFF !important;
-}
-
-.insight-strip span {
-    color: #DCE7E2 !important;
-    line-height: 1.7;
-}
-
-/* ROADMAP */
-.roadmap-card {
-    background: linear-gradient(180deg, #111827 0%, #172033 100%);
-    border-radius: 20px;
-    padding: 1.3rem;
-    border: 1px solid rgba(255,255,255,0.06);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.20);
-    min-height: 210px;
-}
-
-.roadmap-step {
-    display: inline-block;
-    background: rgba(253,184,19,0.16);
-    color: #FDB813 !important;
-    font-size: 0.80rem;
-    font-weight: 800;
-    padding: 0.35rem 0.75rem;
-    border-radius: 999px;
-    margin-bottom: 0.7rem;
-}
-
-.roadmap-title {
-    color: #F8FAFC !important;
-    font-size: 1.06rem;
-    font-weight: 800;
-    margin-bottom: 0.55rem;
-}
-
-.roadmap-text {
-    color: #CBD5E1 !important;
-    font-size: 0.96rem;
-    line-height: 1.68;
-}
-
 /* Footer note */
 .footer-note {
     background: linear-gradient(90deg, rgba(30,111,92,0.18), rgba(11,60,93,0.22));
@@ -364,7 +309,7 @@ with left_hero:
         </div>
         <div class="hero-text">
             It brings together solar simulation, business interpretation, environmental value,
-            site-based validation, and scenario comparison in one unified decision-support platform.
+            and site-based validation in one unified decision-support platform.
         </div>
         <div class="hero-badge-wrap">
             <div class="hero-badge">Built by Data Alchemists</div>
@@ -387,64 +332,11 @@ with right_hero:
         st.warning("solar_image.png not found in the same folder as Home.py")
 
 # -----------------------------
-# PROBLEM + PURPOSE
-# -----------------------------
-left, right = st.columns([1.15, 1], gap="large")
-
-with left:
-    st.markdown("""
-    <div class="card">
-        <div class="sub-label">Client Need</div>
-        <div class="section-title">What problem this dashboard solves</div>
-        <p>
-            SPICE needs a practical way to explain how solar design decisions affect
-            real project outcomes. Stakeholders need more than technical outputs — they need
-            a clear view of how configuration choices influence energy generation, economic value,
-            and environmental benefit.
-        </p>
-        <p>
-            This dashboard bridges that gap by turning solar system parameters into
-            visual, decision-ready insight that supports both project understanding and stakeholder trust.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with right:
-    st.markdown("""
-    <div class="card">
-        <div class="sub-label">Platform Goal</div>
-        <div class="section-title">Why this matters for SPICE</div>
-        <p>
-            This platform supports project planning, communication, and confidence-building
-            by combining simulation, analytics, and business interpretation in one place.
-        </p>
-        <p>
-            It is designed to strengthen conversations with building owners, investors,
-            and community stakeholders who need both technical credibility and business clarity.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-# -----------------------------
-# STRATEGIC STRIP
-# -----------------------------
-st.markdown("""
-<div class="insight-strip">
-    <strong>Strategic Lens:</strong>
-    <span>
-        This dashboard is not just a technical interface. It is designed as a decision-support
-        experience that helps SPICE compare solar configurations, communicate trade-offs,
-        and connect solar performance to investment and impact.
-    </span>
-</div>
-""", unsafe_allow_html=True)
-
-# -----------------------------
 # KPI ROW
 # -----------------------------
 st.markdown('<div class="section-heading">Dashboard Snapshot</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="section-subtext">A quick executive view of the dashboard scope, project identity, and stakeholder-facing value.</div>',
+    '<div class="section-subtext">A quick view of the dashboard scope, project identity, and stakeholder-facing value.</div>',
     unsafe_allow_html=True
 )
 
@@ -491,7 +383,7 @@ with c4:
 # -----------------------------
 st.markdown('<div class="section-heading">What this dashboard enables</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="section-subtext">The platform is built to support both analysis and communication across the most important SPICE use cases.</div>',
+    '<div class="section-subtext">Focused capabilities designed to support solar analysis, financial understanding, and environmental insight.</div>',
     unsafe_allow_html=True
 )
 
@@ -508,127 +400,18 @@ with col1:
         <h4>Financial Analysis</h4>
         <p>Translate production into savings, payback logic, and stakeholder-facing economic value.</p>
     </div>
-
-    <div class="feature-box">
-        <h4>Environmental Impact</h4>
-        <p>Estimate avoided emissions and sustainability outcomes for community-oriented solar projects.</p>
-    </div>
     """, unsafe_allow_html=True)
 
 with col2:
     st.markdown("""
     <div class="feature-box">
-        <h4>Weather & Seasonality Context</h4>
-        <p>Show how Edmonton climate conditions influence solar performance and expected production behavior.</p>
+        <h4>Environmental Impact</h4>
+        <p>Estimate avoided emissions and sustainability outcomes for community-oriented solar projects.</p>
     </div>
 
     <div class="feature-box">
         <h4>Real-Site Validation</h4>
         <p>Compare logic against actual production patterns from sites such as Bissell and Visser.</p>
-    </div>
-
-    <div class="feature-box">
-        <h4>Scenario Comparison</h4>
-        <p>Support better decision-making by comparing multiple design alternatives across simulated cases.</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-# -----------------------------
-# DASHBOARD FLOW
-# -----------------------------
-st.markdown('<div class="section-heading">Explore the platform</div>', unsafe_allow_html=True)
-st.markdown(
-    '<div class="section-subtext">The dashboard is structured to move from problem framing into simulation, impact evaluation, site validation, and predictive analysis.</div>',
-    unsafe_allow_html=True
-)
-
-r1, r2, r3, r4 = st.columns(4, gap="large")
-
-with r1:
-    st.markdown("""
-    <div class="roadmap-card">
-        <div class="roadmap-step">01</div>
-        <div class="roadmap-title">Data Methodology</div>
-        <div class="roadmap-text">
-            Understand the datasets, assumptions, and analytical logic behind the dashboard.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with r2:
-    st.markdown("""
-    <div class="roadmap-card">
-        <div class="roadmap-step">02</div>
-        <div class="roadmap-title">Solar Simulation</div>
-        <div class="roadmap-text">
-            Compare design variables and evaluate how they influence projected solar performance.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with r3:
-    st.markdown("""
-    <div class="roadmap-card">
-        <div class="roadmap-step">03</div>
-        <div class="roadmap-title">Impact Pages</div>
-        <div class="roadmap-text">
-            Connect technical outcomes to financial value and environmental benefit for SPICE stakeholders.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with r4:
-    st.markdown("""
-    <div class="roadmap-card">
-        <div class="roadmap-step">04</div>
-        <div class="roadmap-title">Validation & Modeling</div>
-        <div class="roadmap-text">
-            Review real-site comparison and predictive analysis structure for future decision support.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# -----------------------------
-# STAKEHOLDER SECTION
-# -----------------------------
-st.markdown('<div class="section-heading">Who this supports</div>', unsafe_allow_html=True)
-st.markdown(
-    '<div class="section-subtext">The dashboard is designed for both technical interpretation and stakeholder-facing communication.</div>',
-    unsafe_allow_html=True
-)
-
-a, b, c = st.columns(3, gap="large")
-
-with a:
-    st.markdown("""
-    <div class="card" style="min-height: 220px;">
-        <div class="sub-label">Building Owners</div>
-        <p>
-            Helps property stakeholders understand how solar systems may affect energy savings,
-            feasibility, and overall project value.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with b:
-    st.markdown("""
-    <div class="card" style="min-height: 220px;">
-        <div class="sub-label">Investors</div>
-        <p>
-            Supports financial interpretation by linking output projections to economic value,
-            scenario comparison, and return-oriented discussion.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with c:
-    st.markdown("""
-    <div class="card" style="min-height: 220px;">
-        <div class="sub-label">Community Stakeholders</div>
-        <p>
-            Communicates the environmental and social value of community-driven solar projects
-            in a format that is accessible and visually clear.
-        </p>
     </div>
     """, unsafe_allow_html=True)
 
