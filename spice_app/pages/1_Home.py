@@ -355,15 +355,18 @@ with left_hero:
     st.markdown("""
     <div class="hero-box">
         <div class="hero-label">SPICE · Solar Power Investment Cooperative of Edmonton</div>
+
         <div class="hero-title">
-            Turning Solar Design Choices Into
-            <span class="hero-highlight">Actionable Impact</span>
+            Turning Solar Design Choices
+            Into <span class="hero-highlight">Actionable Impact</span>
         </div>
+
         <div class="hero-text">
             The SPICE Solar Impact Dashboard helps translate solar design decisions into
             meaningful technical, financial, and environmental insight. Instead of stopping
             at raw output numbers, it supports stronger planning and clearer stakeholder communication.
         </div>
+
         <div class="hero-text">
             It brings together solar simulation, business interpretation, environmental value,
             site-based validation, and scenario comparison in one unified decision-support platform.
