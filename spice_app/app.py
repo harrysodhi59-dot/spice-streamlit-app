@@ -177,38 +177,6 @@ section[data-testid="stSidebar"] * {
     backdrop-filter: blur(6px);
 }
 
-.kpi-card {
-    background:
-        radial-gradient(circle at top right, rgba(215,169,40,0.10) 0%, transparent 26%),
-        linear-gradient(135deg, #17382f 0%, #122a22 55%, #0f211b 100%);
-    border: 1px solid rgba(154,205,180,0.14);
-    border-radius: 24px;
-    padding: 1.3rem 1.25rem;
-    box-shadow: 0 12px 26px rgba(0,0,0,0.26);
-    min-height: 155px;
-}
-
-.kpi-label {
-    color: #bdd6ca;
-    font-size: 0.92rem;
-    font-weight: 700;
-    margin-bottom: 0.55rem;
-}
-
-.kpi-value {
-    color: #f8fafc;
-    font-size: 2.15rem;
-    font-weight: 900;
-    line-height: 1.08;
-    margin-bottom: 0.35rem;
-}
-
-.kpi-delta {
-    color: #d7a928;
-    font-size: 0.95rem;
-    font-weight: 700;
-}
-
 .card-title {
     color: #f8fafc;
     font-size: 1.22rem;
@@ -351,7 +319,7 @@ if banner_base64:
                 <div class="hero-text">
                     A business-focused solar analytics dashboard designed to help stakeholders
                     evaluate solar design choices through energy generation, projected financial
-                    return, sustainability impact, and strategic decision support.
+                    return, and sustainability impact.
                 </div>
                 <div class="hero-badges">
                     <div class="hero-chip">Energy Analytics</div>
@@ -379,60 +347,11 @@ else:
             <div class="hero-text">
                 A business-focused solar analytics dashboard designed to help stakeholders
                 evaluate solar design choices through energy generation, projected financial
-                return, sustainability impact, and strategic decision support.
+                return, and sustainability impact.
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-# =========================================================
-# Executive Overview
-# =========================================================
-st.markdown('<div class="section-title">Executive Overview</div>', unsafe_allow_html=True)
-st.markdown(
-    '<div class="section-subtext">A premium snapshot of the business value this platform can communicate to SPICE stakeholders, investors, and decision-makers.</div>',
-    unsafe_allow_html=True
-)
-
-k1, k2, k3, k4 = st.columns(4)
-
-with k1:
-    st.markdown("""
-    <div class="kpi-card">
-        <div class="kpi-label">Estimated Energy Output</div>
-        <div class="kpi-value">5.24 MWh</div>
-        <div class="kpi-delta">Operational performance insight</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with k2:
-    st.markdown("""
-    <div class="kpi-card">
-        <div class="kpi-label">Projected Revenue</div>
-        <div class="kpi-value">$18.5K</div>
-        <div class="kpi-delta">Investor-facing financial value</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with k3:
-    st.markdown("""
-    <div class="kpi-card">
-        <div class="kpi-label">CO₂ Reduction</div>
-        <div class="kpi-value">2,150 kg</div>
-        <div class="kpi-delta">Measured sustainability outcome</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with k4:
-    st.markdown("""
-    <div class="kpi-card">
-        <div class="kpi-label">Payback Outlook</div>
-        <div class="kpi-value">6.5 yrs</div>
-        <div class="kpi-delta">Investment decision support</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
 
 # =========================================================
 # Problem + Value Framing
@@ -465,16 +384,17 @@ with left:
 with right:
     st.markdown("""
     <div class="glass-card">
-        <div class="mini-heading">Strategic Lens</div>
-        <div class="card-title">Business Perspective</div>
+        <div class="mini-heading">Platform Value</div>
+        <div class="card-title">What This Dashboard Delivers</div>
         <p class="card-text">
-            From a business standpoint, the dashboard supports three high-value goals:
+            This dashboard helps transform raw solar data into a clear story for
+            decision-making. It supports:
         </p>
         <br>
         <p class="card-text">
-            1. <span class="card-highlight">Investment clarity</span> — identify whether a configuration appears financially attractive.<br><br>
-            2. <span class="card-highlight">Risk awareness</span> — understand how outcomes change under different assumptions and designs.<br><br>
-            3. <span class="card-highlight">Sustainability communication</span> — show measurable carbon and environmental value in a stakeholder-friendly way.
+            1. <span class="card-highlight">Clearer investment understanding</span> through projected outcomes.<br><br>
+            2. <span class="card-highlight">Better comparison of design options</span> across key solar variables.<br><br>
+            3. <span class="card-highlight">Stronger sustainability communication</span> using measurable impact indicators.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -596,49 +516,6 @@ with r4:
         <div class="roadmap-text">
             Present real-site validation, forecasting logic, and future explainability layers for transparency.
         </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-# =========================================================
-# Stakeholder + Use Case
-# =========================================================
-s1, s2 = st.columns([1, 1])
-
-with s1:
-    st.markdown("""
-    <div class="glass-card">
-        <div class="mini-heading">Audience</div>
-        <div class="card-title">Primary Stakeholders</div>
-        <p class="card-text">
-            This dashboard is designed to support:
-            <br><br>
-            • Community solar investors<br>
-            • SPICE project stakeholders<br>
-            • Sustainability-focused decision-makers<br>
-            • Planning and operations discussions<br>
-            • Applied analytics and academic project teams
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with s2:
-    st.markdown("""
-    <div class="glass-card">
-        <div class="mini-heading">Use Case</div>
-        <div class="card-title">Strategic Decision Question</div>
-        <p class="card-text">
-            The platform is built to help answer one important business question:
-            <br><br>
-            <span class="card-highlight">
-                Which solar configuration delivers the strongest balance of return,
-                efficiency, and environmental impact?
-            </span>
-            <br><br>
-            This makes the dashboard useful not only for analysis, but also for
-            presentation, justification, and stakeholder communication.
-        </p>
     </div>
     """, unsafe_allow_html=True)
 
