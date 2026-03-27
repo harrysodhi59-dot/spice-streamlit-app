@@ -18,8 +18,8 @@ html, body, [class*="css"] {
 
 /* Main page spacing */
 .block-container {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding-top: 1.6rem;
+    padding-bottom: 2.4rem;
     padding-left: 3rem;
     padding-right: 3rem;
     max-width: 100%;
@@ -27,65 +27,91 @@ html, body, [class*="css"] {
 
 /* App background */
 .stApp {
-    background: linear-gradient(180deg, #050816 0%, #08111f 100%);
+    background:
+        radial-gradient(circle at top left, rgba(30,111,92,0.18) 0%, transparent 28%),
+        radial-gradient(circle at top right, rgba(253,184,19,0.08) 0%, transparent 18%),
+        linear-gradient(180deg, #040816 0%, #07111d 45%, #081423 100%);
     color: #F8FAFC;
 }
 
 /* Sidebar */
 section[data-testid="stSidebar"] {
-    background: #161B2D;
+    background: linear-gradient(180deg, #141B2D 0%, #182133 100%);
     border-right: 1px solid rgba(255,255,255,0.06);
 }
 
-section[data-testid="stSidebar"] .css-1d391kg,
-section[data-testid="stSidebar"] .css-163ttbj,
 section[data-testid="stSidebar"] * {
     color: #E5E7EB !important;
 }
 
-/* Streamlit headings */
+/* Headings */
 h1, h2, h3, h4, h5, h6 {
     color: #F8FAFC !important;
     font-weight: 800 !important;
 }
 
-/* Section heading outside cards */
 .section-heading {
-    font-size: 1.8rem;
-    font-weight: 800;
+    font-size: 2rem;
+    font-weight: 850;
     color: #F8FAFC !important;
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
+    margin-top: 0.4rem;
+    margin-bottom: 0.6rem;
 }
 
-/* Hero left box */
+.section-subtext {
+    color: #B6C0CE !important;
+    font-size: 1rem;
+    line-height: 1.75;
+    margin-bottom: 1.3rem;
+}
+
+/* HERO */
 .hero-box {
-    background: linear-gradient(135deg, #1E6F5C 0%, #0B3C5D 100%);
-    padding: 2.7rem;
-    border-radius: 26px;
+    background:
+        linear-gradient(135deg, rgba(30,111,92,0.96) 0%, rgba(11,60,93,0.96) 100%);
+    padding: 3rem;
+    border-radius: 28px;
     color: white;
-    box-shadow: 0 18px 40px rgba(0,0,0,0.30);
-    min-height: 420px;
+    box-shadow: 0 20px 46px rgba(0,0,0,0.34);
+    min-height: 460px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    border: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-box::after {
+    content: "";
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(253,184,19,0.18) 0%, transparent 70%);
+    border-radius: 50%;
 }
 
 .hero-label {
-    color: #B8E0D2 !important;
-    font-size: 0.92rem;
-    font-weight: 700;
+    color: #D6EFE6 !important;
+    font-size: 0.90rem;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.6px;
-    margin-bottom: 0.8rem;
+    letter-spacing: 0.7px;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 2;
 }
 
 .hero-title {
-    font-size: 3.15rem;
-    font-weight: 800;
-    line-height: 1.12;
-    margin-bottom: 1rem;
+    font-size: 3.45rem;
+    font-weight: 900;
+    line-height: 1.08;
+    margin-bottom: 1.1rem;
     color: #FFFFFF !important;
+    position: relative;
+    z-index: 2;
 }
 
 .hero-highlight {
@@ -94,21 +120,42 @@ h1, h2, h3, h4, h5, h6 {
 
 .hero-text {
     font-size: 1.08rem;
-    line-height: 1.8;
+    line-height: 1.9;
     color: #F3F7F6 !important;
     margin-bottom: 0.8rem;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-badge-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 1rem;
+    position: relative;
+    z-index: 2;
 }
 
 .hero-badge {
     display: inline-block;
-    background: #FDB813;
+    background: rgba(253,184,19,0.95);
     color: #111827 !important;
     font-weight: 800;
-    padding: 0.55rem 1rem;
+    padding: 0.58rem 1rem;
     border-radius: 999px;
-    margin-top: 0.8rem;
-    width: fit-content;
     box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+    font-size: 0.92rem;
+}
+
+.hero-chip {
+    display: inline-block;
+    background: rgba(255,255,255,0.10);
+    color: #F8FAFC !important;
+    font-weight: 700;
+    padding: 0.52rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.14);
+    font-size: 0.85rem;
 }
 
 .image-caption {
@@ -119,27 +166,33 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.5;
 }
 
-/* Cards */
-.card {
-    background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F7 100%);
-    border-radius: 22px;
-    padding: 1.65rem;
-    box-shadow: 0 10px 28px rgba(0,0,0,0.18);
-    margin-bottom: 1rem;
-    border: 1px solid rgba(0,0,0,0.06);
-    min-height: 260px;
+/* IMAGE */
+[data-testid="stImage"] img {
+    border-radius: 26px;
+    box-shadow: 0 20px 46px rgba(0,0,0,0.34);
+    border: 1px solid rgba(255,255,255,0.08);
+    width: 100%;
+    object-fit: cover;
 }
 
-.card p, 
-.card li, 
-.card span, 
-.card div {
+/* LIGHT CARDS */
+.card {
+    background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F7 100%);
+    border-radius: 24px;
+    padding: 1.75rem;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+    margin-bottom: 1rem;
+    border: 1px solid rgba(0,0,0,0.06);
+    min-height: 270px;
+}
+
+.card p, .card li, .card span, .card div {
     color: #1F2937 !important;
 }
 
 .sub-label {
     color: #1E6F5C !important;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -148,8 +201,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .section-title {
     color: #0B3C5D !important;
-    font-size: 1.65rem;
-    font-weight: 800;
+    font-size: 1.7rem;
+    font-weight: 850;
     margin-top: 0.25rem;
     margin-bottom: 0.8rem;
     line-height: 1.25;
@@ -157,35 +210,45 @@ h1, h2, h3, h4, h5, h6 {
 
 /* KPI cards */
 .kpi-card {
-    background: linear-gradient(180deg, #111827 0%, #172033 100%);
-    border-radius: 20px;
-    padding: 1.3rem;
+    background:
+        linear-gradient(180deg, #111827 0%, #172033 100%);
+    border-radius: 22px;
+    padding: 1.35rem;
     text-align: center;
     box-shadow: 0 12px 26px rgba(0,0,0,0.24);
     border: 1px solid rgba(255,255,255,0.06);
+    min-height: 145px;
 }
 
 .kpi-title {
     color: #94A3B8 !important;
-    font-size: 0.95rem;
+    font-size: 0.94rem;
     font-weight: 700;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.45rem;
 }
 
 .kpi-value {
     color: #F8FAFC !important;
     font-size: 1.65rem;
-    font-weight: 800;
+    font-weight: 850;
     line-height: 1.25;
 }
 
-/* Feature boxes */
+.kpi-note {
+    color: #FDB813 !important;
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin-top: 0.45rem;
+}
+
+/* DARK FEATURE BOXES */
 .feature-box {
-    background: linear-gradient(180deg, #111827 0%, #172033 100%);
+    background:
+        linear-gradient(180deg, #111827 0%, #172033 100%);
     border-left: 6px solid #FDB813;
-    padding: 1.1rem 1.1rem 1.1rem 1.15rem;
-    border-radius: 16px;
-    margin-bottom: 0.95rem;
+    padding: 1.15rem 1.15rem 1.15rem 1.2rem;
+    border-radius: 18px;
+    margin-bottom: 1rem;
     border: 1px solid rgba(255,255,255,0.06);
     box-shadow: 0 10px 24px rgba(0,0,0,0.20);
 }
@@ -200,8 +263,63 @@ h1, h2, h3, h4, h5, h6 {
 .feature-box p {
     margin-bottom: 0;
     color: #CBD5E1 !important;
-    line-height: 1.65;
-    font-size: 0.98rem;
+    line-height: 1.68;
+    font-size: 0.97rem;
+}
+
+/* STRATEGIC STRIP */
+.insight-strip {
+    background: linear-gradient(90deg, rgba(30,111,92,0.22), rgba(11,60,93,0.22));
+    border-left: 6px solid #FDB813;
+    border-radius: 20px;
+    padding: 1.05rem 1.2rem;
+    margin-top: 0.4rem;
+    margin-bottom: 1.2rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+}
+
+.insight-strip strong {
+    color: #FFFFFF !important;
+}
+
+.insight-strip span {
+    color: #DCE7E2 !important;
+    line-height: 1.7;
+}
+
+/* ROADMAP */
+.roadmap-card {
+    background: linear-gradient(180deg, #111827 0%, #172033 100%);
+    border-radius: 20px;
+    padding: 1.3rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.20);
+    min-height: 210px;
+}
+
+.roadmap-step {
+    display: inline-block;
+    background: rgba(253,184,19,0.16);
+    color: #FDB813 !important;
+    font-size: 0.80rem;
+    font-weight: 800;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    margin-bottom: 0.7rem;
+}
+
+.roadmap-title {
+    color: #F8FAFC !important;
+    font-size: 1.06rem;
+    font-weight: 800;
+    margin-bottom: 0.55rem;
+}
+
+.roadmap-text {
+    color: #CBD5E1 !important;
+    font-size: 0.96rem;
+    line-height: 1.68;
 }
 
 /* Footer note */
@@ -215,22 +333,14 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 10px 24px rgba(0,0,0,0.16);
 }
 
-/* Image styling */
-[data-testid="stImage"] img {
-    border-radius: 24px;
-    box-shadow: 0 18px 40px rgba(0,0,0,0.30);
-    border: 1px solid rgba(255,255,255,0.08);
-    width: 100%;
-    object-fit: cover;
-}
-
-/* Small responsive improvement */
+/* Responsive */
 @media (max-width: 900px) {
     .hero-title {
-        font-size: 2.3rem;
+        font-size: 2.35rem;
     }
     .hero-box {
         min-height: auto;
+        padding: 2rem;
     }
 }
 </style>
@@ -239,7 +349,7 @@ h1, h2, h3, h4, h5, h6 {
 # -----------------------------
 # HERO SECTION
 # -----------------------------
-left_hero, right_hero = st.columns([1.55, 1], gap="large")
+left_hero, right_hero = st.columns([1.45, 1], gap="large")
 
 with left_hero:
     st.markdown("""
@@ -250,17 +360,21 @@ with left_hero:
             <span class="hero-highlight">Actionable Impact</span>
         </div>
         <div class="hero-text">
-            The SPICE Solar Impact Dashboard is designed to help translate solar system
-            configuration into meaningful technical, financial, and environmental insights.
-            Instead of stopping at raw energy outputs, the platform supports clearer
-            decision-making by connecting solar design to value.
+            The SPICE Solar Impact Dashboard helps translate solar design decisions into
+            meaningful technical, financial, and environmental insight. Instead of stopping
+            at raw output numbers, it supports stronger planning and clearer stakeholder communication.
         </div>
         <div class="hero-text">
-            This includes energy production estimates, financial performance, emissions
-            reduction, real-site validation, and scenario-based comparison for community-focused
-            solar planning.
+            It brings together solar simulation, business interpretation, environmental value,
+            site-based validation, and scenario comparison in one unified decision-support platform.
         </div>
-        <div class="hero-badge">Built by Data Alchemists</div>
+
+        <div class="hero-badge-wrap">
+            <div class="hero-badge">Built by Data Alchemists</div>
+            <div class="hero-chip">Energy Analytics</div>
+            <div class="hero-chip">Financial Insight</div>
+            <div class="hero-chip">Sustainability Value</div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -286,14 +400,14 @@ with left:
         <div class="sub-label">Client Need</div>
         <div class="section-title">What problem this dashboard solves</div>
         <p>
-            SPICE needs a practical way to demonstrate how solar design decisions
-            influence real project outcomes. Stakeholders need more than technical
-            numbers — they need a tool that explains how design choices affect
-            energy production, economic value, and environmental benefit.
+            SPICE needs a practical way to explain how solar design decisions affect
+            real project outcomes. Stakeholders need more than technical outputs — they need
+            a clear view of how configuration choices influence energy generation, economic value,
+            and environmental benefit.
         </p>
         <p>
-            This dashboard helps bridge that gap by turning solar system parameters
-            into clear, visual, and decision-ready insights.
+            This dashboard bridges that gap by turning solar system parameters into
+            visual, decision-ready insight that supports both project understanding and stakeholder trust.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -304,20 +418,35 @@ with right:
         <div class="sub-label">Platform Goal</div>
         <div class="section-title">Why this matters for SPICE</div>
         <p>
-            This platform supports solar planning, project communication, and stakeholder
-            confidence by combining simulation, analytics, and business interpretation in one place.
+            This platform supports project planning, communication, and confidence-building
+            by combining simulation, analytics, and business interpretation in one place.
         </p>
         <p>
-            It is designed to support stronger conversations with building owners, investors,
-            and community partners who need both technical credibility and business clarity.
+            It is designed to strengthen conversations with building owners, investors,
+            and community stakeholders who need both technical credibility and business clarity.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
 # -----------------------------
+# STRATEGIC STRIP
+# -----------------------------
+st.markdown("""
+<div class="insight-strip">
+    <strong>Strategic Lens:</strong>
+    <span>
+        This dashboard is not just a technical interface. It is designed as a decision-support
+        experience that helps SPICE compare solar configurations, communicate trade-offs,
+        and connect solar performance to investment and impact.
+    </span>
+</div>
+""", unsafe_allow_html=True)
+
+# -----------------------------
 # KPI ROW
 # -----------------------------
 st.markdown('<div class="section-heading">Dashboard Snapshot</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-subtext">A quick executive view of the dashboard scope, project identity, and stakeholder-facing value.</div>', unsafe_allow_html=True)
 
 c1, c2, c3, c4 = st.columns(4, gap="large")
 
@@ -326,6 +455,7 @@ with c1:
     <div class="kpi-card">
         <div class="kpi-title">Client</div>
         <div class="kpi-value">SPICE</div>
+        <div class="kpi-note">Community solar focus</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -334,22 +464,25 @@ with c2:
     <div class="kpi-card">
         <div class="kpi-title">Team</div>
         <div class="kpi-value">Data Alchemists</div>
+        <div class="kpi-note">Applied analytics collaboration</div>
     </div>
     """, unsafe_allow_html=True)
 
 with c3:
     st.markdown("""
     <div class="kpi-card">
-        <div class="kpi-title">Datasets</div>
-        <div class="kpi-value">9</div>
+        <div class="kpi-title">Dashboard Scope</div>
+        <div class="kpi-value">Energy · Finance · Environment</div>
+        <div class="kpi-note">Business + technical interpretation</div>
     </div>
     """, unsafe_allow_html=True)
 
 with c4:
     st.markdown("""
     <div class="kpi-card">
-        <div class="kpi-title">Scope</div>
-        <div class="kpi-value">Energy · Finance · Environment</div>
+        <div class="kpi-title">Decision Focus</div>
+        <div class="kpi-value">Simulation + Validation</div>
+        <div class="kpi-note">Scenario-based exploration</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -357,6 +490,7 @@ with c4:
 # VALUE BLOCKS
 # -----------------------------
 st.markdown('<div class="section-heading">What this dashboard enables</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-subtext">The platform is built to support both analysis and communication across the most important SPICE use cases.</div>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2, gap="large")
 
@@ -364,17 +498,17 @@ with col1:
     st.markdown("""
     <div class="feature-box">
         <h4>Solar Simulation</h4>
-        <p>Explore how tilt, azimuth, system size, and scenario conditions affect production outcomes.</p>
+        <p>Explore how tilt, azimuth, system size, and design choices affect projected production outcomes.</p>
     </div>
 
     <div class="feature-box">
         <h4>Financial Analysis</h4>
-        <p>Translate energy output into savings, payback, and project value using real pricing and cost context.</p>
+        <p>Translate production into savings, payback logic, and stakeholder-facing economic value.</p>
     </div>
 
     <div class="feature-box">
         <h4>Environmental Impact</h4>
-        <p>Estimate avoided emissions, carbon value, and broader sustainability benefits for community projects.</p>
+        <p>Estimate avoided emissions and sustainability outcomes for community-oriented solar projects.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -382,17 +516,69 @@ with col2:
     st.markdown("""
     <div class="feature-box">
         <h4>Weather & Seasonality Context</h4>
-        <p>Understand how climate patterns, cloud cover, and snow conditions influence solar performance in Edmonton.</p>
+        <p>Show how Edmonton climate conditions influence solar performance and expected production behavior.</p>
     </div>
 
     <div class="feature-box">
         <h4>Real-Site Validation</h4>
-        <p>Compare project logic against observed production data from actual SPICE sites such as Bissell and Visser.</p>
+        <p>Compare logic against actual production patterns from sites such as Bissell and Visser.</p>
     </div>
 
     <div class="feature-box">
         <h4>Scenario Comparison</h4>
-        <p>Support decision-making by comparing design alternatives and system configurations across simulated cases.</p>
+        <p>Support better decision-making by comparing multiple design alternatives across simulated cases.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# -----------------------------
+# DASHBOARD FLOW
+# -----------------------------
+st.markdown('<div class="section-heading">Explore the platform</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-subtext">The dashboard is structured to move from problem framing into simulation, impact evaluation, site validation, and predictive analysis.</div>', unsafe_allow_html=True)
+
+r1, r2, r3, r4 = st.columns(4, gap="large")
+
+with r1:
+    st.markdown("""
+    <div class="roadmap-card">
+        <div class="roadmap-step">01</div>
+        <div class="roadmap-title">Data Methodology</div>
+        <div class="roadmap-text">
+            Understand the datasets, assumptions, and analytical logic behind the dashboard.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with r2:
+    st.markdown("""
+    <div class="roadmap-card">
+        <div class="roadmap-step">02</div>
+        <div class="roadmap-title">Solar Simulation</div>
+        <div class="roadmap-text">
+            Compare design variables and evaluate how they influence projected solar performance.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with r3:
+    st.markdown("""
+    <div class="roadmap-card">
+        <div class="roadmap-step">03</div>
+        <div class="roadmap-title">Impact Pages</div>
+        <div class="roadmap-text">
+            Connect technical outcomes to financial value and environmental benefit for SPICE stakeholders.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with r4:
+    st.markdown("""
+    <div class="roadmap-card">
+        <div class="roadmap-step">04</div>
+        <div class="roadmap-title">Validation & Modeling</div>
+        <div class="roadmap-text">
+            Review real-site comparison and predictive analysis structure for future decision support.
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -400,38 +586,39 @@ with col2:
 # STAKEHOLDER SECTION
 # -----------------------------
 st.markdown('<div class="section-heading">Who this supports</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-subtext">The dashboard is designed for both technical interpretation and stakeholder-facing communication.</div>', unsafe_allow_html=True)
 
 a, b, c = st.columns(3, gap="large")
 
 with a:
     st.markdown("""
-    <div class="card" style="min-height: 210px;">
-        <div class="sub-label">Customers</div>
+    <div class="card" style="min-height: 220px;">
+        <div class="sub-label">Building Owners</div>
         <p>
-            Helps building owners understand how solar systems may affect future
-            energy savings, feasibility, and long-term project value.
+            Helps property stakeholders understand how solar systems may affect energy savings,
+            feasibility, and overall project value.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
 with b:
     st.markdown("""
-    <div class="card" style="min-height: 210px;">
+    <div class="card" style="min-height: 220px;">
         <div class="sub-label">Investors</div>
         <p>
-            Supports financial interpretation by linking production outcomes to
-            savings, payback period, and broader return potential.
+            Supports financial interpretation by linking output projections to economic value,
+            scenario comparison, and return-oriented discussion.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
 with c:
     st.markdown("""
-    <div class="card" style="min-height: 210px;">
+    <div class="card" style="min-height: 220px;">
         <div class="sub-label">Community Stakeholders</div>
         <p>
-            Communicates the environmental and social value of community-driven
-            solar projects in a clear and accessible format.
+            Communicates the environmental and social value of community-driven solar projects
+            in a format that is accessible and visually clear.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -441,7 +628,7 @@ with c:
 # -----------------------------
 st.markdown("""
 <div class="footer-note">
-    <strong>Next step:</strong> Use the sidebar to explore the methodology, simulation,
-    financial, environmental, validation, and predictive analysis pages.
+    <strong>Next step:</strong> Use the sidebar to explore methodology, simulation,
+    financial impact, environmental impact, validation, and predictive analysis pages.
 </div>
 """, unsafe_allow_html=True)
