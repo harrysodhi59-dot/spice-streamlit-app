@@ -536,6 +536,8 @@ st.markdown("---")
 # -------------------------------------------------------
 # RANKING TABLE
 # -------------------------------------------------------
+# RANKING TABLE
+# -------------------------------------------------------
 st.subheader("Scenario Ranking Table")
 
 display_cols = [scenario_col, "Energy_Value", "Revenue_Value", "CO2_Value", "Decision_Score"]
@@ -569,13 +571,23 @@ if size_col:
 ranking_df = data[display_cols].copy().rename(columns=rename_map)
 ranking_df.index = np.arange(1, len(ranking_df) + 1)
 
+# format values manually instead of using pandas Styler
+ranking_display = ranking_df.copy()
+
+if "Energy (kWh)" in ranking_display.columns:
+    ranking_display["Energy (kWh)"] = ranking_display["Energy (kWh)"].map(lambda x: f"{x:,.0f}")
+
+if "Revenue ($)" in ranking_display.columns:
+    ranking_display["Revenue ($)"] = ranking_display["Revenue ($)"].map(lambda x: f"${x:,.0f}")
+
+if "CO₂ Reduction (tonnes)" in ranking_display.columns:
+    ranking_display["CO₂ Reduction (tonnes)"] = ranking_display["CO₂ Reduction (tonnes)"].map(lambda x: f"{x:,.2f}")
+
+if "Score" in ranking_display.columns:
+    ranking_display["Score"] = ranking_display["Score"].map(lambda x: f"{x:.3f}")
+
 st.dataframe(
-    ranking_df.style.format({
-        "Energy (kWh)": "{:,.0f}",
-        "Revenue ($)": "${:,.0f}",
-        "CO₂ Reduction (tonnes)": "{:,.2f}",
-        "Score": "{:.3f}"
-    }),
+    ranking_display,
     use_container_width=True,
     height=380
 )
