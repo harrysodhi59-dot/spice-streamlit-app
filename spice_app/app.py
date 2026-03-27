@@ -8,9 +8,9 @@ st.set_page_config(
     layout="wide"
 )
 
-# -----------------------------
+# =========================================================
 # Helper
-# -----------------------------
+# =========================================================
 def get_base64_image(image_path):
     path = Path(image_path)
     if not path.exists():
@@ -18,96 +18,189 @@ def get_base64_image(image_path):
     with open(path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode()
 
-# Use your existing banner image here
 banner_base64 = get_base64_image("images/norquest_banner.png")
 
-# -----------------------------
-# Custom Theme CSS
-# -----------------------------
+# =========================================================
+# Custom CSS
+# =========================================================
 st.markdown("""
 <style>
-/* Main app background */
+/* -------------------------
+   Global App Styling
+------------------------- */
 .stApp {
-    background: linear-gradient(180deg, #07120f 0%, #0b1714 40%, #0f1f1a 100%);
+    background:
+        radial-gradient(circle at top left, rgba(32, 92, 70, 0.22) 0%, transparent 28%),
+        radial-gradient(circle at top right, rgba(215, 169, 40, 0.10) 0%, transparent 22%),
+        linear-gradient(180deg, #06110e 0%, #0a1713 35%, #0c1d18 70%, #10261e 100%);
     color: #f3f4f6;
 }
 
-/* Hide default Streamlit header space a bit */
 .block-container {
-    padding-top: 1.5rem;
-    padding-bottom: 2rem;
+    padding-top: 1.4rem;
+    padding-bottom: 2.5rem;
     padding-left: 2.5rem;
     padding-right: 2.5rem;
-    max-width: 1400px;
+    max-width: 1450px;
 }
 
-/* Global font */
 html, body, [class*="css"] {
     font-family: "Segoe UI", sans-serif;
 }
 
-/* Section heading */
+/* -------------------------
+   Sidebar polish
+------------------------- */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #151823 0%, #1d2130 100%);
+    border-right: 1px solid rgba(255,255,255,0.05);
+}
+
+section[data-testid="stSidebar"] * {
+    color: #f3f4f6 !important;
+}
+
+/* -------------------------
+   Typography
+------------------------- */
+.page-tag {
+    display: inline-block;
+    padding: 0.42rem 0.95rem;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    color: #eef6f2;
+    border: 1px solid rgba(255,255,255,0.12);
+    font-size: 0.80rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+}
+
 .section-title {
-    font-size: 2rem;
-    font-weight: 800;
+    font-size: 2.1rem;
+    font-weight: 900;
     color: #f8fafc;
-    margin-top: 0.5rem;
-    margin-bottom: 0.35rem;
+    margin-top: 0.3rem;
+    margin-bottom: 0.4rem;
 }
 
 .section-subtext {
-    color: #b8c4bf;
+    color: #b6c5be;
     font-size: 1rem;
-    line-height: 1.7;
-    margin-bottom: 1.5rem;
+    line-height: 1.75;
+    margin-bottom: 1.35rem;
 }
 
-/* Hero badge */
-.hero-badge {
-    display: inline-block;
-    background: rgba(255,255,255,0.12);
+.mini-heading {
+    color: #d7a928;
+    font-size: 0.84rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 0.5rem;
+}
+
+/* -------------------------
+   Hero Section
+------------------------- */
+.hero-wrap {
+    position: relative;
+    overflow: hidden;
+    border-radius: 30px;
+    min-height: 390px;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 46px rgba(0,0,0,0.36);
+    border: 1px solid rgba(255,255,255,0.07);
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, rgba(9,36,28,0.96) 0%, rgba(20,83,62,0.88) 42%, rgba(8,18,15,0.72) 100%);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 3.2rem 3.3rem;
+    max-width: 800px;
+}
+
+.hero-title {
+    font-size: 3.35rem;
+    font-weight: 950;
+    line-height: 1.08;
     color: #f8fafc;
-    padding: 0.45rem 0.95rem;
-    border-radius: 999px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.4px;
     margin-bottom: 1rem;
-    border: 1px solid rgba(255,255,255,0.15);
 }
 
-/* Premium card */
-.dark-card {
-    background: linear-gradient(180deg, rgba(18,33,28,0.96) 0%, rgba(13,24,21,0.96) 100%);
-    border: 1px solid rgba(139, 196, 175, 0.14);
-    border-radius: 22px;
-    padding: 1.35rem 1.35rem;
-    box-shadow: 0 10px 28px rgba(0,0,0,0.28);
+.hero-highlight {
+    color: #d7a928;
+}
+
+.hero-text {
+    color: #e8f2ed;
+    font-size: 1.08rem;
+    line-height: 1.9;
+    max-width: 720px;
+    margin-bottom: 1.4rem;
+}
+
+.hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.hero-chip {
+    background: rgba(255,255,255,0.10);
+    color: #f8fafc;
+    border: 1px solid rgba(255,255,255,0.14);
+    padding: 0.55rem 0.95rem;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+/* -------------------------
+   Cards
+------------------------- */
+.glass-card {
+    background: linear-gradient(180deg, rgba(19,35,29,0.96) 0%, rgba(12,24,21,0.96) 100%);
+    border: 1px solid rgba(154,205,180,0.11);
+    border-radius: 24px;
+    padding: 1.4rem 1.35rem;
+    box-shadow: 0 14px 30px rgba(0,0,0,0.24);
     min-height: 100%;
+    backdrop-filter: blur(6px);
 }
 
-/* KPI card */
 .kpi-card {
-    background: linear-gradient(135deg, #17382f 0%, #10271f 100%);
-    border: 1px solid rgba(154, 205, 180, 0.15);
-    border-radius: 22px;
-    padding: 1.25rem 1.2rem;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    background:
+        radial-gradient(circle at top right, rgba(215,169,40,0.10) 0%, transparent 26%),
+        linear-gradient(135deg, #17382f 0%, #122a22 55%, #0f211b 100%);
+    border: 1px solid rgba(154,205,180,0.14);
+    border-radius: 24px;
+    padding: 1.3rem 1.25rem;
+    box-shadow: 0 12px 26px rgba(0,0,0,0.26);
+    min-height: 155px;
 }
 
 .kpi-label {
-    color: #b9d4c7;
+    color: #bdd6ca;
     font-size: 0.92rem;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 0.55rem;
 }
 
 .kpi-value {
     color: #f8fafc;
-    font-size: 2rem;
-    font-weight: 800;
-    line-height: 1.1;
-    margin-bottom: 0.3rem;
+    font-size: 2.15rem;
+    font-weight: 900;
+    line-height: 1.08;
+    margin-bottom: 0.35rem;
 }
 
 .kpi-delta {
@@ -116,143 +209,188 @@ html, body, [class*="css"] {
     font-weight: 700;
 }
 
-/* Info text */
 .card-title {
     color: #f8fafc;
-    font-size: 1.2rem;
-    font-weight: 800;
+    font-size: 1.22rem;
+    font-weight: 900;
     margin-bottom: 0.7rem;
 }
 
 .card-text {
-    color: #c5d2cb;
+    color: #c8d5cf;
     font-size: 0.98rem;
-    line-height: 1.8;
+    line-height: 1.82;
     margin-bottom: 0;
 }
 
 .card-highlight {
     color: #d7a928;
-    font-weight: 700;
+    font-weight: 800;
 }
 
-/* Mini highlight boxes */
-.feature-box {
-    background: linear-gradient(180deg, #132a23 0%, #0f1f1a 100%);
-    border: 1px solid rgba(215, 169, 40, 0.12);
-    border-radius: 20px;
-    padding: 1.2rem;
-    min-height: 220px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.22);
+.feature-card {
+    background:
+        linear-gradient(180deg, rgba(18,40,33,0.97) 0%, rgba(11,24,20,0.97) 100%);
+    border: 1px solid rgba(215,169,40,0.10);
+    border-radius: 22px;
+    padding: 1.25rem;
+    min-height: 235px;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.22);
+}
+
+.feature-icon {
+    font-size: 1.3rem;
+    margin-bottom: 0.6rem;
 }
 
 .feature-title {
     color: #f8fafc;
-    font-size: 1.1rem;
-    font-weight: 800;
-    margin-bottom: 0.8rem;
+    font-size: 1.08rem;
+    font-weight: 850;
+    margin-bottom: 0.75rem;
 }
 
 .feature-text {
-    color: #c5d2cb;
-    font-size: 0.96rem;
+    color: #c8d5cf;
+    font-size: 0.95rem;
     line-height: 1.75;
 }
 
-/* Recommendation banner */
-.reco-box {
+/* -------------------------
+   Special strips
+------------------------- */
+.insight-strip {
     background: linear-gradient(90deg, rgba(27,79,62,0.95) 0%, rgba(18,50,41,0.95) 100%);
     border-left: 6px solid #d7a928;
-    border-radius: 18px;
+    border-radius: 20px;
     padding: 1.25rem 1.35rem;
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 8px 18px rgba(0,0,0,0.20);
+    margin-top: 0.8rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.20);
 }
 
-.reco-title {
+.insight-title {
     font-size: 1.08rem;
-    font-weight: 800;
+    font-weight: 850;
     color: #f8fafc;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.45rem;
 }
 
-.reco-text {
-    color: #dbe7e1;
+.insight-text {
+    color: #e3eee8;
     font-size: 0.98rem;
+    line-height: 1.75;
+}
+
+.roadmap-card {
+    background: linear-gradient(180deg, rgba(19,35,29,0.96) 0%, rgba(12,24,21,0.96) 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 22px;
+    padding: 1.15rem;
+    min-height: 220px;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.22);
+}
+
+.roadmap-step {
+    display: inline-block;
+    background: rgba(215,169,40,0.14);
+    color: #f2c44b;
+    padding: 0.32rem 0.72rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+}
+
+.roadmap-title {
+    color: #f8fafc;
+    font-size: 1.08rem;
+    font-weight: 850;
+    margin-bottom: 0.65rem;
+}
+
+.roadmap-text {
+    color: #c8d5cf;
+    font-size: 0.95rem;
     line-height: 1.7;
 }
 
-/* Footer line */
+/* -------------------------
+   Footer
+------------------------- */
 .footer-note {
-    color: #8fa49b;
+    color: #90a69d;
     text-align: center;
     font-size: 0.92rem;
-    margin-top: 1rem;
+    margin-top: 1.4rem;
+    padding-bottom: 0.5rem;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# Hero Section
-# -----------------------------
+# =========================================================
+# Hero
+# =========================================================
 if banner_base64:
     st.markdown(
         f"""
-        <div style="
-            position: relative;
-            border-radius: 28px;
-            overflow: hidden;
-            margin-bottom: 2rem;
-            min-height: 360px;
-            box-shadow: 0 18px 42px rgba(0,0,0,0.34);
-            background-image:
-                linear-gradient(90deg, rgba(13,55,42,0.95) 0%, rgba(28,102,76,0.84) 48%, rgba(10,22,18,0.72) 100%),
-                url('data:image/png;base64,{banner_base64}');
+        <div class="hero-wrap" style="
+            background-image: url('data:image/png;base64,{banner_base64}');
             background-size: cover;
             background-position: center;
-            display: flex;
-            align-items: center;
         ">
-            <div style="padding: 3rem 3.2rem; max-width: 760px;">
-                <div class="hero-badge">SPICE • TEAM DATA ALCHEMISTS • NORQUEST COLLEGE</div>
-                <h1 style="
-                    font-size: 3.25rem;
-                    font-weight: 900;
-                    line-height: 1.12;
-                    margin-bottom: 0.85rem;
-                    color: #f8fafc;
-                ">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <div class="page-tag">SPICE • TEAM DATA ALCHEMISTS • NORQUEST COLLEGE</div>
+                <div class="hero-title">
                     Smart Solar Decisions for
-                    <span style="color:#d7a928;">Investment</span>,
-                    <span style="color:#d7a928;">Impact</span>, and
-                    <span style="color:#d7a928;">Growth</span>
-                </h1>
-                <p style="
-                    font-size: 1.08rem;
-                    line-height: 1.8;
-                    color: #ecf5f1;
-                    max-width: 690px;
-                    margin-bottom: 0;
-                ">
-                    A business-focused solar analytics dashboard that helps stakeholders evaluate
-                    energy generation, financial return, investment value, and environmental impact
-                    across different system configurations.
-                </p>
+                    <span class="hero-highlight">Investment</span>,
+                    <span class="hero-highlight">Impact</span>, and
+                    <span class="hero-highlight">Growth</span>
+                </div>
+                <div class="hero-text">
+                    A business-focused solar analytics dashboard designed to help stakeholders
+                    evaluate solar design choices through energy generation, projected financial
+                    return, sustainability impact, and strategic decision support.
+                </div>
+                <div class="hero-badges">
+                    <div class="hero-chip">Energy Analytics</div>
+                    <div class="hero-chip">Financial Insight</div>
+                    <div class="hero-chip">Environmental Value</div>
+                    <div class="hero-chip">Investor Communication</div>
+                </div>
             </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 else:
-    st.warning("Banner image not found. Make sure this file exists: images/norquest_banner.png")
+    st.markdown("""
+    <div class="hero-wrap">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="page-tag">SPICE • TEAM DATA ALCHEMISTS • NORQUEST COLLEGE</div>
+            <div class="hero-title">
+                Smart Solar Decisions for
+                <span class="hero-highlight">Investment</span>,
+                <span class="hero-highlight">Impact</span>, and
+                <span class="hero-highlight">Growth</span>
+            </div>
+            <div class="hero-text">
+                A business-focused solar analytics dashboard designed to help stakeholders
+                evaluate solar design choices through energy generation, projected financial
+                return, sustainability impact, and strategic decision support.
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# -----------------------------
-# KPI Row
-# -----------------------------
+# =========================================================
+# Executive Overview
+# =========================================================
 st.markdown('<div class="section-title">Executive Overview</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="section-subtext">A quick business snapshot of the value this platform can communicate to investors, community stakeholders, and decision-makers.</div>',
+    '<div class="section-subtext">A premium snapshot of the business value this platform can communicate to SPICE stakeholders, investors, and decision-makers.</div>',
     unsafe_allow_html=True
 )
 
@@ -281,7 +419,7 @@ with k3:
     <div class="kpi-card">
         <div class="kpi-label">CO₂ Reduction</div>
         <div class="kpi-value">2,150 kg</div>
-        <div class="kpi-delta">Sustainability outcome</div>
+        <div class="kpi-delta">Measured sustainability outcome</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -296,57 +434,71 @@ with k4:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# -----------------------------
-# Two-column business value section
-# -----------------------------
-col1, col2 = st.columns([1.1, 1])
+# =========================================================
+# Problem + Value Framing
+# =========================================================
+left, right = st.columns([1.05, 0.95])
 
-with col1:
+with left:
     st.markdown("""
-    <div class="dark-card">
+    <div class="glass-card">
+        <div class="mini-heading">Problem Statement</div>
         <div class="card-title">Why This Dashboard Matters</div>
         <p class="card-text">
-            The SPICE Solar Analytics Dashboard is more than a technical project. It is a
-            <span class="card-highlight">business decision-support platform</span> that helps users understand how
-            different solar configurations affect financial return, operational performance, and
-            long-term sustainability value.
+            SPICE needs a clearer way to explain how solar design choices influence
+            <span class="card-highlight">energy production</span>,
+            <span class="card-highlight">financial return</span>, and
+            <span class="card-highlight">environmental benefit</span>.
+            Without a unified dashboard, technical results remain harder to communicate
+            to non-technical stakeholders and potential investors.
         </p>
         <br>
         <p class="card-text">
-            Instead of looking only at raw energy numbers, the dashboard connects
-            <span class="card-highlight">energy generation</span>,
-            <span class="card-highlight">projected revenue</span>,
-            <span class="card-highlight">ROI-related indicators</span>, and
-            <span class="card-highlight">carbon reduction</span> in one place.
-            This makes the platform useful for community investors, planning teams, and stakeholders.
+            This platform turns solar inputs and performance outputs into a
+            <span class="card-highlight">business-facing decision support experience</span>.
+            Instead of only displaying numbers, it helps connect design decisions with
+            practical questions around return, feasibility, and sustainability impact.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-with col2:
+with right:
     st.markdown("""
-    <div class="dark-card">
+    <div class="glass-card">
+        <div class="mini-heading">Strategic Lens</div>
         <div class="card-title">Business Perspective</div>
         <p class="card-text">
-            From a business point of view, this project supports three core goals:
+            From a business standpoint, the dashboard supports three high-value goals:
         </p>
         <br>
         <p class="card-text">
-            1. <span class="card-highlight">Investment clarity</span> — show whether a solar setup is financially attractive.<br><br>
-            2. <span class="card-highlight">Risk awareness</span> — help stakeholders understand uncertainty in outcomes.<br><br>
-            3. <span class="card-highlight">Sustainability reporting</span> — communicate measurable environmental value.
+            1. <span class="card-highlight">Investment clarity</span> — identify whether a configuration appears financially attractive.<br><br>
+            2. <span class="card-highlight">Risk awareness</span> — understand how outcomes change under different assumptions and designs.<br><br>
+            3. <span class="card-highlight">Sustainability communication</span> — show measurable carbon and environmental value in a stakeholder-friendly way.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
+# =========================================================
+# Insight Strip
+# =========================================================
+st.markdown("""
+<div class="insight-strip">
+    <div class="insight-title">Strategic Positioning</div>
+    <div class="insight-text">
+        The strongest value of this dashboard is that it does not behave like a simple calculator.
+        It behaves like a <b>decision-support platform</b> that helps users compare solar configurations,
+        understand trade-offs, and communicate the business case behind renewable energy investment.
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-# -----------------------------
-# Feature / business cards
-# -----------------------------
-st.markdown('<div class="section-title">Business Value Areas</div>', unsafe_allow_html=True)
+# =========================================================
+# Value Areas
+# =========================================================
+st.markdown('<div class="section-title">Core Value Areas</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="section-subtext">These sections make the homepage feel aligned with SPICE, investor communication, and real-world analytics use cases.</div>',
+    '<div class="section-subtext">These areas define how the dashboard supports SPICE in both technical analysis and stakeholder communication.</div>',
     unsafe_allow_html=True
 )
 
@@ -354,106 +506,166 @@ f1, f2, f3 = st.columns(3)
 
 with f1:
     st.markdown("""
-    <div class="feature-box">
+    <div class="feature-card">
+        <div class="feature-icon">💰</div>
         <div class="feature-title">Financial Feasibility</div>
         <div class="feature-text">
-            Show expected revenue, cost efficiency, and payback outlook for different
-            solar system configurations. This helps users move from curiosity to
-            investment evaluation.
+            Evaluate projected revenue, cost efficiency, and payback outlook for different
+            solar system configurations. This helps shift the conversation from interest
+            to investment readiness.
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 with f2:
     st.markdown("""
-    <div class="feature-box">
+    <div class="feature-card">
+        <div class="feature-icon">⚙️</div>
         <div class="feature-title">Operational Performance</div>
         <div class="feature-text">
-            Analyze how system size, tilt, orientation, and loss factors influence
-            energy generation. This gives users a clearer view of performance behaviour
-            instead of relying on static assumptions.
+            Show how variables such as system size, tilt, azimuth, and losses can influence
+            energy generation. This creates a clearer performance story than static assumptions alone.
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 with f3:
     st.markdown("""
-    <div class="feature-box">
+    <div class="feature-card">
+        <div class="feature-icon">🌱</div>
         <div class="feature-title">Environmental Reporting</div>
         <div class="feature-text">
-            Translate solar production into carbon reduction and sustainability impact.
-            This is especially valuable for stakeholder presentations, policy alignment,
-            and ESG-style communication.
+            Translate solar output into carbon reduction and sustainability value. This is
+            especially useful for presentations, grant narratives, ESG-style communication,
+            and community impact reporting.
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# -----------------------------
-# Stakeholder / recommendation row
-# -----------------------------
-left, right = st.columns([1, 1])
+# =========================================================
+# Dashboard Roadmap
+# =========================================================
+st.markdown('<div class="section-title">Dashboard Experience</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="section-subtext">The dashboard is structured to move from project context into simulation, validation, business impact, and modeling insight.</div>',
+    unsafe_allow_html=True
+)
 
-with left:
+r1, r2, r3, r4 = st.columns(4)
+
+with r1:
     st.markdown("""
-    <div class="dark-card">
+    <div class="roadmap-card">
+        <div class="roadmap-step">01 • Context</div>
+        <div class="roadmap-title">Home & Data Methodology</div>
+        <div class="roadmap-text">
+            Introduce the problem, data foundation, and analytical structure behind the dashboard.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with r2:
+    st.markdown("""
+    <div class="roadmap-card">
+        <div class="roadmap-step">02 • Design</div>
+        <div class="roadmap-title">Solar Simulation</div>
+        <div class="roadmap-text">
+            Compare tilt, azimuth, and system size scenarios to explore how design changes affect output.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with r3:
+    st.markdown("""
+    <div class="roadmap-card">
+        <div class="roadmap-step">03 • Impact</div>
+        <div class="roadmap-title">Financial & Environmental Impact</div>
+        <div class="roadmap-text">
+            Connect projected solar generation to revenue, payback logic, and carbon reduction outcomes.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with r4:
+    st.markdown("""
+    <div class="roadmap-card">
+        <div class="roadmap-step">04 • Trust</div>
+        <div class="roadmap-title">Validation & Modeling</div>
+        <div class="roadmap-text">
+            Present real-site validation, forecasting logic, and future explainability layers for transparency.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# =========================================================
+# Stakeholder + Use Case
+# =========================================================
+s1, s2 = st.columns([1, 1])
+
+with s1:
+    st.markdown("""
+    <div class="glass-card">
+        <div class="mini-heading">Audience</div>
         <div class="card-title">Primary Stakeholders</div>
         <p class="card-text">
-            This dashboard can support:
+            This dashboard is designed to support:
             <br><br>
             • Community solar investors<br>
             • SPICE project stakeholders<br>
             • Sustainability-focused decision-makers<br>
-            • Academic and applied analytics teams<br>
-            • Policy and planning discussions
+            • Planning and operations discussions<br>
+            • Applied analytics and academic project teams
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-with right:
+with s2:
     st.markdown("""
-    <div class="dark-card">
-        <div class="card-title">Strategic Use Case</div>
+    <div class="glass-card">
+        <div class="mini-heading">Use Case</div>
+        <div class="card-title">Strategic Decision Question</div>
         <p class="card-text">
-            The strongest use of this dashboard is to help answer one business question:
-            <span class="card-highlight">Which solar configuration delivers the best balance of return, efficiency, and impact?</span>
+            The platform is built to help answer one important business question:
             <br><br>
-            That makes the platform useful not just for analysis, but for communication and decision support.
+            <span class="card-highlight">
+                Which solar configuration delivers the strongest balance of return,
+                efficiency, and environmental impact?
+            </span>
+            <br><br>
+            This makes the dashboard useful not only for analysis, but also for
+            presentation, justification, and stakeholder communication.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# -----------------------------
-# Recommendation strip
-# -----------------------------
-st.markdown("""
-<div class="reco-box">
-    <div class="reco-title">Recommended Homepage Direction</div>
-    <div class="reco-text">
-        Keep this page focused on <b>business value, investor communication, and project purpose</b>.
-        Then use the next pages for detailed EDA, financial charts, simulation controls,
-        and model-driven insights. This will make the whole dashboard feel structured and professional.
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# -----------------------------
-# Team section
-# -----------------------------
+# =========================================================
+# Team Section
+# =========================================================
 st.markdown('<div class="section-title">Team Data Alchemists</div>', unsafe_allow_html=True)
 
 st.markdown("""
-<div class="dark-card">
+<div class="glass-card">
+    <div class="mini-heading">Project Identity</div>
+    <div class="card-title">Applied Solar Analytics for SPICE</div>
     <p class="card-text">
-        This dashboard is being developed as part of the SPICE Energy Conservation and Data Analytics
-        initiative at NorQuest College. It reflects an applied machine learning and analytics approach
-        to a real-world renewable energy problem, combining technical analysis with financial and
-        stakeholder-facing business insight.
+        This dashboard is being developed as part of the SPICE Energy Conservation and
+        Data Analytics initiative at NorQuest College. It reflects an applied analytics
+        approach to a real renewable energy decision problem by combining simulation logic,
+        business interpretation, and stakeholder-facing dashboard design.
     </p>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="footer-note">SPICE Solar Analytics Dashboard | Designed for dark theme presentation</div>', unsafe_allow_html=True)
+# =========================================================
+# Footer
+# =========================================================
+st.markdown(
+    '<div class="footer-note">SPICE Solar Analytics Dashboard | Premium dark-theme home experience</div>',
+    unsafe_allow_html=True
+)
