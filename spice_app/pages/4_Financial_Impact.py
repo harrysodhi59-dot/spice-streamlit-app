@@ -214,15 +214,26 @@ section[data-testid="stSidebar"] * {
     border: 1px solid rgba(0,0,0,0.05);
 }
 
+.card,
+.card p,
+.card span,
+.card div,
+.card strong,
+.card li,
+.card h3,
+.card h4 {
+    color: #1F2937 !important;
+}
+
 .card-title {
-    color: #0B3C5D;
+    color: #0B3C5D !important;
     font-size: 1.3rem;
     font-weight: 850;
     margin-bottom: 0.45rem;
 }
 
 .card-label {
-    color: #1E6F5C;
+    color: #1E6F5C !important;
     font-size: 0.88rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -231,7 +242,7 @@ section[data-testid="stSidebar"] * {
 }
 
 .small-note {
-    color: #334155;
+    color: #334155 !important;
     font-size: 0.95rem;
     line-height: 1.7;
 }
@@ -249,6 +260,10 @@ section[data-testid="stSidebar"] * {
     box-shadow: 0 10px 24px rgba(0,0,0,0.16);
     font-size: 0.98rem;
     line-height: 1.75;
+}
+
+.insight-box strong {
+    color: #8FF0B7 !important;
 }
 
 /* Metric dark strips */
@@ -381,12 +396,10 @@ annual_energy = control2.number_input(
 lifetime_years = control3.slider("📆 Project Lifetime (years)", 5, 30, 25)
 annual_escalation = control4.slider("📈 Annual Savings Growth (%)", 0.0, 5.0, 2.0, 0.1)
 
-# Optional comparison
-compare_projects_default = project_list[:min(4, len(project_list))]
 selected_compare_projects = st.multiselect(
     "📊 Compare against other SPICE projects",
     options=project_list,
-    default=compare_projects_default
+    default=project_list[:min(4, len(project_list))]
 )
 
 # -----------------------------
@@ -394,13 +407,13 @@ selected_compare_projects = st.multiselect(
 # -----------------------------
 project_row = cost_df[cost_df["Project_Name"] == selected_project].iloc[0]
 
-system_size = project_row["System_Size_kW"] if "System_Size_kW" in project_row else 0
-total_cost = project_row["Total_Cost_CAD"] if "Total_Cost_CAD" in project_row else 0
-cost_per_watt = project_row["Cost_per_Watt_CAD"] if "Cost_per_Watt_CAD" in project_row else 0
-lease_payment = project_row["Lease_Annual_Payment"] if "Lease_Annual_Payment" in project_row else 0
-lease_years = project_row["Lease_Term_Years"] if "Lease_Term_Years" in project_row else 0
-financing_type = project_row["Financing_Type"] if "Financing_Type" in project_row else "N/A"
-spice_investment = project_row["SPICE_Investment_CAD"] if "SPICE_Investment_CAD" in project_row else 0
+system_size = project_row["System_Size_kW"] if "System_Size_kW" in cost_df.columns else 0
+total_cost = project_row["Total_Cost_CAD"] if "Total_Cost_CAD" in cost_df.columns else 0
+cost_per_watt = project_row["Cost_per_Watt_CAD"] if "Cost_per_Watt_CAD" in cost_df.columns else 0
+lease_payment = project_row["Lease_Annual_Payment"] if "Lease_Annual_Payment" in cost_df.columns else 0
+lease_years = project_row["Lease_Term_Years"] if "Lease_Term_Years" in cost_df.columns else 0
+financing_type = project_row["Financing_Type"] if "Financing_Type" in cost_df.columns else "N/A"
+spice_investment = project_row["SPICE_Investment_CAD"] if "SPICE_Investment_CAD" in cost_df.columns else 0
 
 # -----------------------------
 # Rate selection logic
