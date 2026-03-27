@@ -429,8 +429,8 @@ planning_horizon = c4.slider(
 emissions_row = emissions_df[emissions_df["Year"] == selected_year].iloc[0]
 carbon_row = carbon_df[carbon_df["Year"] == selected_carbon_year].iloc[0]
 
-emission_factor = emissions_row["Grid_Intensity_kg_CO2e_per_kWh"]      # kg CO2e / kWh
-carbon_price = carbon_row["Carbon_Tax_CAD_per_tonne"]                  # CAD / tonne
+emission_factor = emissions_row["Grid_Intensity_kg_CO2e_per_kWh"]
+carbon_price = carbon_row["Carbon_Tax_CAD_per_tonne"]
 
 co2_kg = annual_energy * emission_factor
 co2_tonnes = co2_kg / 1000
@@ -443,7 +443,6 @@ trees_equivalent = co2_tonnes * 40
 cars_removed_equivalent = co2_tonnes / 4.6 if co2_tonnes > 0 else 0
 homes_powered_equivalent = annual_energy / 10000
 
-# Dynamic insight wording
 if co2_tonnes >= 20:
     impact_strength = "a strong annual emissions reduction profile"
 elif co2_tonnes >= 8:
@@ -714,44 +713,103 @@ with c2:
     """, unsafe_allow_html=True)
 
 # -----------------------------
-# Combined summary chart
+# Clean impact snapshot
 # -----------------------------
 st.markdown('<div class="section-heading">Impact Snapshot</div>', unsafe_allow_html=True)
 
-impact_df = pd.DataFrame({
-    "Metric": ["Avoided Emissions (tonnes)", "Carbon Value (CAD)", "Lifetime Avoided Emissions (tonnes)"],
-    "Value": [co2_tonnes, carbon_value, lifetime_co2]
+snapshot_left, snapshot_right = st.columns(2, gap="large")
+
+emissions_snapshot_df = pd.DataFrame({
+    "Metric": ["Avoided Emissions", "Lifetime Avoided Emissions"],
+    "Value": [co2_tonnes, lifetime_co2]
 })
 
-st.markdown("""
-<div class="card">
-    <div class="card-label">Selected Case</div>
-    <div class="card-title">📌 Environmental Benefit Overview</div>
-""", unsafe_allow_html=True)
+carbon_snapshot_df = pd.DataFrame({
+    "Metric": ["Annual Carbon Value", "Lifetime Carbon Value"],
+    "Value": [carbon_value, lifetime_carbon_value]
+})
 
-fig_summary = px.bar(
-    impact_df,
-    x="Metric",
-    y="Value",
-    color="Metric"
-)
-fig_summary.update_layout(
-    xaxis_title="Metric",
-    yaxis_title="Value",
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="white",
-    showlegend=False,
-    font=dict(family="Segoe UI")
-)
-st.plotly_chart(fig_summary, use_container_width=True)
+with snapshot_left:
+    st.markdown("""
+    <div class="card">
+        <div class="card-label">Selected Case</div>
+        <div class="card-title">🌱 Emissions Benefit Overview</div>
+    """, unsafe_allow_html=True)
 
-st.markdown("""
-    <p class="small-note">
-        This summary combines the physical and policy-based dimensions of environmental performance
-        under the selected annual generation case.
-    </p>
-</div>
-""", unsafe_allow_html=True)
+    fig_emissions_snapshot = px.bar(
+        emissions_snapshot_df,
+        x="Metric",
+        y="Value",
+        color="Metric",
+        text="Value"
+    )
+
+    fig_emissions_snapshot.update_traces(
+        texttemplate="%{text:.2f}",
+        textposition="outside"
+    )
+
+    fig_emissions_snapshot.update_layout(
+        xaxis_title="Metric",
+        yaxis_title="Avoided Emissions (tonnes CO₂e)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="white",
+        showlegend=False,
+        font=dict(family="Segoe UI"),
+        margin=dict(t=25, b=20, l=20, r=20)
+    )
+
+    st.plotly_chart(fig_emissions_snapshot, use_container_width=True)
+
+    st.markdown(f"""
+        <p class="small-note">
+            This chart focuses only on the physical environmental benefit in <strong>tonnes of CO₂e</strong>.
+            The selected case avoids <strong>{co2_tonnes:,.2f} tonnes</strong> annually and
+            <strong>{lifetime_co2:,.2f} tonnes</strong> over the selected project horizon.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with snapshot_right:
+    st.markdown("""
+    <div class="card">
+        <div class="card-label">Selected Case</div>
+        <div class="card-title">💰 Carbon Value Overview</div>
+    """, unsafe_allow_html=True)
+
+    fig_carbon_snapshot = px.bar(
+        carbon_snapshot_df,
+        x="Metric",
+        y="Value",
+        color="Metric",
+        text="Value"
+    )
+
+    fig_carbon_snapshot.update_traces(
+        texttemplate="$%{text:,.0f}",
+        textposition="outside"
+    )
+
+    fig_carbon_snapshot.update_layout(
+        xaxis_title="Metric",
+        yaxis_title="Carbon Value (CAD)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="white",
+        showlegend=False,
+        font=dict(family="Segoe UI"),
+        margin=dict(t=25, b=20, l=20, r=20)
+    )
+
+    st.plotly_chart(fig_carbon_snapshot, use_container_width=True)
+
+    st.markdown(f"""
+        <p class="small-note">
+            This chart focuses only on the policy-based environmental value in <strong>CAD</strong>.
+            The selected case creates an annual carbon value of <strong>${carbon_value:,.0f}</strong>
+            and a lifetime carbon value of <strong>${lifetime_carbon_value:,.0f}</strong>.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # -----------------------------
 # Optional data preview
