@@ -81,6 +81,16 @@ h1, h2, h3, h4 {
     padding: 10px 14px;
     font-size: 14px;
     margin-top: 8px;
+    margin-bottom: 10px;
+}
+.info-box {
+    background: rgba(59,130,246,0.12);
+    border: 1px solid rgba(59,130,246,0.25);
+    color: #93c5fd;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 14px;
+    margin-bottom: 10px;
 }
 div[data-testid="stDataFrame"] {
     border-radius: 14px;
@@ -90,36 +100,54 @@ div[data-testid="stDataFrame"] {
 """, unsafe_allow_html=True)
 
 # -------------------------------------------------------
+# FALLBACK DATASET
+# -------------------------------------------------------
+def create_fallback_data():
+    return pd.DataFrame({
+        "scenario": [
+            "Baseline",
+            "South Optimized 25kW",
+            "South Optimized 50kW",
+            "SE Balanced 40kW",
+            "SW Balanced 35kW",
+            "Flat Roof Test 30kW",
+            "High Tilt 45kW"
+        ],
+        "tilt": [15, 30, 32, 28, 26, 10, 40],
+        "azimuth": [180, 180, 180, 160, 200, 180, 185],
+        "system_size": [20, 25, 50, 40, 35, 30, 45],
+        "annual_energy": [24500, 33200, 68900, 54800, 50100, 35600, 61500],
+        "annual_revenue": [2940, 3984, 8268, 6576, 6012, 4272, 7380],
+        "co2_reduction": [12.25, 16.60, 34.45, 27.40, 25.05, 17.80, 30.75],
+        "baseline": [True, False, False, False, False, False, False]
+    })
+
+# -------------------------------------------------------
 # HELPER FUNCTIONS
 # -------------------------------------------------------
 def load_data():
     """
-    Load dataset from:
-    1. session_state["df"]
-    2. session_state["uploaded_data"]
-    3. uploaded_dataset.csv
+    Page 8 works independently:
+    1. If a CSV exists locally, use it
+    2. Otherwise use built-in fallback data
     """
-    if "df" in st.session_state and st.session_state["df"] is not None:
-        return st.session_state["df"]
+    possible_files = [
+        "uploaded_dataset.csv",
+        "final_recommendation_data.csv",
+        "scenario_comparison.csv",
+        "solar_simulation_results.csv"
+    ]
 
-    if "uploaded_data" in st.session_state and st.session_state["uploaded_data"] is not None:
-        return st.session_state["uploaded_data"]
-
-    if "uploaded_file_path" in st.session_state:
-        saved_path = st.session_state["uploaded_file_path"]
-        if saved_path and os.path.exists(saved_path):
+    for file_name in possible_files:
+        if os.path.exists(file_name):
             try:
-                return pd.read_csv(saved_path)
+                df = pd.read_csv(file_name)
+                if not df.empty:
+                    return df, f"Loaded local file: {file_name}"
             except Exception:
                 pass
 
-    if os.path.exists("uploaded_dataset.csv"):
-        try:
-            return pd.read_csv("uploaded_dataset.csv")
-        except Exception:
-            pass
-
-    return None
+    return create_fallback_data(), "Using built-in demo dataset"
 
 
 def find_column(df, possible_names):
@@ -174,15 +202,29 @@ st.markdown("""
 # -------------------------------------------------------
 # LOAD DATA
 # -------------------------------------------------------
-df = load_data()
+df, data_source_message = load_data()
 
-if df is None:
-    st.error("No dataset found. Please upload your CSV file from the Home page first.")
-    st.info("Go to the Home page, upload your dataset, then return to this page.")
+if df is None or df.empty:
+    st.error("No usable data is available for this page.")
     st.stop()
 
-# Keep a clean copy
 data = df.copy()
+
+# -------------------------------------------------------
+# DATA STATUS MESSAGE
+# -------------------------------------------------------
+if "demo dataset" in data_source_message.lower():
+    st.markdown(f"""
+    <div class="info-box">
+        <b>{data_source_message}</b> — this page is running independently with built-in sample solar scenario data.
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown(f"""
+    <div class="badge-box">
+        <b>{data_source_message}</b>
+    </div>
+    """, unsafe_allow_html=True)
 
 # -------------------------------------------------------
 # COLUMN DETECTION
@@ -197,20 +239,19 @@ co2_col = find_column(data, ["co2", "carbon", "co2_reduction", "carbon_reduction
 baseline_flag_col = find_column(data, ["baseline", "is_baseline", "base_case"])
 
 # -------------------------------------------------------
-# CREATE FALLBACK SCENARIO NAME
+# FALLBACK SCENARIO NAME
 # -------------------------------------------------------
 if scenario_col is None:
     data["Scenario"] = [f"Scenario {i+1}" for i in range(len(data))]
     scenario_col = "Scenario"
 
 # -------------------------------------------------------
-# CREATE REQUIRED NUMERIC METRICS
+# NUMERIC METRICS
 # -------------------------------------------------------
 data["Energy_Value"] = safe_numeric(data, energy_col, 0)
 data["Revenue_Value"] = safe_numeric(data, revenue_col, 0)
 data["CO2_Value"] = safe_numeric(data, co2_col, 0)
 
-# fallback estimates if revenue or co2 columns missing
 if data["Revenue_Value"].sum() == 0 and data["Energy_Value"].sum() > 0:
     data["Revenue_Value"] = data["Energy_Value"] * 0.12
 
@@ -235,7 +276,10 @@ energy_weight /= weight_total
 revenue_weight /= weight_total
 co2_weight /= weight_total
 
-top_n = st.sidebar.selectbox("Top Scenarios to Compare", [3, 5, 7, 10], index=0)
+top_n = min(
+    st.sidebar.selectbox("Top Scenarios to Compare", [3, 5, 7, 10], index=0),
+    len(data)
+)
 
 # -------------------------------------------------------
 # SCORING ENGINE
@@ -336,11 +380,13 @@ with c5:
 st.markdown("---")
 
 # -------------------------------------------------------
-# DATA STATUS
+# DATASET STATUS
 # -------------------------------------------------------
 st.markdown(f"""
 <div class="badge-box">
-<b>Dataset loaded successfully.</b> Rows: {len(data):,} | Columns: {len(data.columns):,}
+<b>Rows:</b> {len(data):,} &nbsp;&nbsp; | &nbsp;&nbsp;
+<b>Columns:</b> {len(data.columns):,} &nbsp;&nbsp; | &nbsp;&nbsp;
+<b>Source:</b> {data_source_message}
 </div>
 """, unsafe_allow_html=True)
 
@@ -407,7 +453,7 @@ with col_b:
 st.markdown("---")
 
 # -------------------------------------------------------
-# TOP SCENARIO COMPARISON CHART
+# TOP SCENARIO CHART
 # -------------------------------------------------------
 st.subheader(f"Top {top_n} Scenario Comparison")
 
@@ -445,7 +491,7 @@ fig_top.update_layout(
 st.plotly_chart(fig_top, use_container_width=True)
 
 # -------------------------------------------------------
-# SCORE CONTRIBUTION DONUT
+# DONUT + EXPLANATION
 # -------------------------------------------------------
 col_d1, col_d2 = st.columns([1, 1.2])
 
@@ -479,8 +525,8 @@ with col_d2:
             <li><b>CO₂ reduction</b> to show environmental impact</li>
         </ul>
         <p class="small-note">
-            This gives a more balanced recommendation for SPICE and makes the final page more
-            useful for stakeholder-level decision support.
+            This creates a more balanced recommendation for SPICE and makes the page useful
+            even as a standalone decision-support screen.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -488,7 +534,7 @@ with col_d2:
 st.markdown("---")
 
 # -------------------------------------------------------
-# SCENARIO RANKING TABLE
+# RANKING TABLE
 # -------------------------------------------------------
 st.subheader("Scenario Ranking Table")
 
@@ -518,7 +564,7 @@ if size_col:
     else:
         size_insert_pos = 1
     display_cols.insert(size_insert_pos, size_col)
-    rename_map[size_col] = "System Size"
+    rename_map[size_col] = "System Size (kW)"
 
 ranking_df = data[display_cols].copy().rename(columns=rename_map)
 ranking_df.index = np.arange(1, len(ranking_df) + 1)
@@ -654,7 +700,7 @@ st.download_button(
 )
 
 # -------------------------------------------------------
-# OPTIONAL PROCESSED DATA
+# OPTIONAL RAW DATA
 # -------------------------------------------------------
 with st.expander("Show processed scoring data"):
     preview_cols = [scenario_col, "Energy_Value", "Revenue_Value", "CO2_Value",
