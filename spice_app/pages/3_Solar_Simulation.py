@@ -41,7 +41,6 @@ html, body, [class*="css"] {
     color: #F8FAFC;
 }
 
-/* Sidebar */
 section[data-testid="stSidebar"] {
     background: linear-gradient(180deg, #141B2D 0%, #182133 100%);
     border-right: 1px solid rgba(255,255,255,0.06);
@@ -51,7 +50,6 @@ section[data-testid="stSidebar"] * {
     color: #E5E7EB !important;
 }
 
-/* Hero */
 .hero-box {
     background: linear-gradient(135deg, rgba(30,111,92,0.96) 0%, rgba(11,60,93,0.96) 100%);
     padding: 2.8rem;
@@ -159,7 +157,6 @@ section[data-testid="stSidebar"] * {
     object-fit: cover;
 }
 
-/* Text */
 .section-heading {
     font-size: 2rem;
     font-weight: 850;
@@ -175,7 +172,6 @@ section[data-testid="stSidebar"] * {
     margin-bottom: 1.3rem;
 }
 
-/* KPI */
 .kpi-card {
     background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F7 100%);
     border-radius: 22px;
@@ -200,7 +196,6 @@ section[data-testid="stSidebar"] * {
     line-height: 1.2;
 }
 
-/* Cards */
 .card {
     background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F7 100%);
     border-radius: 22px;
@@ -232,7 +227,6 @@ section[data-testid="stSidebar"] * {
     line-height: 1.7;
 }
 
-/* Insight */
 .insight-box {
     background: linear-gradient(90deg, rgba(30,111,92,0.18), rgba(11,60,93,0.18));
     border-left: 6px solid #FDB813;
@@ -247,7 +241,6 @@ section[data-testid="stSidebar"] * {
     line-height: 1.75;
 }
 
-/* Scenario metrics */
 .metric-strip {
     background: rgba(255,255,255,0.02);
     border: 1px solid rgba(255,255,255,0.06);
@@ -268,7 +261,6 @@ section[data-testid="stSidebar"] * {
     font-weight: 850;
 }
 
-/* Footer */
 .footer-note {
     background: linear-gradient(90deg, rgba(30,111,92,0.18), rgba(11,60,93,0.22));
     border-radius: 18px;
@@ -279,7 +271,6 @@ section[data-testid="stSidebar"] * {
     box-shadow: 0 10px 24px rgba(0,0,0,0.16);
 }
 
-/* Mobile */
 @media (max-width: 900px) {
     .hero-title {
         font-size: 2.2rem;
@@ -379,72 +370,16 @@ def apply_plot_style(fig):
     )
     return fig
 
-def guess_reference_columns(df):
-    month_col = None
-    for col in ["month", "Month", "month_name", "month_num"]:
-        if col in df.columns:
-            month_col = col
-            break
-
-    energy_col = None
-    for col in ["monthly_kwh", "energy_kwh", "kwh", "Energy", "energy"]:
-        if col in df.columns:
-            energy_col = col
-            break
-
-    site_col = None
-    for col in ["site", "Site", "building", "Building", "scenario", "Scenario"]:
-        if col in df.columns:
-            site_col = col
-            break
-
-    return month_col, energy_col, site_col
-
-def format_signed_value(value, suffix=""):
-    if value > 0:
-        return f"+{value:,.1f}{suffix}"
-    if value < 0:
-        return f"{value:,.1f}{suffix}"
-    return f"{value:,.1f}{suffix}"
-
-def generate_design_insight(system_size, tilt, azimuth, baseline_tilt, baseline_azimuth,
-                            output_selected, output_baseline, pct_difference,
-                            annual_difference, best_month, worst_month):
-    direction = "improves" if annual_difference > 0 else "reduces" if annual_difference < 0 else "maintains"
-    strength = abs(pct_difference)
-
-    if strength >= 10:
-        impact_phrase = "a strong shift in projected performance"
-    elif strength >= 5:
-        impact_phrase = "a noticeable improvement in projected output" if annual_difference > 0 else "a noticeable reduction in projected output"
-    elif strength >= 1:
-        impact_phrase = "a moderate design difference"
-    else:
-        impact_phrase = "only a small change"
-
-    if annual_difference > 0:
-        compare_text = (
-            f"This selected setup produces {abs(annual_difference):,.0f} kWh more than the baseline, "
-            f"which is {abs(pct_difference):.1f}% higher."
-        )
-    elif annual_difference < 0:
-        compare_text = (
-            f"This selected setup produces {abs(annual_difference):,.0f} kWh less than the baseline, "
-            f"which is {abs(pct_difference):.1f}% lower."
-        )
-    else:
-        compare_text = "This selected setup performs almost the same as the baseline configuration."
-
+def generate_design_insight(system_size, tilt, azimuth, annual_output, best_month, worst_month, low_energy, high_energy):
     return (
-        f"<strong>Design Insight:</strong> With a selected system size of <strong>{system_size} kW</strong>, "
-        f"the current design at <strong>{tilt}° tilt</strong> and <strong>{azimuth}° azimuth</strong> "
-        f"generates an estimated <strong>{output_selected:,.0f} kWh</strong> over the filtered period. "
-        f"Compared with the baseline setting of <strong>{baseline_tilt}° / {baseline_azimuth}°</strong>, "
-        f"the current design <strong>{direction}</strong> projected energy performance and creates "
-        f"<strong>{impact_phrase}</strong>. {compare_text} "
-        f"The strongest projected month is <strong>{best_month}</strong>, while the weakest month is "
-        f"<strong>{worst_month}</strong>. This helps SPICE explain not only what the output is, "
-        f"but also how design choices change the business story behind the result."
+        f"<strong>Simulation Insight:</strong> With a selected system size of "
+        f"<strong>{system_size} kW</strong>, tilt of <strong>{tilt}°</strong>, and azimuth of "
+        f"<strong>{azimuth}°</strong>, the projected filtered production is "
+        f"<strong>{annual_output:,.0f} kWh</strong>. The strongest projected month is "
+        f"<strong>{best_month}</strong>, while the weakest month is <strong>{worst_month}</strong>. "
+        f"Based on the same design window, the likely production range spans from "
+        f"<strong>{low_energy:,.0f} kWh</strong> to <strong>{high_energy:,.0f} kWh</strong>. "
+        f"This helps SPICE explain how system configuration choices affect output in a clear, scenario-based way."
     )
 
 # =========================================================
@@ -457,7 +392,6 @@ if not available_files:
     st.stop()
 
 main_candidates = []
-reference_candidates = []
 
 for file in available_files:
     try:
@@ -465,8 +399,6 @@ for file in available_files:
         dt_col, tilt_col, azimuth_col, target_col = detect_columns(test_df)
         if dt_col and tilt_col and azimuth_col and target_col:
             main_candidates.append(file)
-        else:
-            reference_candidates.append(file)
     except Exception:
         pass
 
@@ -474,8 +406,7 @@ if len(main_candidates) == 0:
     st.error("No valid main simulation dataset found. A main dataset must contain datetime, tilt, azimuth, and a power/energy column.")
     st.stop()
 
-main_candidates = main_candidates[:4]
-reference_candidates = reference_candidates[:4]
+main_candidates = main_candidates[:6]
 
 # =========================================================
 # Sidebar controls
@@ -501,27 +432,16 @@ system_size = st.sidebar.slider("System Size (kW)", 1, 100, 10)
 tilt = st.sidebar.slider("Tilt (degrees)", 0, 60, 30)
 azimuth = st.sidebar.slider("Azimuth (degrees)", -180, 180, 0)
 
-baseline_tilt = st.sidebar.slider("Baseline Tilt (comparison)", 0, 60, 20)
-baseline_azimuth = st.sidebar.slider("Baseline Azimuth (comparison)", -180, 180, 0)
-
 month_range = st.sidebar.slider("Month Range", 1, 12, (1, 12))
 quarter_filter = st.sidebar.multiselect("Quarter Filter", [1, 2, 3, 4], default=[1, 2, 3, 4])
 
 chart_type = st.sidebar.selectbox(
-    "Monthly Comparison Chart",
+    "Monthly Production Chart",
     ["Line", "Bar", "Area"]
 )
 
 show_distribution = st.sidebar.checkbox("Show output distribution", value=True)
 show_top_designs = st.sidebar.checkbox("Show top design combinations", value=True)
-
-selected_reference_file = None
-if reference_candidates:
-    selected_reference_file = st.sidebar.selectbox(
-        "Reference Dataset (Optional)",
-        options=[None] + reference_candidates,
-        format_func=lambda x: "None" if x is None else x.name
-    )
 
 # =========================================================
 # Main calculations
@@ -530,29 +450,16 @@ filtered_selected, monthly_selected, annual_selected = get_design_summary(
     df, tilt, azimuth, system_size, target_col, tilt_col, azimuth_col
 )
 
-filtered_baseline, monthly_baseline, annual_baseline = get_design_summary(
-    df, baseline_tilt, baseline_azimuth, system_size, target_col, tilt_col, azimuth_col
-)
-
 monthly_selected = monthly_selected[
     monthly_selected["month_num"].between(month_range[0], month_range[1]) &
     monthly_selected["quarter"].isin(quarter_filter)
 ].copy()
 
-monthly_baseline = monthly_baseline[
-    monthly_baseline["month_num"].between(month_range[0], month_range[1]) &
-    monthly_baseline["quarter"].isin(quarter_filter)
-].copy()
-
 annual_selected_filtered = monthly_selected["estimated_kwh"].sum()
-annual_baseline_filtered = monthly_baseline["estimated_kwh"].sum()
 
 low_energy = annual_selected_filtered * 0.85
 avg_energy = annual_selected_filtered
 high_energy = annual_selected_filtered * 1.15
-
-annual_difference = annual_selected_filtered - annual_baseline_filtered
-pct_difference = (annual_difference / annual_baseline_filtered * 100) if annual_baseline_filtered != 0 else 0
 
 best_month = monthly_selected.loc[monthly_selected["estimated_kwh"].idxmax(), "month_name"] if not monthly_selected.empty else "N/A"
 worst_month = monthly_selected.loc[monthly_selected["estimated_kwh"].idxmin(), "month_name"] if not monthly_selected.empty else "N/A"
@@ -561,14 +468,11 @@ design_insight_html = generate_design_insight(
     system_size=system_size,
     tilt=tilt,
     azimuth=azimuth,
-    baseline_tilt=baseline_tilt,
-    baseline_azimuth=baseline_azimuth,
-    output_selected=annual_selected_filtered,
-    output_baseline=annual_baseline_filtered,
-    pct_difference=pct_difference,
-    annual_difference=annual_difference,
+    annual_output=annual_selected_filtered,
     best_month=best_month,
-    worst_month=worst_month
+    worst_month=worst_month,
+    low_energy=low_energy,
+    high_energy=high_energy
 )
 
 # =========================================================
@@ -584,18 +488,17 @@ with hero_left:
             Solar <span class="hero-highlight">Simulation</span>
         </div>
         <div class="hero-text">
-            This page helps SPICE compare solar design choices by showing how changes in
-            system size, tilt, and azimuth affect projected energy output.
+            This page helps SPICE evaluate how system size, tilt, and azimuth affect projected solar production.
         </div>
         <div class="hero-text">
-            Instead of presenting one static estimate, the dashboard supports scenario-based
-            analysis for design discussion, investor communication, and project planning.
+            The graphs below update dynamically based on the selected design inputs, making the page more useful for planning and stakeholder discussion.
         </div>
         <div class="hero-badge-wrap">
-            <div class="hero-badge">Design Comparison</div>
-            <div class="hero-chip">Scenario Planning</div>
-            <div class="hero-chip">Output Forecasting</div>
-            <div class="hero-chip">Decision Support</div>
+            <div class="hero-badge">Dynamic Output View</div>
+            <div class="hero-chip">System Size</div>
+            <div class="hero-chip">Tilt</div>
+            <div class="hero-chip">Azimuth</div>
+            <div class="hero-chip">Production Forecast</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -605,7 +508,7 @@ with hero_right:
         st.image(image_path, use_container_width=True)
         st.markdown("""
         <div class="image-caption">
-            Visual context for solar planning and stakeholder-facing scenario discussion.
+            Visual context for solar planning and system-level production forecasting.
         </div>
         """, unsafe_allow_html=True)
     else:
@@ -616,11 +519,11 @@ with hero_right:
 # =========================================================
 st.markdown('<div class="section-heading">Simulation Summary</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="section-subtext">A quick comparison of the current solar design against the chosen baseline configuration.</div>',
+    '<div class="section-subtext">A quick summary of the currently selected solar configuration and its projected production.</div>',
     unsafe_allow_html=True
 )
 
-k1, k2, k3, k4, k5, k6 = st.columns(6, gap="large")
+k1, k2, k3, k4, k5 = st.columns(5, gap="large")
 
 with k1:
     st.markdown(f"""
@@ -633,7 +536,7 @@ with k1:
 with k2:
     st.markdown(f"""
     <div class="kpi-card">
-        <div class="kpi-title">Selected Size</div>
+        <div class="kpi-title">System Size</div>
         <div class="kpi-value">{system_size} kW</div>
     </div>
     """, unsafe_allow_html=True)
@@ -641,32 +544,24 @@ with k2:
 with k3:
     st.markdown(f"""
     <div class="kpi-card">
-        <div class="kpi-title">Tilt / Azimuth</div>
-        <div class="kpi-value">{tilt}° / {azimuth}°</div>
+        <div class="kpi-title">Tilt</div>
+        <div class="kpi-value">{tilt}°</div>
     </div>
     """, unsafe_allow_html=True)
 
 with k4:
     st.markdown(f"""
     <div class="kpi-card">
-        <div class="kpi-title">Filtered Output</div>
-        <div class="kpi-value">{annual_selected_filtered:,.0f} kWh</div>
+        <div class="kpi-title">Azimuth</div>
+        <div class="kpi-value">{azimuth}°</div>
     </div>
     """, unsafe_allow_html=True)
 
 with k5:
     st.markdown(f"""
     <div class="kpi-card">
-        <div class="kpi-title">Vs Baseline</div>
-        <div class="kpi-value">{pct_difference:+.1f}%</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with k6:
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-title">Peak Month</div>
-        <div class="kpi-value" style="font-size:1.35rem;">{best_month}</div>
+        <div class="kpi-title">Projected Output</div>
+        <div class="kpi-value">{annual_selected_filtered:,.0f} kWh</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -713,60 +608,43 @@ with m3:
 with m4:
     st.markdown(f"""
     <div class="metric-strip">
-        <div class="metric-label-dark">Lowest Month</div>
-        <div class="metric-value-dark">{worst_month}</div>
+        <div class="metric-label-dark">Peak Month</div>
+        <div class="metric-value-dark">{best_month}</div>
     </div>
     """, unsafe_allow_html=True)
 
 # =========================================================
-# Monthly comparison
+# Monthly production + quarterly output
 # =========================================================
-st.markdown('<div class="section-heading">Monthly Design Comparison</div>', unsafe_allow_html=True)
-
-compare_monthly = monthly_selected[["month_num", "month_name", "estimated_kwh"]].copy()
-compare_monthly = compare_monthly.rename(columns={"estimated_kwh": "Selected Design"})
-
-baseline_map = monthly_baseline.set_index("month_num")["estimated_kwh"].to_dict()
-compare_monthly["Baseline Design"] = compare_monthly["month_num"].map(baseline_map).fillna(0)
-
-compare_long = compare_monthly.melt(
-    id_vars=["month_num", "month_name"],
-    value_vars=["Selected Design", "Baseline Design"],
-    var_name="Design",
-    value_name="Estimated Energy (kWh)"
-).sort_values("month_num")
+st.markdown('<div class="section-heading">Production Performance</div>', unsafe_allow_html=True)
 
 left, right = st.columns(2, gap="large")
 
 with left:
     st.markdown("""
     <div class="card">
-        <div class="card-label">Seasonal Output</div>
-        <div class="card-title">Selected vs Baseline Monthly Production</div>
+        <div class="card-label">Monthly Output</div>
+        <div class="card-title">Monthly Production for Selected System</div>
     """, unsafe_allow_html=True)
 
     if chart_type == "Line":
         fig_monthly = px.line(
-            compare_long,
+            monthly_selected,
             x="month_name",
-            y="Estimated Energy (kWh)",
-            color="Design",
+            y="estimated_kwh",
             markers=True
         )
     elif chart_type == "Bar":
         fig_monthly = px.bar(
-            compare_long,
+            monthly_selected,
             x="month_name",
-            y="Estimated Energy (kWh)",
-            color="Design",
-            barmode="group"
+            y="estimated_kwh"
         )
     else:
         fig_monthly = px.area(
-            compare_long,
+            monthly_selected,
             x="month_name",
-            y="Estimated Energy (kWh)",
-            color="Design"
+            y="estimated_kwh"
         )
 
     fig_monthly.update_layout(
@@ -778,8 +656,7 @@ with left:
 
     st.markdown("""
         <p class="small-note">
-            This chart shows whether the selected design outperforms the baseline consistently
-            across the year or only in certain parts of the seasonal cycle.
+            This chart updates directly when the selected system size, tilt, or azimuth changes.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -787,26 +664,20 @@ with left:
 with right:
     st.markdown("""
     <div class="card">
-        <div class="card-label">Quarterly Summary</div>
-        <div class="card-title">Quarterly Output Comparison</div>
+        <div class="card-label">Quarterly Output</div>
+        <div class="card-title">Quarterly Production Summary</div>
     """, unsafe_allow_html=True)
 
     q_selected = monthly_selected.groupby("quarter", as_index=False)["estimated_kwh"].sum()
-    q_selected["Design"] = "Selected Design"
-
-    q_baseline = monthly_baseline.groupby("quarter", as_index=False)["estimated_kwh"].sum()
-    q_baseline["Design"] = "Baseline Design"
-
-    q_compare = pd.concat([q_selected, q_baseline], ignore_index=True)
-    q_compare["quarter_label"] = "Q" + q_compare["quarter"].astype(str)
+    q_selected["quarter_label"] = "Q" + q_selected["quarter"].astype(str)
 
     fig_quarter = px.bar(
-        q_compare,
+        q_selected,
         x="quarter_label",
         y="estimated_kwh",
-        color="Design",
-        barmode="group"
+        text="estimated_kwh"
     )
+    fig_quarter.update_traces(texttemplate="%{text:,.0f}", textposition="outside")
     fig_quarter.update_layout(
         xaxis_title="Quarter",
         yaxis_title="Estimated Energy (kWh)"
@@ -816,52 +687,50 @@ with right:
 
     st.markdown("""
         <p class="small-note">
-            Quarterly comparison gives a broader business-friendly view of seasonal output trends,
-            which is helpful for investor discussion and planning.
+            This quarterly view helps explain seasonal production patterns in a more business-friendly format.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
 # =========================================================
-# Annual comparison + distribution
+# Annual output + distribution
 # =========================================================
-st.markdown('<div class="section-heading">Design Evaluation</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-heading">System Evaluation</div>', unsafe_allow_html=True)
 
 a1, a2 = st.columns(2, gap="large")
 
 with a1:
     st.markdown("""
     <div class="card">
-        <div class="card-label">Annual Comparison</div>
-        <div class="card-title">Selected vs Baseline Output</div>
+        <div class="card-label">Annual Output</div>
+        <div class="card-title">Projected Energy for Selected System</div>
     """, unsafe_allow_html=True)
 
-    annual_compare_df = pd.DataFrame({
-        "Design": ["Selected Design", "Baseline Design"],
-        "Annual Energy (kWh)": [annual_selected_filtered, annual_baseline_filtered]
+    annual_df = pd.DataFrame({
+        "Metric": ["Projected Output"],
+        "Annual Energy (kWh)": [annual_selected_filtered]
     })
 
     fig_annual = px.bar(
-        annual_compare_df,
-        x="Design",
+        annual_df,
+        x="Metric",
         y="Annual Energy (kWh)",
-        color="Design",
-        text="Annual Energy (kWh)"
+        text="Annual Energy (kWh)",
+        color="Metric",
+        color_discrete_map={"Projected Output": "#1E6F5C"}
     )
     fig_annual.update_traces(texttemplate='%{text:,.0f}', textposition='outside')
     fig_annual.update_layout(
-        xaxis_title="Design",
+        xaxis_title="",
         yaxis_title="Annual Energy (kWh)",
         showlegend=False
     )
     apply_plot_style(fig_annual)
     st.plotly_chart(fig_annual, use_container_width=True)
 
-    direction_word = "increase" if annual_difference > 0 else "decrease" if annual_difference < 0 else "change"
     st.markdown(f"""
         <p class="small-note">
-            Relative to the baseline, the selected configuration creates an estimated
-            <strong>{abs(annual_difference):,.0f} kWh {direction_word}</strong> over the filtered period.
+            For the current configuration, the filtered annual projection is <strong>{annual_selected_filtered:,.0f} kWh</strong>.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -893,8 +762,7 @@ with a2:
 
     st.markdown("""
         <p class="small-note">
-            This distribution helps show whether projected output is tightly clustered
-            or spread across a wider range inside the selected design window.
+            This distribution shows how output values are spread within the selected tilt and azimuth design window.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -931,8 +799,7 @@ with h1:
 
     st.markdown("""
         <p class="small-note">
-            The heatmap reveals where stronger-performing tilt and azimuth combinations appear
-            across the broader simulation space.
+            The heatmap helps show how estimated annual output changes across tilt and azimuth combinations.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -955,11 +822,14 @@ with h2:
             top_designs,
             x="annual_kwh_est",
             y="design_label",
-            orientation="h"
+            orientation="h",
+            color="annual_kwh_est",
+            color_continuous_scale="YlGn"
         )
         fig_top.update_layout(
             xaxis_title="Estimated Annual Energy (kWh)",
-            yaxis_title="Design Combination"
+            yaxis_title="Design Combination",
+            coloraxis_showscale=False
         )
         apply_plot_style(fig_top)
         st.plotly_chart(fig_top, use_container_width=True)
@@ -968,79 +838,10 @@ with h2:
 
     st.markdown("""
         <p class="small-note">
-            This ranking makes it easier to benchmark how the current design compares with
-            some of the strongest combinations in the dataset.
+            This ranking helps benchmark where the selected system sits within the broader simulation space.
         </p>
     </div>
     """, unsafe_allow_html=True)
-
-# =========================================================
-# Reference dataset section
-# =========================================================
-st.markdown('<div class="section-heading">Scenario Comparison Reference</div>', unsafe_allow_html=True)
-
-if selected_reference_file is not None:
-    reference_df = load_dataset(str(selected_reference_file))
-    month_col, energy_col, site_col = guess_reference_columns(reference_df)
-
-    st.markdown("""
-    <div class="card">
-        <div class="card-label">Reference Dataset</div>
-        <div class="card-title">External / Site-Level Scenario Reference</div>
-    """, unsafe_allow_html=True)
-
-    if site_col:
-        site_options = sorted(reference_df[site_col].dropna().astype(str).unique().tolist())
-        chosen_sites = st.multiselect(
-            "Filter Reference Sites / Scenarios",
-            options=site_options,
-            default=site_options[:min(3, len(site_options))]
-        )
-        if chosen_sites:
-            reference_df = reference_df[reference_df[site_col].astype(str).isin(chosen_sites)].copy()
-
-    if month_col and energy_col:
-        ref_chart_type = st.selectbox(
-            "Reference Chart Type",
-            ["Line", "Bar"],
-            key="reference_chart_type"
-        )
-
-        if ref_chart_type == "Line":
-            fig_ref = px.line(
-                reference_df,
-                x=month_col,
-                y=energy_col,
-                color=site_col if site_col else None,
-                markers=True
-            )
-        else:
-            fig_ref = px.bar(
-                reference_df,
-                x=month_col,
-                y=energy_col,
-                color=site_col if site_col else None,
-                barmode="group"
-            )
-
-        fig_ref.update_layout(
-            xaxis_title="Month",
-            yaxis_title="Monthly Energy"
-        )
-        apply_plot_style(fig_ref)
-        st.plotly_chart(fig_ref, use_container_width=True)
-
-        if site_col and month_col:
-            summary_table = reference_df.groupby(site_col, as_index=False)[energy_col].sum()
-            summary_table = summary_table.sort_values(energy_col, ascending=False)
-            st.dataframe(summary_table, use_container_width=True)
-    else:
-        st.dataframe(reference_df.head(20), use_container_width=True)
-        st.info("Reference dataset loaded, but no standard month/energy columns were detected.")
-
-    st.markdown("</div>", unsafe_allow_html=True)
-else:
-    st.info("Select a reference dataset from the sidebar if you want site-level or scenario-level comparison.")
 
 # =========================================================
 # Data preview
