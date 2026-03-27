@@ -17,6 +17,9 @@ image_path = "solar_image.png"   # keep image in same folder as this file
 # =========================================================
 st.markdown("""
 <style>
+/* -----------------------------
+   Global Styling
+----------------------------- */
 html, body, [class*="css"] {
     font-family: "Segoe UI", sans-serif;
 }
@@ -37,6 +40,9 @@ html, body, [class*="css"] {
     max-width: 1450px;
 }
 
+/* -----------------------------
+   Sidebar
+----------------------------- */
 section[data-testid="stSidebar"] {
     background: linear-gradient(180deg, #141926 0%, #1a2130 100%);
     border-right: 1px solid rgba(255,255,255,0.05);
@@ -46,7 +52,9 @@ section[data-testid="stSidebar"] * {
     color: #f4f4f4 !important;
 }
 
-/* Hero */
+/* -----------------------------
+   Hero
+----------------------------- */
 .hero-box {
     background:
         linear-gradient(135deg, rgba(7, 30, 22, 0.96) 0%, rgba(17, 74, 56, 0.92) 100%);
@@ -113,7 +121,9 @@ section[data-testid="stSidebar"] * {
     margin-top: 0.5rem;
 }
 
-/* Section headings */
+/* -----------------------------
+   Section Headings
+----------------------------- */
 .section-heading {
     font-size: 2.15rem;
     font-weight: 900;
@@ -129,7 +139,9 @@ section[data-testid="stSidebar"] * {
     margin-bottom: 1.3rem;
 }
 
-/* Generic card */
+/* -----------------------------
+   Cards
+----------------------------- */
 .card {
     background: linear-gradient(180deg, rgba(10, 32, 25, 0.96) 0%, rgba(6, 24, 19, 0.96) 100%);
     border: 1px solid rgba(255,255,255,0.08);
@@ -137,6 +149,17 @@ section[data-testid="stSidebar"] * {
     padding: 1.4rem 1.35rem;
     box-shadow: 0 12px 28px rgba(0,0,0,0.22);
     min-height: 100%;
+}
+
+.sub-label {
+    display: inline-block;
+    background: rgba(226, 182, 59, 0.14);
+    color: #f0c34c;
+    padding: 0.36rem 0.82rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin-bottom: 0.9rem;
 }
 
 .card-title {
@@ -153,7 +176,9 @@ section[data-testid="stSidebar"] * {
     margin-bottom: 0.8rem;
 }
 
-/* Dashboard experience */
+/* -----------------------------
+   Dashboard Experience
+----------------------------- */
 .roadmap-card {
     background: linear-gradient(180deg, rgba(11, 35, 27, 0.96) 0%, rgba(7, 26, 20, 0.96) 100%);
     border: 1px solid rgba(255,255,255,0.08);
@@ -187,7 +212,9 @@ section[data-testid="stSidebar"] * {
     line-height: 1.8;
 }
 
-/* Strategic strip */
+/* -----------------------------
+   Insight Strip
+----------------------------- */
 .insight-strip {
     background: linear-gradient(90deg, rgba(19, 72, 55, 0.95) 0%, rgba(12, 46, 36, 0.95) 100%);
     border-left: 6px solid #e2b63b;
@@ -200,7 +227,9 @@ section[data-testid="stSidebar"] * {
     box-shadow: 0 10px 22px rgba(0,0,0,0.18);
 }
 
-/* KPI cards */
+/* -----------------------------
+   KPI Cards
+----------------------------- */
 .kpi-card {
     background: linear-gradient(135deg, rgba(9, 36, 28, 0.97) 0%, rgba(14, 58, 44, 0.94) 100%);
     border: 1px solid rgba(255,255,255,0.08);
@@ -232,7 +261,9 @@ section[data-testid="stSidebar"] * {
     line-height: 1.6;
 }
 
-/* Feature boxes */
+/* -----------------------------
+   Feature Boxes
+----------------------------- */
 .feature-box {
     background: linear-gradient(180deg, rgba(11, 31, 24, 0.96) 0%, rgba(8, 23, 18, 0.96) 100%);
     border: 1px solid rgba(255,255,255,0.07);
@@ -256,7 +287,9 @@ section[data-testid="stSidebar"] * {
     margin-bottom: 0;
 }
 
-/* Footer */
+/* -----------------------------
+   Footer
+----------------------------- */
 .footer-note {
     text-align: center;
     color: #91a69d;
@@ -459,8 +492,18 @@ with col1:
 with col2:
     st.markdown("""
     <div class="feature-box">
+        <h4>Weather & Seasonality Context</h4>
+        <p>Show how Edmonton climate conditions influence solar performance and expected production behavior.</p>
+    </div>
+
+    <div class="feature-box">
         <h4>Real-Site Validation</h4>
         <p>Compare logic against actual production patterns from sites such as Bissell and Visser.</p>
+    </div>
+
+    <div class="feature-box">
+        <h4>Scenario Comparison</h4>
+        <p>Support better decision-making by comparing multiple design alternatives across simulated cases.</p>
     </div>
     """, unsafe_allow_html=True)
 
