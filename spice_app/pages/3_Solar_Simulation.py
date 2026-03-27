@@ -1,14 +1,20 @@
-import streamlit as st
+import os
+from pathlib import Path
+
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
-from pathlib import Path
+import streamlit as st
 
 st.set_page_config(
     page_title="Solar Simulation",
     page_icon="☀️",
     layout="wide"
 )
+
+# =========================================================
+# Image path
+# =========================================================
+image_path = os.path.join(os.path.dirname(__file__), "norquest.png")
 
 # =========================================================
 # Styling
@@ -20,103 +26,268 @@ html, body, [class*="css"] {
 }
 
 .block-container {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding-top: 1.6rem;
+    padding-bottom: 2.4rem;
     padding-left: 2.5rem;
     padding-right: 2.5rem;
+    max-width: 100%;
 }
 
-.hero {
-    background: linear-gradient(90deg, #1E6F5C, #0B3C5D);
-    padding: 2.4rem;
-    border-radius: 22px;
+.stApp {
+    background:
+        radial-gradient(circle at top left, rgba(30,111,92,0.18) 0%, transparent 28%),
+        radial-gradient(circle at top right, rgba(253,184,19,0.08) 0%, transparent 18%),
+        linear-gradient(180deg, #040816 0%, #07111d 45%, #081423 100%);
+    color: #F8FAFC;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #141B2D 0%, #182133 100%);
+    border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+section[data-testid="stSidebar"] * {
+    color: #E5E7EB !important;
+}
+
+/* Hero */
+.hero-box {
+    background: linear-gradient(135deg, rgba(30,111,92,0.96) 0%, rgba(11,60,93,0.96) 100%);
+    padding: 2.8rem;
+    border-radius: 28px;
     color: white;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 16px 36px rgba(0,0,0,0.18);
+    box-shadow: 0 20px 46px rgba(0,0,0,0.34);
+    min-height: 355px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+    overflow: hidden;
 }
 
-.hero h1 {
-    font-size: 2.8rem;
+.hero-box::after {
+    content: "";
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(253,184,19,0.18) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.hero-label {
+    color: #D6EFE6 !important;
+    font-size: 0.90rem;
     font-weight: 800;
-    margin-bottom: 0.6rem;
-}
-
-.hero p {
-    font-size: 1.04rem;
-    line-height: 1.7;
-    max-width: 980px;
-    margin-bottom: 0;
-}
-
-.card {
-    background: rgba(255,255,255,0.95);
-    border-radius: 20px;
-    padding: 1.3rem;
-    box-shadow: 0 10px 26px rgba(0,0,0,0.08);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
     margin-bottom: 1rem;
+    position: relative;
+    z-index: 2;
 }
 
-.kpi-card {
-    background: rgba(255,255,255,0.97);
-    border-radius: 18px;
-    padding: 1.2rem;
+.hero-title {
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 1.08;
+    margin-bottom: 1rem;
+    color: #FFFFFF !important;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-highlight {
+    color: #FDB813 !important;
+}
+
+.hero-text {
+    font-size: 1.05rem;
+    line-height: 1.88;
+    color: #F3F7F6 !important;
+    margin-bottom: 0.75rem;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-badge-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 1rem;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-badge {
+    display: inline-block;
+    background: rgba(253,184,19,0.95);
+    color: #111827 !important;
+    font-weight: 800;
+    padding: 0.58rem 1rem;
+    border-radius: 999px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+    font-size: 0.92rem;
+}
+
+.hero-chip {
+    display: inline-block;
+    background: rgba(255,255,255,0.10);
+    color: #F8FAFC !important;
+    font-weight: 700;
+    padding: 0.52rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.14);
+    font-size: 0.85rem;
+}
+
+.image-caption {
+    color: #CBD5E1 !important;
     text-align: center;
-    box-shadow: 0 10px 24px rgba(0,0,0,0.08);
-    min-height: 130px;
+    font-size: 0.92rem;
+    margin-top: 0.75rem;
+    line-height: 1.5;
+}
+
+[data-testid="stImage"] img {
+    border-radius: 26px;
+    box-shadow: 0 20px 46px rgba(0,0,0,0.34);
+    border: 1px solid rgba(255,255,255,0.08);
+    width: 100%;
+    object-fit: cover;
+}
+
+/* Text */
+.section-heading {
+    font-size: 2rem;
+    font-weight: 850;
+    color: #F8FAFC !important;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.section-subtext {
+    color: #B6C0CE !important;
+    font-size: 1rem;
+    line-height: 1.75;
+    margin-bottom: 1.3rem;
+}
+
+/* KPI */
+.kpi-card {
+    background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F7 100%);
+    border-radius: 22px;
+    padding: 1.25rem;
+    text-align: center;
+    box-shadow: 0 12px 26px rgba(0,0,0,0.18);
+    border: 1px solid rgba(0,0,0,0.05);
+    min-height: 140px;
 }
 
 .kpi-title {
     color: #0B3C5D;
     font-size: 0.95rem;
     font-weight: 700;
+    margin-bottom: 0.5rem;
 }
 
 .kpi-value {
     color: #1E6F5C;
     font-size: 1.8rem;
-    font-weight: 800;
-    margin-top: 0.35rem;
+    font-weight: 850;
+    line-height: 1.2;
 }
 
-.section-title {
+/* Cards */
+.card {
+    background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F7 100%);
+    border-radius: 22px;
+    padding: 1.3rem;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+    margin-bottom: 1rem;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.card-title {
     color: #0B3C5D;
-    font-size: 1.55rem;
-    font-weight: 800;
-    margin-top: 0.5rem;
-    margin-bottom: 0.75rem;
+    font-size: 1.3rem;
+    font-weight: 850;
+    margin-bottom: 0.45rem;
 }
 
-.sub-label {
+.card-label {
     color: #1E6F5C;
-    font-size: 0.9rem;
-    font-weight: 700;
+    font-size: 0.88rem;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.35rem;
 }
 
 .small-note {
-    color: #445;
-    font-size: 0.94rem;
-    line-height: 1.6;
+    color: #334155;
+    font-size: 0.95rem;
+    line-height: 1.7;
 }
 
-.footer-note {
-    background: #EEF5F3;
-    border-radius: 16px;
-    padding: 1rem 1.2rem;
-    color: #234;
-    margin-top: 1rem;
-}
-
+/* Insight */
 .insight-box {
-    background: linear-gradient(90deg, rgba(30,111,92,0.12), rgba(11,60,93,0.10));
-    border-left: 5px solid #1E6F5C;
-    border-radius: 14px;
-    padding: 1rem 1.2rem;
-    margin-top: 0.8rem;
+    background: linear-gradient(90deg, rgba(30,111,92,0.18), rgba(11,60,93,0.18));
+    border-left: 6px solid #FDB813;
+    border-radius: 18px;
+    padding: 1.1rem 1.25rem;
+    margin-top: 0.9rem;
     margin-bottom: 1.3rem;
-    color: #223;
+    color: #E5F3EE !important;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+    font-size: 0.98rem;
+    line-height: 1.75;
+}
+
+/* Scenario metrics */
+.metric-strip {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 1.15rem 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.metric-label-dark {
+    color: #CBD5E1 !important;
+    font-size: 0.90rem;
+    margin-bottom: 0.35rem;
+}
+
+.metric-value-dark {
+    color: #F8FAFC !important;
+    font-size: 1.95rem;
+    font-weight: 850;
+}
+
+/* Footer */
+.footer-note {
+    background: linear-gradient(90deg, rgba(30,111,92,0.18), rgba(11,60,93,0.22));
+    border-radius: 18px;
+    padding: 1rem 1.2rem;
+    color: #E5E7EB !important;
+    margin-top: 1rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+    .hero-title {
+        font-size: 2.2rem;
+    }
+    .hero-box {
+        min-height: auto;
+        padding: 2rem;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -229,6 +400,53 @@ def guess_reference_columns(df):
 
     return month_col, energy_col, site_col
 
+def format_signed_value(value, suffix=""):
+    if value > 0:
+        return f"+{value:,.1f}{suffix}"
+    if value < 0:
+        return f"{value:,.1f}{suffix}"
+    return f"{value:,.1f}{suffix}"
+
+def generate_design_insight(system_size, tilt, azimuth, baseline_tilt, baseline_azimuth,
+                            output_selected, output_baseline, pct_difference,
+                            annual_difference, best_month, worst_month):
+    direction = "improves" if annual_difference > 0 else "reduces" if annual_difference < 0 else "maintains"
+    strength = abs(pct_difference)
+
+    if strength >= 10:
+        impact_phrase = "a strong shift in projected performance"
+    elif strength >= 5:
+        impact_phrase = "a noticeable improvement in projected output" if annual_difference > 0 else "a noticeable reduction in projected output"
+    elif strength >= 1:
+        impact_phrase = "a moderate design difference"
+    else:
+        impact_phrase = "only a small change"
+
+    if annual_difference > 0:
+        compare_text = (
+            f"This selected setup produces {abs(annual_difference):,.0f} kWh more than the baseline, "
+            f"which is {abs(pct_difference):.1f}% higher."
+        )
+    elif annual_difference < 0:
+        compare_text = (
+            f"This selected setup produces {abs(annual_difference):,.0f} kWh less than the baseline, "
+            f"which is {abs(pct_difference):.1f}% lower."
+        )
+    else:
+        compare_text = "This selected setup performs almost the same as the baseline configuration."
+
+    return (
+        f"<strong>Design Insight:</strong> With a selected system size of <strong>{system_size} kW</strong>, "
+        f"the current design at <strong>{tilt}° tilt</strong> and <strong>{azimuth}° azimuth</strong> "
+        f"generates an estimated <strong>{output_selected:,.0f} kWh</strong> over the filtered period. "
+        f"Compared with the baseline setting of <strong>{baseline_tilt}° / {baseline_azimuth}°</strong>, "
+        f"the current design <strong>{direction}</strong> projected energy performance and creates "
+        f"<strong>{impact_phrase}</strong>. {compare_text} "
+        f"The strongest projected month is <strong>{best_month}</strong>, while the weakest month is "
+        f"<strong>{worst_month}</strong>. This helps SPICE explain not only what the output is, "
+        f"but also how design choices change the business story behind the result."
+    )
+
 # =========================================================
 # Dataset loading
 # =========================================================
@@ -256,25 +474,8 @@ if len(main_candidates) == 0:
     st.error("No valid main simulation dataset found. A main dataset must contain datetime, tilt, azimuth, and a power/energy column.")
     st.stop()
 
-# Limit visible choices to 4 total files for cleaner UX
 main_candidates = main_candidates[:4]
 reference_candidates = reference_candidates[:4]
-
-# =========================================================
-# Hero
-# =========================================================
-st.markdown("""
-<div class="hero">
-    <div class="sub-label">Simulation & Design Analysis</div>
-    <h1>Solar Simulation</h1>
-    <p>
-        This page helps SPICE compare solar design choices by showing how changes in
-        system size, tilt, and azimuth affect projected energy output. Instead of
-        presenting one static estimate, the dashboard supports scenario-based analysis
-        for design discussion, investor communication, and project planning.
-    </p>
-</div>
-""", unsafe_allow_html=True)
 
 # =========================================================
 # Sidebar controls
@@ -356,18 +557,76 @@ pct_difference = (annual_difference / annual_baseline_filtered * 100) if annual_
 best_month = monthly_selected.loc[monthly_selected["estimated_kwh"].idxmax(), "month_name"] if not monthly_selected.empty else "N/A"
 worst_month = monthly_selected.loc[monthly_selected["estimated_kwh"].idxmin(), "month_name"] if not monthly_selected.empty else "N/A"
 
+design_insight_html = generate_design_insight(
+    system_size=system_size,
+    tilt=tilt,
+    azimuth=azimuth,
+    baseline_tilt=baseline_tilt,
+    baseline_azimuth=baseline_azimuth,
+    output_selected=annual_selected_filtered,
+    output_baseline=annual_baseline_filtered,
+    pct_difference=pct_difference,
+    annual_difference=annual_difference,
+    best_month=best_month,
+    worst_month=worst_month
+)
+
+# =========================================================
+# Hero
+# =========================================================
+hero_left, hero_right = st.columns([1.4, 1], gap="large")
+
+with hero_left:
+    st.markdown("""
+    <div class="hero-box">
+        <div class="hero-label">Simulation & Design Analysis</div>
+        <div class="hero-title">
+            Solar <span class="hero-highlight">Simulation</span>
+        </div>
+        <div class="hero-text">
+            This page helps SPICE compare solar design choices by showing how changes in
+            system size, tilt, and azimuth affect projected energy output.
+        </div>
+        <div class="hero-text">
+            Instead of presenting one static estimate, the dashboard supports scenario-based
+            analysis for design discussion, investor communication, and project planning.
+        </div>
+        <div class="hero-badge-wrap">
+            <div class="hero-badge">Design Comparison</div>
+            <div class="hero-chip">Scenario Planning</div>
+            <div class="hero-chip">Output Forecasting</div>
+            <div class="hero-chip">Decision Support</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with hero_right:
+    if os.path.exists(image_path):
+        st.image(image_path, use_container_width=True)
+        st.markdown("""
+        <div class="image-caption">
+            Visual context for solar planning and stakeholder-facing scenario discussion.
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.warning("norquest.png not found in the same folder as this page")
+
 # =========================================================
 # KPI row
 # =========================================================
-st.markdown("## Simulation Summary")
+st.markdown('<div class="section-heading">Simulation Summary</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="section-subtext">A quick comparison of the current solar design against the chosen baseline configuration.</div>',
+    unsafe_allow_html=True
+)
 
-k1, k2, k3, k4, k5, k6 = st.columns(6)
+k1, k2, k3, k4, k5, k6 = st.columns(6, gap="large")
 
 with k1:
     st.markdown(f"""
     <div class="kpi-card">
         <div class="kpi-title">Dataset</div>
-        <div class="kpi-value" style="font-size:1.0rem;">{selected_main_file.name[:18]}</div>
+        <div class="kpi-value" style="font-size:1.02rem;">{selected_main_file.name[:18]}</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -412,33 +671,57 @@ with k6:
     """, unsafe_allow_html=True)
 
 # =========================================================
-# Insight box
+# Dynamic insight
 # =========================================================
 st.markdown(f"""
 <div class="insight-box">
-    <strong>Design Insight:</strong> With a selected system size of <strong>{system_size} kW</strong>,
-    the chosen design at <strong>{tilt}° tilt</strong> and <strong>{azimuth}° azimuth</strong> produces
-    <strong>{annual_selected_filtered:,.0f} kWh</strong> over the filtered period. Compared with the
-    baseline design, the change is <strong>{pct_difference:+.1f}%</strong>. This helps SPICE explain
-    whether a design adjustment creates meaningful value rather than only showing raw technical output.
+    {design_insight_html}
 </div>
 """, unsafe_allow_html=True)
 
 # =========================================================
 # Production range
 # =========================================================
-st.markdown("## Production Range")
+st.markdown('<div class="section-heading">Production Range</div>', unsafe_allow_html=True)
 
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Low Scenario", f"{low_energy:,.0f} kWh")
-c2.metric("Average Scenario", f"{avg_energy:,.0f} kWh")
-c3.metric("High Scenario", f"{high_energy:,.0f} kWh")
-c4.metric("Lowest Month", worst_month)
+m1, m2, m3, m4 = st.columns(4, gap="large")
+
+with m1:
+    st.markdown(f"""
+    <div class="metric-strip">
+        <div class="metric-label-dark">Low Scenario</div>
+        <div class="metric-value-dark">{low_energy:,.0f} kWh</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with m2:
+    st.markdown(f"""
+    <div class="metric-strip">
+        <div class="metric-label-dark">Average Scenario</div>
+        <div class="metric-value-dark">{avg_energy:,.0f} kWh</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with m3:
+    st.markdown(f"""
+    <div class="metric-strip">
+        <div class="metric-label-dark">High Scenario</div>
+        <div class="metric-value-dark">{high_energy:,.0f} kWh</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with m4:
+    st.markdown(f"""
+    <div class="metric-strip">
+        <div class="metric-label-dark">Lowest Month</div>
+        <div class="metric-value-dark">{worst_month}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # =========================================================
 # Monthly comparison
 # =========================================================
-st.markdown("## Monthly Design Comparison")
+st.markdown('<div class="section-heading">Monthly Design Comparison</div>', unsafe_allow_html=True)
 
 compare_monthly = monthly_selected[["month_num", "month_name", "estimated_kwh"]].copy()
 compare_monthly = compare_monthly.rename(columns={"estimated_kwh": "Selected Design"})
@@ -453,13 +736,13 @@ compare_long = compare_monthly.melt(
     value_name="Estimated Energy (kWh)"
 ).sort_values("month_num")
 
-left, right = st.columns(2)
+left, right = st.columns(2, gap="large")
 
 with left:
     st.markdown("""
     <div class="card">
-        <div class="sub-label">Seasonal Output</div>
-        <div class="section-title">Selected vs Baseline Monthly Production</div>
+        <div class="card-label">Seasonal Output</div>
+        <div class="card-title">Selected vs Baseline Monthly Production</div>
     """, unsafe_allow_html=True)
 
     if chart_type == "Line":
@@ -495,9 +778,8 @@ with left:
 
     st.markdown("""
         <p class="small-note">
-            This view compares how the selected design performs throughout the year
-            against a baseline configuration. It helps show whether the design decision
-            improves output consistently or only in certain months.
+            This chart shows whether the selected design outperforms the baseline consistently
+            across the year or only in certain parts of the seasonal cycle.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -505,8 +787,8 @@ with left:
 with right:
     st.markdown("""
     <div class="card">
-        <div class="sub-label">Quarterly Summary</div>
-        <div class="section-title">Quarterly Output Comparison</div>
+        <div class="card-label">Quarterly Summary</div>
+        <div class="card-title">Quarterly Output Comparison</div>
     """, unsafe_allow_html=True)
 
     q_selected = monthly_selected.groupby("quarter", as_index=False)["estimated_kwh"].sum()
@@ -534,8 +816,8 @@ with right:
 
     st.markdown("""
         <p class="small-note">
-            Quarterly comparison makes it easier to explain broader seasonal trends
-            to non-technical users such as stakeholders and investors.
+            Quarterly comparison gives a broader business-friendly view of seasonal output trends,
+            which is helpful for investor discussion and planning.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -543,15 +825,15 @@ with right:
 # =========================================================
 # Annual comparison + distribution
 # =========================================================
-st.markdown("## Design Evaluation")
+st.markdown('<div class="section-heading">Design Evaluation</div>', unsafe_allow_html=True)
 
-a1, a2 = st.columns(2)
+a1, a2 = st.columns(2, gap="large")
 
 with a1:
     st.markdown("""
     <div class="card">
-        <div class="sub-label">Annual Comparison</div>
-        <div class="section-title">Selected vs Baseline Output</div>
+        <div class="card-label">Annual Comparison</div>
+        <div class="card-title">Selected vs Baseline Output</div>
     """, unsafe_allow_html=True)
 
     annual_compare_df = pd.DataFrame({
@@ -575,10 +857,11 @@ with a1:
     apply_plot_style(fig_annual)
     st.plotly_chart(fig_annual, use_container_width=True)
 
+    direction_word = "increase" if annual_difference > 0 else "decrease" if annual_difference < 0 else "change"
     st.markdown(f"""
         <p class="small-note">
-            The selected configuration changes output by
-            <strong>{annual_difference:,.0f} kWh</strong> relative to baseline over the filtered period.
+            Relative to the baseline, the selected configuration creates an estimated
+            <strong>{abs(annual_difference):,.0f} kWh {direction_word}</strong> over the filtered period.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -586,12 +869,14 @@ with a1:
 with a2:
     st.markdown("""
     <div class="card">
-        <div class="sub-label">Distribution</div>
-        <div class="section-title">Output Distribution for Selected Design Space</div>
+        <div class="card-label">Distribution</div>
+        <div class="card-title">Output Distribution for Selected Design Space</div>
     """, unsafe_allow_html=True)
 
     if show_distribution and not filtered_selected.empty:
+        filtered_selected = filtered_selected.copy()
         filtered_selected["estimated_output_kwh"] = filtered_selected[target_col] / 1000 * system_size * 24
+
         fig_hist = px.histogram(
             filtered_selected,
             x="estimated_output_kwh",
@@ -608,8 +893,8 @@ with a2:
 
     st.markdown("""
         <p class="small-note">
-            This chart shows the spread of projected output values inside the selected
-            design window, which helps indicate whether the design performs consistently.
+            This distribution helps show whether projected output is tightly clustered
+            or spread across a wider range inside the selected design window.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -617,22 +902,22 @@ with a2:
 # =========================================================
 # Heatmap + top combinations
 # =========================================================
-st.markdown("## Tilt and Azimuth Performance Patterns")
+st.markdown('<div class="section-heading">Tilt and Azimuth Performance Patterns</div>', unsafe_allow_html=True)
 
-h1, h2 = st.columns(2)
+h1, h2 = st.columns(2, gap="large")
+
+surface_df = (
+    df.groupby([tilt_col, azimuth_col], as_index=False)[target_col]
+    .mean()
+)
+surface_df["annual_kwh_est"] = surface_df[target_col] / 1000 * system_size * 24 * 365
 
 with h1:
     st.markdown("""
     <div class="card">
-        <div class="sub-label">Design Surface</div>
-        <div class="section-title">Heatmap of Estimated Annual Output</div>
+        <div class="card-label">Design Surface</div>
+        <div class="card-title">Heatmap of Estimated Annual Output</div>
     """, unsafe_allow_html=True)
-
-    surface_df = (
-        df.groupby([tilt_col, azimuth_col], as_index=False)[target_col]
-        .mean()
-    )
-    surface_df["annual_kwh_est"] = surface_df[target_col] / 1000 * system_size * 24 * 365
 
     pivot_df = surface_df.pivot(index=tilt_col, columns=azimuth_col, values="annual_kwh_est")
 
@@ -646,7 +931,8 @@ with h1:
 
     st.markdown("""
         <p class="small-note">
-            The heatmap helps identify stronger-performing tilt and azimuth zones in the simulation data.
+            The heatmap reveals where stronger-performing tilt and azimuth combinations appear
+            across the broader simulation space.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -654,8 +940,8 @@ with h1:
 with h2:
     st.markdown("""
     <div class="card">
-        <div class="sub-label">Top Designs</div>
-        <div class="section-title">Best Performing Tilt / Azimuth Combinations</div>
+        <div class="card-label">Top Designs</div>
+        <div class="card-title">Best Performing Tilt / Azimuth Combinations</div>
     """, unsafe_allow_html=True)
 
     if show_top_designs:
@@ -682,7 +968,8 @@ with h2:
 
     st.markdown("""
         <p class="small-note">
-            This chart gives a fast benchmark of which design combinations tend to rank highest.
+            This ranking makes it easier to benchmark how the current design compares with
+            some of the strongest combinations in the dataset.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -690,7 +977,7 @@ with h2:
 # =========================================================
 # Reference dataset section
 # =========================================================
-st.markdown("## Scenario Comparison Reference")
+st.markdown('<div class="section-heading">Scenario Comparison Reference</div>', unsafe_allow_html=True)
 
 if selected_reference_file is not None:
     reference_df = load_dataset(str(selected_reference_file))
@@ -698,8 +985,8 @@ if selected_reference_file is not None:
 
     st.markdown("""
     <div class="card">
-        <div class="sub-label">Reference Dataset</div>
-        <div class="section-title">External / Site-Level Scenario Reference</div>
+        <div class="card-label">Reference Dataset</div>
+        <div class="card-title">External / Site-Level Scenario Reference</div>
     """, unsafe_allow_html=True)
 
     if site_col:
@@ -756,9 +1043,9 @@ else:
     st.info("Select a reference dataset from the sidebar if you want site-level or scenario-level comparison.")
 
 # =========================================================
-# Raw preview
+# Data preview
 # =========================================================
-st.markdown("## Filtered Data Preview")
+st.markdown('<div class="section-heading">Filtered Data Preview</div>', unsafe_allow_html=True)
 
 preview_cols = [c for c in [datetime_col, tilt_col, azimuth_col, target_col, "month_name", "quarter"] if c in filtered_selected.columns]
 st.dataframe(filtered_selected[preview_cols].head(20), use_container_width=True)
@@ -769,6 +1056,6 @@ st.dataframe(filtered_selected[preview_cols].head(20), use_container_width=True)
 st.markdown("""
 <div class="footer-note">
     <strong>Next step:</strong> Continue to the Financial Impact page to convert projected
-    production into revenue, savings, and business value for SPICE stakeholders.
+    solar production into revenue, investment-facing interpretation, and business value for SPICE stakeholders.
 </div>
 """, unsafe_allow_html=True)
