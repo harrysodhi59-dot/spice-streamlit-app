@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -388,15 +387,16 @@ if len(summary) == 2:
     b_val = summary.loc[summary["site"] == "Bissell", "total_energy_kwh"].iloc[0]
     v_val = summary.loc[summary["site"] == "Visser", "total_energy_kwh"].iloc[0]
     leader = "Bissell" if b_val > v_val else "Visser"
-    gap_pct = abs((b_val - v_val) / min(b_val, v_val) * 100) if min(b_val, v_val) > 0 else 0
+    avg_base = (b_val + v_val) / 2
+    gap_pct = abs((b_val - v_val) / avg_base * 100) if avg_base > 0 else 0
 
     insight_html = f"""
     <div class="insight-box">
         <strong>Validation Insight:</strong> Across the selected years, <strong>{leader}</strong>
         delivers the stronger overall production profile. The difference between the two sites is
         approximately <strong>{gap_pct:.1f}%</strong>, which helps show how site conditions and
-        operational variability can influence long-term solar output. Converting production into
-        revenue also makes the comparison more meaningful for SPICE from a business perspective.
+        operational variability can influence long-term solar output. Revenue has been retained in the
+        summary cards so the comparison still connects clearly to business value.
     </div>
     """
 else:
@@ -444,164 +444,83 @@ with m3:
     """, unsafe_allow_html=True)
 
 # ---------------------------------------------------
-# Production trend
+# Production trend only
 # ---------------------------------------------------
-left_chart, right_chart = st.columns(2, gap="large")
+st.markdown("""
+<div class="card">
+    <div class="card-label">Production Trend</div>
+    <div class="card-title">⚡ Average Monthly Production by Site</div>
+""", unsafe_allow_html=True)
 
-with left_chart:
-    st.markdown("""
-    <div class="card">
-        <div class="card-label">Production Trend</div>
-        <div class="card-title">⚡ Average Monthly Production by Site</div>
-    """, unsafe_allow_html=True)
+fig_prod = px.line(
+    monthly_comparison.sort_values("month"),
+    x="month_name",
+    y="energy_kwh",
+    color="site",
+    markers=True,
+    category_orders={"month_name": month_order},
+    color_discrete_map={
+        "Bissell": "#8ED1FC",
+        "Visser": "#156CC4"
+    }
+)
+fig_prod.update_layout(
+    xaxis_title="Month",
+    yaxis_title="Average Monthly Production (kWh)",
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="white",
+    font=dict(family="Segoe UI"),
+    legend_title_text=""
+)
+st.plotly_chart(fig_prod, use_container_width=True)
 
-    fig_prod = px.line(
-        monthly_comparison.sort_values("month"),
-        x="month_name",
-        y="energy_kwh",
-        color="site",
-        markers=True,
-        category_orders={"month_name": month_order},
-        color_discrete_map={
-            "Bissell": "#8ED1FC",
-            "Visser": "#156CC4"
-        }
-    )
-    fig_prod.update_layout(
-        xaxis_title="Month",
-        yaxis_title="Average Monthly Production (kWh)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="white",
-        font=dict(family="Segoe UI"),
-        legend_title_text=""
-    )
-    st.plotly_chart(fig_prod, use_container_width=True)
-
-    st.markdown("""
-        <p class="small-note">
-            This chart compares the average monthly production pattern for each real site over the selected years.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with right_chart:
-    st.markdown("""
-    <div class="card">
-        <div class="card-label">Revenue Trend</div>
-        <div class="card-title">💰 Average Monthly Revenue by Site</div>
-    """, unsafe_allow_html=True)
-
-    fig_rev_line = px.line(
-        monthly_comparison.sort_values("month"),
-        x="month_name",
-        y="revenue_cad",
-        color="site",
-        markers=True,
-        category_orders={"month_name": month_order},
-        color_discrete_map={
-            "Bissell": "#FDB813",
-            "Visser": "#1E6F5C"
-        }
-    )
-    fig_rev_line.update_layout(
-        xaxis_title="Month",
-        yaxis_title="Average Monthly Revenue (CAD)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="white",
-        font=dict(family="Segoe UI"),
-        legend_title_text=""
-    )
-    st.plotly_chart(fig_rev_line, use_container_width=True)
-
-    st.markdown("""
-        <p class="small-note">
-            Revenue is estimated by converting energy generation into electricity value using the selected rate.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+st.markdown("""
+    <p class="small-note">
+        This chart compares the average monthly production pattern for each real site over the selected years.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 # ---------------------------------------------------
-# Total comparison charts
+# Total production only
 # ---------------------------------------------------
-left_total, right_total = st.columns(2, gap="large")
+st.markdown("""
+<div class="card">
+    <div class="card-label">Site Comparison</div>
+    <div class="card-title">📊 Total Production by Site</div>
+""", unsafe_allow_html=True)
 
-with left_total:
-    st.markdown("""
-    <div class="card">
-        <div class="card-label">Site Comparison</div>
-        <div class="card-title">📊 Total Production by Site</div>
-    """, unsafe_allow_html=True)
+fig_total_prod = px.bar(
+    summary,
+    x="site",
+    y="total_energy_kwh",
+    color="site",
+    text="total_energy_kwh",
+    color_discrete_map={
+        "Bissell": "#1E6F5C",
+        "Visser": "#FDB813"
+    }
+)
+fig_total_prod.update_traces(
+    texttemplate="%{text:,.0f}",
+    textposition="outside"
+)
+fig_total_prod.update_layout(
+    xaxis_title="Site",
+    yaxis_title="Total Production (kWh)",
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="white",
+    showlegend=False,
+    font=dict(family="Segoe UI")
+)
+st.plotly_chart(fig_total_prod, use_container_width=True)
 
-    fig_total_prod = px.bar(
-        summary,
-        x="site",
-        y="total_energy_kwh",
-        color="site",
-        text="total_energy_kwh",
-        color_discrete_map={
-            "Bissell": "#1E6F5C",
-            "Visser": "#FDB813"
-        }
-    )
-    fig_total_prod.update_traces(
-        texttemplate="%{text:,.0f}",
-        textposition="outside"
-    )
-    fig_total_prod.update_layout(
-        xaxis_title="Site",
-        yaxis_title="Total Production (kWh)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="white",
-        showlegend=False,
-        font=dict(family="Segoe UI")
-    )
-    st.plotly_chart(fig_total_prod, use_container_width=True)
-
-    st.markdown("""
-        <p class="small-note">
-            This view compares total solar generation across the selected sites and years.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with right_total:
-    st.markdown("""
-    <div class="card">
-        <div class="card-label">Business Value</div>
-        <div class="card-title">🏛️ Total Revenue by Site</div>
-    """, unsafe_allow_html=True)
-
-    fig_total_rev = px.bar(
-        summary,
-        x="site",
-        y="total_revenue_cad",
-        color="site",
-        text="total_revenue_cad",
-        color_discrete_map={
-            "Bissell": "#FDB813",
-            "Visser": "#1E6F5C"
-        }
-    )
-    fig_total_rev.update_traces(
-        texttemplate="$%{text:,.0f}",
-        textposition="outside"
-    )
-    fig_total_rev.update_layout(
-        xaxis_title="Site",
-        yaxis_title="Total Revenue (CAD)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="white",
-        showlegend=False,
-        font=dict(family="Segoe UI")
-    )
-    st.plotly_chart(fig_total_rev, use_container_width=True)
-
-    st.markdown("""
-        <p class="small-note">
-            Translating production into revenue helps turn technical energy output into a clearer business story.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+st.markdown("""
+    <p class="small-note">
+        This view compares total solar generation across the selected sites and years.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 # ---------------------------------------------------
 # Electricity saved + best month
