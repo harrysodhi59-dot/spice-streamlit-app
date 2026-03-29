@@ -217,8 +217,8 @@ section[data-testid="stSidebar"] * {
 # ---------------------------------------------------
 @st.cache_data
 def load_data():
-    bissell = pd.read_csv("data/bissell_adjusted_SIM_production_2018_2023_clean 1.csv")
-    visser = pd.read_csv("data/visser_adjusted_SIM_production_2018_2023_clean 1.csv")
+    bissell = pd.read_csv("data/bissell_complete_dataset_clean.csv")
+    visser = pd.read_csv("data/visser_complete_dataset_clean.csv")
     return bissell, visser
 
 # ---------------------------------------------------
