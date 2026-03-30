@@ -911,13 +911,25 @@ with left:
     )
 
     monthly_chart_df = (
-        monthly_selected.groupby(["month", "month_name"], as_index=False, observed=True)["energy_kwh"]
+        monthly_selected.groupby("month", as_index=False, observed=True)["energy_kwh"]
         .sum()
-        .sort_values("month")
     )
 
+    # Force a clean 12-month structure
+    monthly_chart_df = pd.DataFrame({"month": list(range(1, 13))}).merge(
+        monthly_chart_df,
+        on="month",
+        how="left"
+    )
+
+    monthly_chart_df["energy_kwh"] = monthly_chart_df["energy_kwh"].fillna(0)
+
     monthly_chart_df["month_name"] = pd.Categorical(
-        monthly_chart_df["month_name"],
+        monthly_chart_df["month"].map({
+            1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr",
+            5: "May", 6: "Jun", 7: "Jul", 8: "Aug",
+            9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"
+        }),
         categories=MONTH_ORDER,
         ordered=True
     )
@@ -934,8 +946,10 @@ with left:
         yaxis_title="Estimated Energy (kWh)"
     )
     fig_monthly.update_xaxes(categoryorder="array", categoryarray=MONTH_ORDER)
+
     apply_plot_style(fig_monthly)
     st.plotly_chart(fig_monthly, use_container_width=True)
+    fig_monthly.update_layout(height=400)
 
     st.markdown(
         """
@@ -957,31 +971,35 @@ with right:
         unsafe_allow_html=True,
     )
 
+    # Clean monthly totals for selected design
     selected_compare = (
-        monthly_selected.groupby(["month", "month_name"], as_index=False, observed=True)["energy_kwh"]
+        monthly_selected.groupby("month", as_index=False, observed=True)["energy_kwh"]
         .sum()
         .rename(columns={"energy_kwh": "Selected Design"})
-        .sort_values("month")
     )
 
+    # Clean monthly totals for reference design
     baseline_compare = (
-        monthly_baseline.groupby(["month", "month_name"], as_index=False, observed=True)["energy_kwh"]
+        monthly_baseline.groupby("month", as_index=False, observed=True)["energy_kwh"]
         .sum()
         .rename(columns={"energy_kwh": "Reference Design"})
-        .sort_values("month")
     )
 
-    compare_monthly = (
-        selected_compare.merge(
-            baseline_compare[["month", "Reference Design"]],
-            on="month",
-            how="outer"
-        )
-        .sort_values("month")
-    )
+    # Build a clean 12-month calendar so the chart always has one row per month
+    compare_monthly = pd.DataFrame({"month": list(range(1, 13))})
+
+    compare_monthly = compare_monthly.merge(selected_compare, on="month", how="left")
+    compare_monthly = compare_monthly.merge(baseline_compare, on="month", how="left")
+
+    compare_monthly["Selected Design"] = compare_monthly["Selected Design"].fillna(0)
+    compare_monthly["Reference Design"] = compare_monthly["Reference Design"].fillna(0)
 
     compare_monthly["month_name"] = pd.Categorical(
-        compare_monthly["month_name"],
+        compare_monthly["month"].map({
+            1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr",
+            5: "May", 6: "Jun", 7: "Jul", 8: "Aug",
+            9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"
+        }),
         categories=MONTH_ORDER,
         ordered=True
     )
@@ -1000,11 +1018,13 @@ with right:
         color="Design",
         markers=True
     )
+
     fig_compare_month.update_layout(
         xaxis_title="Month",
         yaxis_title="Estimated Energy (kWh)"
     )
     fig_compare_month.update_xaxes(categoryorder="array", categoryarray=MONTH_ORDER)
+
     apply_plot_style(fig_compare_month)
     st.plotly_chart(fig_compare_month, use_container_width=True)
 
@@ -1017,7 +1037,6 @@ with right:
     """,
         unsafe_allow_html=True,
     )
-
 # =========================================================
 # Quarterly and distribution
 # =========================================================
