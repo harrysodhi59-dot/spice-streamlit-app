@@ -1,18 +1,21 @@
-import os
+from pathlib import Path
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-st.set_page_config(
-    page_title="Financial Impact",
-    page_icon="💰",
-    layout="wide"
-)
+# -----------------------------
+# Paths
+# -----------------------------
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
+IMAGE_DIR = BASE_DIR / "images"
+MODEL_DIR = BASE_DIR / "models"
 
 # -----------------------------
 # Image path
 # -----------------------------
-image_path = os.path.join(os.path.dirname(__file__), "finance.png")
+image_path = IMAGE_DIR / "finance.png"
 
 # -----------------------------
 # Styling
@@ -304,11 +307,11 @@ section[data-testid="stSidebar"] * {
 # -----------------------------
 @st.cache_data
 def load_rates():
-    return pd.read_csv("data/epcor_historical_rates.csv")
+    return pd.read_csv(DATA_DIR / "epcor_historical_rates.csv")
 
 @st.cache_data
 def load_costs():
-    return pd.read_csv("data/spice_actual_project_costs.csv")
+    return pd.read_csv(DATA_DIR / "spice_actual_project_costs.csv")
 
 try:
     rates_df = load_rates()
@@ -361,15 +364,15 @@ with hero_left:
     """, unsafe_allow_html=True)
 
 with hero_right:
-    if os.path.exists(image_path):
-        st.image(image_path, use_container_width=True)
+    if image_path.exists():
+        st.image(str(image_path), use_container_width=True)
         st.markdown("""
         <div class="image-caption">
             Financial interpretation helps connect solar performance with business value and investment discussion.
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.warning("finance.png not found in the same folder as this page")
+        st.warning("finance.png not found in the images folder")
 
 # -----------------------------
 # Main controls on page

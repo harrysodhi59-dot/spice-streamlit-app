@@ -1,18 +1,21 @@
-import os
+from pathlib import Path
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-st.set_page_config(
-    page_title="Environmental Impact",
-    page_icon="🌍",
-    layout="wide"
-)
+# -----------------------------
+# Paths
+# -----------------------------
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
+IMAGE_DIR = BASE_DIR / "images"
+MODEL_DIR = BASE_DIR / "models"
 
 # -----------------------------
 # Image path
 # -----------------------------
-image_path = os.path.join(os.path.dirname(__file__), "environment.png")
+image_path = IMAGE_DIR / "environment.png"
 
 # -----------------------------
 # Styling
@@ -304,11 +307,11 @@ section[data-testid="stSidebar"] * {
 # -----------------------------
 @st.cache_data
 def load_emissions():
-    return pd.read_csv("data/alberta_grid_emission_factors.csv")
+    return pd.read_csv(DATA_DIR / "alberta_grid_emission_factors.csv")
 
 @st.cache_data
 def load_carbon():
-    return pd.read_csv("data/federal_carbon_pricing.csv")
+    return pd.read_csv(DATA_DIR / "federal_carbon_pricing.csv")
 
 try:
     emissions_df = load_emissions()
@@ -373,15 +376,15 @@ with hero_left:
     """, unsafe_allow_html=True)
 
 with hero_right:
-    if os.path.exists(image_path):
-        st.image(image_path, use_container_width=True)
+    if image_path.exists():
+        st.image(str(image_path), use_container_width=True)
         st.markdown("""
         <div class="image-caption">
             Environmental framing helps SPICE connect solar generation to sustainability value and community impact.
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.warning("environment.png not found in the same folder as this page")
+        st.warning("environment.png not found in the images folder")
 
 # -----------------------------
 # Main controls on page

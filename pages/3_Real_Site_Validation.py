@@ -1,12 +1,15 @@
+from pathlib import Path
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-st.set_page_config(
-    page_title="Real Site Validation",
-    page_icon="📊",
-    layout="wide"
-)
+# ---------------------------------------------------
+# Paths
+# ---------------------------------------------------
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
+IMAGE_DIR = BASE_DIR / "images"
+MODEL_DIR = BASE_DIR / "models"
 
 # ---------------------------------------------------
 # Styling - Dark Mode + Green/Yellow theme
@@ -217,8 +220,8 @@ section[data-testid="stSidebar"] * {
 # ---------------------------------------------------
 @st.cache_data
 def load_data():
-    bissell = pd.read_csv("data/bissell_complete_dataset_clean.csv")
-    visser = pd.read_csv("data/visser_complete_dataset_clean.csv")
+    bissell = pd.read_csv(DATA_DIR / "bissell_complete_dataset_clean.csv")
+    visser = pd.read_csv(DATA_DIR / "visser_complete_dataset_clean.csv")
     return bissell, visser
 
 # ---------------------------------------------------

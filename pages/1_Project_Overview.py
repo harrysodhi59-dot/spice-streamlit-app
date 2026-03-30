@@ -2,11 +2,13 @@ import streamlit as st
 import base64
 from pathlib import Path
 
-st.set_page_config(
-    page_title="SPICE Solar Analytics Dashboard",
-    page_icon="☀️",
-    layout="wide"
-)
+# =========================================================
+# Paths (FIXED)
+# =========================================================
+BASE_DIR = Path(__file__).resolve().parent.parent
+IMAGE_DIR = BASE_DIR / "images"
+DATA_DIR = BASE_DIR / "data"
+MODEL_DIR = BASE_DIR / "models"
 
 # =========================================================
 # Helper
@@ -18,7 +20,7 @@ def get_base64_image(image_path):
     with open(path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode()
 
-banner_base64 = get_base64_image("images/norquest_banner.png")
+banner_base64 = get_base64_image(IMAGE_DIR / "norquest_banner.png")
 
 # =========================================================
 # Custom CSS

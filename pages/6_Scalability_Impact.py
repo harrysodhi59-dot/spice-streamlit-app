@@ -4,8 +4,6 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
-st.set_page_config(page_title="Scalability & Business Impact", layout="wide")
-
 # ---------------------------------------------------
 # CUSTOM CSS - DARK MODE + GREEN/YELLOW THEME
 # ---------------------------------------------------

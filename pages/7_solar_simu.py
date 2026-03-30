@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 import joblib
@@ -7,7 +6,10 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-st.set_page_config(page_title="Solar Simulation+", page_icon="☀️", layout="wide")
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
+IMAGE_DIR = BASE_DIR / "images"
+MODEL_DIR = BASE_DIR / "models"
 
 # =========================================================
 # Styling
@@ -289,7 +291,7 @@ MONTH_ORDER = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "O
 
 
 def candidate_paths(*names: str) -> list[Path]:
-    roots = [Path("."), Path("data"), Path(__file__).resolve().parent, Path(__file__).resolve().parent / "data"]
+    roots = [MODEL_DIR, DATA_DIR, IMAGE_DIR, BASE_DIR, Path(__file__).resolve().parent]
     out = []
     for root in roots:
         for name in names:
@@ -373,9 +375,12 @@ def load_weather_data():
 
 @st.cache_data
 def load_reference_dataset():
-    for path in candidate_paths("sample_250000.csv"):
+    for path in candidate_paths("sample_250000.csv", "sample_250000.xlsx"):
         if path.exists():
-            df = pd.read_csv(path)
+            if path.suffix.lower() == ".xlsx":
+                df = pd.read_excel(path)
+            else:
+                df = pd.read_csv(path)
             df.columns = [str(c).strip() for c in df.columns]
             return df, path
     return None, None
@@ -561,7 +566,7 @@ weather_by_year, weather_climatology = load_weather_data()
 reference_df, reference_path = load_reference_dataset()
 surface_df = build_design_surface(reference_df)
 
-image_path = Path(__file__).resolve().parent / "norquest.png"
+image_path = IMAGE_DIR / "norquest.png"
 
 # =========================================================
 # Sidebar controls

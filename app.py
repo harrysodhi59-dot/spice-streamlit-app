@@ -9,6 +9,12 @@ st.set_page_config(
 )
 
 # =========================================================
+# PATH FIX (IMPORTANT)
+# =========================================================
+BASE_DIR = Path(__file__).resolve().parent
+IMAGE_DIR = BASE_DIR / "images"
+
+# =========================================================
 # Helper
 # =========================================================
 def get_base64_image(image_path):
@@ -18,8 +24,7 @@ def get_base64_image(image_path):
     with open(path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode()
 
-banner_base64 = get_base64_image("images/norquest_banner.png")
-
+banner_base64 = get_base64_image(IMAGE_DIR / "norquest_banner.png")
 # =========================================================
 # Custom CSS
 # =========================================================
