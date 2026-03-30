@@ -1,0 +1,70 @@
+[
+  {
+    "title": "Project Overview",
+    "text": "The SPICE Solar Analytics Dashboard helps stakeholders evaluate solar projects using simulation models, real site data, and business-focused visual insights. It supports planning, comparison, and decision-making."
+  },
+  {
+    "title": "Solar Simulation",
+    "text": "The Solar Simulation page shows how system size, tilt, and azimuth affect projected solar production. It provides monthly, quarterly, and annual output views and compares a selected design against a reference design."
+  },
+  {
+    "title": "Normalized Output",
+    "text": "Normalized output means annual energy production in kWh per kW installed. It helps compare different system sizes fairly by showing performance efficiency instead of only total energy."
+  },
+  {
+    "title": "Reference Comparison",
+    "text": "Reference comparison shows whether the selected design performs better or worse than the baseline design. It helps measure annual output difference and percentage improvement."
+  },
+  {
+    "title": "Scenario Range",
+    "text": "Scenario range shows low, expected, and high energy outcomes. It helps stakeholders understand how stable or variable performance may be under different weather conditions."
+  },
+  {
+    "title": "Monthly Output",
+    "text": "Monthly output shows seasonal production patterns. Solar energy is usually lower in winter and higher in spring and summer because sunlight availability changes across the year."
+  },
+  {
+    "title": "Quarterly Output",
+    "text": "Quarterly output groups production into Q1, Q2, Q3, and Q4. This makes the seasonal trend easier to explain in business discussions."
+  },
+  {
+    "title": "Weather-Year Distribution",
+    "text": "Weather-year distribution compares annual output across historical weather years. It helps assess production stability and planning confidence."
+  },
+  {
+    "title": "Design Heatmap",
+    "text": "The tilt and azimuth heatmap shows how performance changes across design combinations. It helps identify stronger and weaker design zones."
+  },
+  {
+    "title": "Tilt Response",
+    "text": "Tilt response shows how annual energy changes when tilt changes within a similar azimuth range. It helps identify a stronger tilt range for planning."
+  },
+  {
+    "title": "Real Site Validation",
+    "text": "The Real Site Validation page compares production across Bissell and Visser using operational data. It helps validate site performance patterns and translate output into stakeholder-friendly insights."
+  },
+  {
+    "title": "Financial Impact",
+    "text": "The Financial Impact page converts solar production into financial value using electricity rates and project cost benchmarks. It helps explain annual savings, payback logic, and investment attractiveness."
+  },
+  {
+    "title": "Environmental Impact",
+    "text": "The Environmental Impact page translates solar output into avoided emissions and carbon value. It helps communicate sustainability outcomes for reporting and stakeholder engagement."
+  },
+  {
+    "title": "Scalability Impact",
+    "text": "The Scalability Impact page shows how increasing system size can increase production, savings, and avoided emissions. It supports planning for larger-scale solar adoption."
+  },
+  {
+    "title": "Decision Support",
+    "text": "Decision support means turning analysis into recommendations. The dashboard helps identify stronger configurations, compare options, and explain trade-offs in simple terms."
+  },
+  {
+    "title": "Peak Month",
+    "text": "Peak month is the month with the highest projected energy output. In many solar systems this occurs in late spring or summer."
+  },
+  {
+    "title": "Business Value",
+    "text": "The dashboard is designed to translate technical outputs into business-focused insights. It supports investment understanding, planning decisions, and stakeholder communication."
+  }
+]
