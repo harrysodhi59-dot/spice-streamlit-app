@@ -910,16 +910,33 @@ with left:
         unsafe_allow_html=True,
     )
 
-    if chart_type == "Line":
-        fig_monthly = px.line(monthly_selected, x="month_name", y="energy_kwh", markers=True)
-    elif chart_type == "Bar":
-        fig_monthly = px.bar(monthly_selected, x="month_name", y="energy_kwh")
-    else:
-        fig_monthly = px.area(monthly_selected, x="month_name", y="energy_kwh")
+    monthly_chart_df = (
+        monthly_selected.groupby(["month", "month_name"], as_index=False, observed=True)["energy_kwh"]
+        .sum()
+        .sort_values("month")
+    )
 
-    fig_monthly.update_layout(xaxis_title="Month", yaxis_title="Estimated Energy (kWh)")
+    monthly_chart_df["month_name"] = pd.Categorical(
+        monthly_chart_df["month_name"],
+        categories=MONTH_ORDER,
+        ordered=True
+    )
+
+    if chart_type == "Line":
+        fig_monthly = px.line(monthly_chart_df, x="month_name", y="energy_kwh", markers=True)
+    elif chart_type == "Bar":
+        fig_monthly = px.bar(monthly_chart_df, x="month_name", y="energy_kwh")
+    else:
+        fig_monthly = px.area(monthly_chart_df, x="month_name", y="energy_kwh")
+
+    fig_monthly.update_layout(
+        xaxis_title="Month",
+        yaxis_title="Estimated Energy (kWh)"
+    )
+    fig_monthly.update_xaxes(categoryorder="array", categoryarray=MONTH_ORDER)
     apply_plot_style(fig_monthly)
     st.plotly_chart(fig_monthly, use_container_width=True)
+
     st.markdown(
         """
         <p class="small-note">
@@ -939,18 +956,28 @@ with right:
     """,
         unsafe_allow_html=True,
     )
-    
-    compare_monthly = (
-    monthly_selected[["month", "month_name", "energy_kwh"]]
-    .rename(columns={"energy_kwh": "Selected Design"})
-    .merge(
-        monthly_baseline[["month", "energy_kwh"]]
-        .rename(columns={"energy_kwh": "Reference Design"}),
-        on="month",
-        how="outer",
+
+    selected_compare = (
+        monthly_selected.groupby(["month", "month_name"], as_index=False, observed=True)["energy_kwh"]
+        .sum()
+        .rename(columns={"energy_kwh": "Selected Design"})
+        .sort_values("month")
     )
-    .drop_duplicates(subset=["month"])
-    .sort_values("month")
+
+    baseline_compare = (
+        monthly_baseline.groupby(["month", "month_name"], as_index=False, observed=True)["energy_kwh"]
+        .sum()
+        .rename(columns={"energy_kwh": "Reference Design"})
+        .sort_values("month")
+    )
+
+    compare_monthly = (
+        selected_compare.merge(
+            baseline_compare[["month", "Reference Design"]],
+            on="month",
+            how="outer"
+        )
+        .sort_values("month")
     )
 
     compare_monthly["month_name"] = pd.Categorical(
@@ -965,10 +992,22 @@ with right:
         var_name="Design",
         value_name="energy_kwh"
     )
-    fig_compare_month = px.line(compare_long, x="month_name", y="energy_kwh", color="Design", markers=True)
-    fig_compare_month.update_layout(xaxis_title="Month", yaxis_title="Estimated Energy (kWh)")
+
+    fig_compare_month = px.line(
+        compare_long,
+        x="month_name",
+        y="energy_kwh",
+        color="Design",
+        markers=True
+    )
+    fig_compare_month.update_layout(
+        xaxis_title="Month",
+        yaxis_title="Estimated Energy (kWh)"
+    )
+    fig_compare_month.update_xaxes(categoryorder="array", categoryarray=MONTH_ORDER)
     apply_plot_style(fig_compare_month)
     st.plotly_chart(fig_compare_month, use_container_width=True)
+
     st.markdown(
         f"""
         <p class="small-note">
@@ -983,6 +1022,7 @@ with right:
 # Quarterly and distribution
 # =========================================================
 q1, q2 = st.columns(2, gap="large")
+
 with q1:
     st.markdown(
         """
@@ -992,13 +1032,28 @@ with q1:
     """,
         unsafe_allow_html=True,
     )
-    q_selected = monthly_selected.groupby("quarter", as_index=False)["energy_kwh"].sum()
+
+    q_selected = (
+        monthly_selected.groupby("quarter", as_index=False, observed=True)["energy_kwh"]
+        .sum()
+        .sort_values("quarter")
+    )
     q_selected["quarter_label"] = "Q" + q_selected["quarter"].astype(str)
-    fig_quarter = px.bar(q_selected, x="quarter_label", y="energy_kwh", text="energy_kwh")
+
+    fig_quarter = px.bar(
+        q_selected,
+        x="quarter_label",
+        y="energy_kwh",
+        text="energy_kwh"
+    )
     fig_quarter.update_traces(texttemplate="%{text:,.0f}", textposition="outside")
-    fig_quarter.update_layout(xaxis_title="Quarter", yaxis_title="Estimated Energy (kWh)")
+    fig_quarter.update_layout(
+        xaxis_title="Quarter",
+        yaxis_title="Estimated Energy (kWh)"
+    )
     apply_plot_style(fig_quarter)
     st.plotly_chart(fig_quarter, use_container_width=True)
+
     st.markdown(
         """
         <p class="small-note">
@@ -1018,12 +1073,22 @@ with q2:
     """,
         unsafe_allow_html=True,
     )
+
     if scenario_dist is not None and not scenario_dist.empty:
-        fig_dist = px.bar(scenario_dist, x="weather_year", y="annual_kwh", text="annual_kwh")
+        fig_dist = px.bar(
+            scenario_dist,
+            x="weather_year",
+            y="annual_kwh",
+            text="annual_kwh"
+        )
         fig_dist.update_traces(texttemplate="%{text:,.0f}", textposition="outside")
-        fig_dist.update_layout(xaxis_title="Historical Weather Year", yaxis_title="Annual Energy (kWh)")
+        fig_dist.update_layout(
+            xaxis_title="Historical Weather Year",
+            yaxis_title="Annual Energy (kWh)"
+        )
         apply_plot_style(fig_dist)
         st.plotly_chart(fig_dist, use_container_width=True)
+
         st.markdown(
             """
             <p class="small-note">
