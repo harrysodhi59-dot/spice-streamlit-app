@@ -939,14 +939,32 @@ with right:
     """,
         unsafe_allow_html=True,
     )
-    compare_monthly = monthly_selected[["month", "month_name", "energy_kwh"]].rename(columns={"energy_kwh": "Selected Design"}).merge(
-        monthly_baseline[["month", "energy_kwh"]].rename(columns={"energy_kwh": "Reference Design"}),
+    
+    compare_monthly = (
+    monthly_selected[["month", "month_name", "energy_kwh"]]
+    .rename(columns={"energy_kwh": "Selected Design"})
+    .merge(
+        monthly_baseline[["month", "energy_kwh"]]
+        .rename(columns={"energy_kwh": "Reference Design"}),
         on="month",
         how="outer",
     )
-    compare_monthly["month_name"] = pd.Categorical(MONTH_ORDER[: len(compare_monthly)], categories=MONTH_ORDER, ordered=True)
-    compare_monthly = compare_monthly.sort_values("month")
-    compare_long = compare_monthly.melt(id_vars=["month", "month_name"], value_vars=["Selected Design", "Reference Design"], var_name="Design", value_name="energy_kwh")
+    .drop_duplicates(subset=["month"])
+    .sort_values("month")
+    )
+
+    compare_monthly["month_name"] = pd.Categorical(
+        compare_monthly["month_name"],
+        categories=MONTH_ORDER,
+        ordered=True
+    )
+
+    compare_long = compare_monthly.melt(
+        id_vars=["month", "month_name"],
+        value_vars=["Selected Design", "Reference Design"],
+        var_name="Design",
+        value_name="energy_kwh"
+    )
     fig_compare_month = px.line(compare_long, x="month_name", y="energy_kwh", color="Design", markers=True)
     fig_compare_month.update_layout(xaxis_title="Month", yaxis_title="Estimated Energy (kWh)")
     apply_plot_style(fig_compare_month)
