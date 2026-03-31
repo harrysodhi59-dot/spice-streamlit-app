@@ -11,6 +11,33 @@ DATA_DIR = BASE_DIR / "data"
 IMAGE_DIR = BASE_DIR / "images"
 MODEL_DIR = BASE_DIR / "models"
 
+# ==========Added Section==========================
+
+# 🔥 Ensure models folder exists
+MODEL_DIR.mkdir(exist_ok=True)
+
+import gdown
+
+def download_file(url, path):
+    if not path.exists():
+        with st.spinner(f"Downloading {path.name}..."):
+            gdown.download(url, str(path), quiet=False)
+
+# 🔥 Model download links
+BASELINE_URL = "https://drive.google.com/uc?id=1cAEST2WgcVrAzUxcjIV9W0ifBKzpBkEI"
+CORRECTION_URL = "https://drive.google.com/uc?id=1iHsdQ-Jt97fmXZ0U2dvsvRltKJlhtBe7"
+
+# 🔥 Define model paths
+baseline_path = MODEL_DIR / "baseline_model.pkl"
+correction_path = MODEL_DIR / "correction_model.pkl"
+
+# 🔥 Download models if missing
+download_file(BASELINE_URL, baseline_path)
+download_file(CORRECTION_URL, correction_path)
+
+# =========End of added section========================
+
+
 # =========================================================
 # Styling
 # =========================================================
@@ -447,26 +474,65 @@ def simulate_output(
     use_weather_adjustment: bool,
 ):
     sim_df = build_hourly_frame(sim_year).copy()
-    sim_df["tilt"] = tilt
-    sim_df["azimuth"] = azimuth
+
+# ==== Start of changes made ================================================
+
+  # 🔧 FIX: ensure numeric inputs
+    sim_df["tilt"] = float(tilt)
+    sim_df["azimuth"] = float(azimuth)
 
     if baseline_model is None:
         raise ValueError("Baseline model file not found.")
 
+    # 🔧 FIX: ensure features exist
+    for col in BASELINE_FEATURES:
+        if col not in sim_df.columns:
+            sim_df[col] = 0
+
+    # 🔧 FIX: enforce numeric dtype
+    sim_df[BASELINE_FEATURES] = sim_df[BASELINE_FEATURES].astype(float)
+
+    # =====================
+    # BASELINE MODEL
+    # =====================
     sim_df["power_per_kw"] = baseline_model.predict(sim_df[BASELINE_FEATURES])
     sim_df["power_per_kw"] = np.clip(sim_df["power_per_kw"], a_min=0, a_max=None)
+
     sim_df["energy_kwh_baseline"] = (sim_df["power_per_kw"] / 1000.0) * system_size_kw
 
+    # =====================
+    # WEATHER CORRECTION
+    # =====================
     if use_weather_adjustment and correction_model is not None and climatology is not None:
+
         sim_df = merge_weather(sim_df, climatology)
-        sim_df["correction_factor"] = correction_model.predict(sim_df[CORRECTION_FEATURES])
+
+        # 🔧 FIX: ensure correction features exist
+        for col in CORRECTION_FEATURES:
+            if col not in sim_df.columns:
+                sim_df[col] = 0
+
+        # 🔧 FIX: enforce numeric
+        sim_df[CORRECTION_FEATURES] = sim_df[CORRECTION_FEATURES].astype(float)
+
+        sim_df["correction_factor"] = correction_model.predict(
+            sim_df[CORRECTION_FEATURES]
+        )
+
         sim_df["correction_factor"] = np.clip(sim_df["correction_factor"], 0, 2)
-        sim_df["energy_kwh"] = sim_df["energy_kwh_baseline"] * sim_df["correction_factor"]
-        method = "Weather-adjusted model estimate"
+
+        sim_df["energy_kwh"] = (
+            sim_df["energy_kwh_baseline"] * sim_df["correction_factor"]
+        )
+
+        method = "ML Simulation (Baseline + Weather)"
+
     else:
         sim_df["correction_factor"] = 1.0
         sim_df["energy_kwh"] = sim_df["energy_kwh_baseline"]
-        method = "Baseline model estimate"
+        method = "ML Simulation (Baseline Only)"
+
+# ===========End of Changes===================================
 
     monthly = (
         sim_df.groupby(["month", "month_name", "quarter"], as_index=False)["energy_kwh"]
@@ -1240,31 +1306,70 @@ with h2:
     """,
         unsafe_allow_html=True,
     )
-    if surface_df is not None and not surface_df.empty:
-        tilt_df = surface_df[surface_df["azimuth"].between(azimuth - 15, azimuth + 15)].copy()
-        tilt_df["annual_kwh_est"] = (tilt_df["power_per_kw"] / 1000.0) * system_size * 24 * 365
-        tilt_summary = tilt_df.groupby("tilt", as_index=False)["annual_kwh_est"].mean().sort_values("tilt")
-        fig_tilt = px.line(tilt_summary, x="tilt", y="annual_kwh_est", markers=True)
-        fig_tilt.update_layout(xaxis_title="Tilt (degrees)", yaxis_title="Estimated Annual Energy (kWh)")
+
+# ==============Changed For Model Tilt Chart===================
+
+  # 🔥 NEW: model-based tilt sweep (replaces surface_df logic)
+
+    tilt_range = list(range(5, 65, 5))
+    tilt_outputs = []
+
+    for t in tilt_range:
+        try:
+            _, _, annual, _, _ = simulate_output(
+                tilt=t,
+                azimuth=azimuth,
+                system_size_kw=system_size,
+                sim_year=sim_year,
+                baseline_model=baseline_model,
+                correction_model=correction_model,
+                climatology=weather_climatology,
+                use_weather_adjustment=use_weather_adjustment,
+            )
+            tilt_outputs.append(annual)
+        except:
+            tilt_outputs.append(None)
+
+    tilt_summary = pd.DataFrame({
+        "tilt": tilt_range,
+        "annual_kwh_est": tilt_outputs
+    }).dropna()
+
+    if not tilt_summary.empty:
+        fig_tilt = px.line(
+            tilt_summary,
+            x="tilt",
+            y="annual_kwh_est",
+            markers=True
+        )
+
+        fig_tilt.update_layout(
+            xaxis_title="Tilt (degrees)",
+            yaxis_title="Estimated Annual Energy (kWh)"
+        )
+
         apply_plot_style(fig_tilt)
         st.plotly_chart(fig_tilt, use_container_width=True)
-        if not tilt_summary.empty:
-            best_tilt = float(tilt_summary.loc[tilt_summary["annual_kwh_est"].idxmax(), "tilt"])
-            best_energy = float(tilt_summary["annual_kwh_est"].max())
-            st.markdown(
-                f"""
-                <p class="small-note">
-                    Within the selected azimuth window, the strongest tilt in the reference design space is approximately <strong>{best_tilt:.0f}°</strong>, at about <strong>{best_energy:,.0f} kWh</strong> annually.
-                </p>
-            </div>
-            """,
-                unsafe_allow_html=True,
-            )
-        else:
-            st.markdown("</div>", unsafe_allow_html=True)
+
+        # 🔥 Best tilt insight (keeps your original feature)
+        best_tilt = float(tilt_summary.loc[tilt_summary["annual_kwh_est"].idxmax(), "tilt"])
+        best_energy = float(tilt_summary["annual_kwh_est"].max())
+
+        st.markdown(
+            f"""
+            <p class="small-note">
+                The strongest tilt for this azimuth is approximately <strong>{best_tilt:.0f}°</strong>, producing about <strong>{best_energy:,.0f} kWh</strong> annually.
+            </p>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
     else:
-        st.info("A reference simulation dataset is needed for tilt-response analysis.")
+        st.warning("Unable to compute tilt response from the model.")
         st.markdown("</div>", unsafe_allow_html=True)
+
+# ==========End of changed section============================
 
 # =========================================================
 # Page notes
