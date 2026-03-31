@@ -1,2 +1,10 @@
-Models.pkl/
-*.pkl
+# Virtual environment
+venv/
+
+# Models (ignore actual files but keep folder)
+models/*
+!models/.gitkeep
+
+# Python cache
+__pycache__/
+*.pyc
