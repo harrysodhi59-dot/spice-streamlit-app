@@ -1267,36 +1267,21 @@ with h2:
         st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================================================
-# Assumptions box (replaces data preview)
+# Page notes
 # =========================================================
-st.markdown('<div class="section-heading">Planning Assumptions</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-heading">Page Notes</div>', unsafe_allow_html=True)
 st.markdown(
-    """
+    f"""
 <div class="card">
-    <div class="card-label">Assumptions Summary</div>
-    <div class="card-title">How to Read This Page</div>
+    <div class="card-label">Quick Guide</div>
+    <div class="card-title">What This Page Shows</div>
     <p class="small-note">
-        This page is designed for planning and stakeholder discussion rather than engineering-grade site design. It compares design choices using a baseline production model, optionally applies a weather-correction layer, and then summarizes the result in monthly, quarterly, annual, and normalized forms.
+        This page compares the selected solar design with a reference design using estimated annual and monthly energy output.
+        It highlights seasonal production patterns, weather-year variation, and how design choices affect total output.
     </p>
-""",
-    unsafe_allow_html=True,
-)
-
-assumptions = [
-    f"Simulation calendar: {sim_year}",
-    f"Selected design: {tilt}° tilt, {azimuth}° azimuth",
-    f"Reference design: {baseline_tilt}° tilt, {baseline_azimuth}° azimuth",
-    f"System size: {system_size} kW",
-    f"Method: {engine_label}",
-    "Normalized KPI: annual kWh per kW installed",
-]
-for item in assumptions:
-    st.markdown(f'<span class="assumption-pill">{item}</span>', unsafe_allow_html=True)
-
-st.markdown(
-    """
-    <p class="small-note" style="margin-top:1rem;">
-        For the financial page, the most important outputs from this page are annual energy, monthly profile, normalized performance, and change versus the reference design.
+    <p class="small-note">
+        Current selection: <strong>{tilt}° tilt</strong>, <strong>{azimuth}° azimuth</strong>,
+        <strong>{system_size} kW</strong>, simulation year <strong>{sim_year}</strong>.
     </p>
 </div>
 """,
