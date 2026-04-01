@@ -1203,7 +1203,7 @@ with q2:
         )
 
 # =========================================================
-# Annual + normalized comparison
+# Selected vs Reference Monthly Gap
 # =========================================================
 st.markdown('<div class="section-heading">System Evaluation</div>', unsafe_allow_html=True)
 a1, a2 = st.columns(2, gap="large")
@@ -1212,30 +1212,73 @@ with a1:
     st.markdown(
         """
     <div class="card">
-        <div class="card-label">Annual Output</div>
-        <div class="card-title">Total and Normalized Performance</div>
+        <div class="card-label">Monthly Difference</div>
+        <div class="card-title">Selected vs Reference Monthly Gap</div>
     """,
         unsafe_allow_html=True,
     )
-    annual_df = pd.DataFrame(
-        {
-            "Metric": ["Annual kWh", "kWh per kW"],
-            "Value": [annual_selected_filtered, normalized_selected_filtered],
-        }
+
+    monthly_gap_df = pd.DataFrame({"month": list(range(1, 13))})
+
+    monthly_gap_df = monthly_gap_df.merge(
+        monthly_selected.groupby("month", as_index=False)["energy_kwh"]
+        .sum()
+        .rename(columns={"energy_kwh": "selected_kwh"}),
+        on="month",
+        how="left"
     )
-    fig_annual = px.bar(annual_df, x="Metric", y="Value", text="Value")
-    fig_annual.update_traces(texttemplate="%{text:,.0f}", textposition="outside")
-    fig_annual.update_layout(xaxis_title="", yaxis_title="Value")
-    apply_plot_style(fig_annual)
-    st.plotly_chart(fig_annual, use_container_width=True)
+
+    monthly_gap_df = monthly_gap_df.merge(
+        monthly_baseline.groupby("month", as_index=False)["energy_kwh"]
+        .sum()
+        .rename(columns={"energy_kwh": "reference_kwh"}),
+        on="month",
+        how="left"
+    )
+
+    monthly_gap_df["selected_kwh"] = monthly_gap_df["selected_kwh"].fillna(0)
+    monthly_gap_df["reference_kwh"] = monthly_gap_df["reference_kwh"].fillna(0)
+    monthly_gap_df["gap_kwh"] = monthly_gap_df["selected_kwh"] - monthly_gap_df["reference_kwh"]
+
+    monthly_gap_df["month_name"] = pd.Categorical(
+        monthly_gap_df["month"].map({
+            1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr",
+            5: "May", 6: "Jun", 7: "Jul", 8: "Aug",
+            9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"
+        }),
+        categories=MONTH_ORDER,
+        ordered=True
+    )
+
+    if monthly_gap_df["gap_kwh"].abs().sum() == 0:
+        st.info("The selected design and reference design are currently the same, so there is no monthly difference to display.")
+    else:
+        fig_gap = px.bar(
+            monthly_gap_df,
+            x="month_name",
+            y="gap_kwh",
+        text="gap_kwh"
+    )
+    fig_gap.update_traces(texttemplate="%{text:,.0f}", textposition="outside")
+    fig_gap.update_layout(
+        xaxis_title="Month",
+        yaxis_title="Energy Difference (kWh)",
+        height=430
+    )
+    fig_gap.update_xaxes(categoryorder="array", categoryarray=MONTH_ORDER)
+
+    apply_plot_style(fig_gap)
+    st.plotly_chart(fig_gap, use_container_width=True)
+
     st.markdown(
-        f"""
+        """
         <p class="small-note">
-            The selected system is estimated to produce <strong>{annual_selected_filtered:,.0f} kWh</strong> annually, which equals <strong>{normalized_selected_filtered:,.0f} kWh per kW installed</strong>.
+            This chart shows the monthly energy difference between the selected design and the reference design.
+            Positive values mean the selected design performs better.
         </p>
     </div>
     """,
-        unsafe_allow_html=True,
+    unsafe_allow_html=True,
     )
 
 with a2:
