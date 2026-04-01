@@ -1280,6 +1280,7 @@ with a1:
     """,
         unsafe_allow_html=True,
     )
+    
 with a2:
     st.markdown(
         """
@@ -1300,7 +1301,7 @@ with a2:
     fig_compare.update_traces(texttemplate="%{text:,.0f}", textposition="outside")
     fig_compare.update_layout(xaxis_title="", yaxis_title="Annual Energy (kWh)", showlegend=False)
     apply_plot_style(fig_compare)
-    st.plotly_chart(fig_compare, use_container_width=True)
+    st.plotly_chart(fig_gap, width="stretch")
     st.markdown(
         f"""
         <p class="small-note">
