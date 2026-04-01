@@ -535,7 +535,7 @@ def simulate_output(
 # ===========End of Changes===================================
 
     monthly = (
-        sim_df.groupby(["month", "month_name", "quarter"], as_index=False)["energy_kwh"]
+        sim_df.groupby(["month", "month_name", "quarter"], as_index=False, observed=False)["energy_kwh"]
         .sum()
         .sort_values("month")
     )
@@ -1015,7 +1015,7 @@ with left:
     fig_monthly.update_xaxes(categoryorder="array", categoryarray=MONTH_ORDER)
 
     apply_plot_style(fig_monthly)
-    st.plotly_chart(fig_monthly, use_container_width=True)
+    st.plotly_chart(fig_monthly, width="stretch")
 
     st.markdown(
         """
@@ -1099,7 +1099,7 @@ with right:
     fig_compare_month.update_xaxes(categoryorder="array", categoryarray=MONTH_ORDER)
 
     apply_plot_style(fig_compare_month)
-    st.plotly_chart(fig_compare_month, use_container_width=True)
+    st.plotly_chart(fig_compare_month, width="stretch")
 
     st.markdown(
         f"""
@@ -1144,7 +1144,7 @@ with q1:
         yaxis_title="Estimated Energy (kWh)"
     )
     apply_plot_style(fig_quarter)
-    st.plotly_chart(fig_quarter, use_container_width=True)
+    st.plotly_chart(fig_quarter, width="stretch")
 
     st.markdown(
         """
@@ -1179,7 +1179,7 @@ with q2:
             yaxis_title="Annual Energy (kWh)"
         )
         apply_plot_style(fig_dist)
-        st.plotly_chart(fig_dist, use_container_width=True)
+        st.plotly_chart(fig_dist, width="stretch")
 
         st.markdown(
             """
@@ -1280,7 +1280,7 @@ with a1:
     """,
         unsafe_allow_html=True,
     )
-    
+
 with a2:
     st.markdown(
         """
@@ -1301,7 +1301,7 @@ with a2:
     fig_compare.update_traces(texttemplate="%{text:,.0f}", textposition="outside")
     fig_compare.update_layout(xaxis_title="", yaxis_title="Annual Energy (kWh)", showlegend=False)
     apply_plot_style(fig_compare)
-    st.plotly_chart(fig_gap, width="stretch")
+    st.plotly_chart(fig_compare, width="stretch")
     st.markdown(
         f"""
         <p class="small-note">
