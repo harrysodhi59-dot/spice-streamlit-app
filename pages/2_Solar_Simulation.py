@@ -1008,14 +1008,14 @@ with left:
         fig_monthly = px.area(monthly_chart_df, x="month_name", y="energy_kwh")
 
     fig_monthly.update_layout(
-        xaxis_title="Month",
-        yaxis_title="Estimated Energy (kWh)"
+    xaxis_title="Month",
+    yaxis_title="Estimated Energy (kWh)",
+    height=460
     )
     fig_monthly.update_xaxes(categoryorder="array", categoryarray=MONTH_ORDER)
 
     apply_plot_style(fig_monthly)
     st.plotly_chart(fig_monthly, use_container_width=True)
-    fig_monthly.update_layout(height=400)
 
     st.markdown(
         """
@@ -1086,8 +1086,15 @@ with right:
     )
 
     fig_compare_month.update_layout(
-        xaxis_title="Month",
-        yaxis_title="Estimated Energy (kWh)"
+    xaxis_title="Month",
+    yaxis_title="Estimated Energy (kWh)",
+    height=460,
+    legend=dict(
+        orientation="h",
+        yanchor="top",
+        y=-0.20,
+        xanchor="center",
+        x=0.5)
     )
     fig_compare_month.update_xaxes(categoryorder="array", categoryarray=MONTH_ORDER)
 
