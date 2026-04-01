@@ -1251,24 +1251,24 @@ with a1:
     )
 
     if monthly_gap_df["gap_kwh"].abs().sum() == 0:
-        st.info("The selected design and reference design are currently the same, so there is no monthly difference to display.")
+        st.info("No monthly gap is shown because the selected design matches the reference design.")
     else:
         fig_gap = px.bar(
             monthly_gap_df,
             x="month_name",
             y="gap_kwh",
-        text="gap_kwh"
-    )
-    fig_gap.update_traces(texttemplate="%{text:,.0f}", textposition="outside")
-    fig_gap.update_layout(
-        xaxis_title="Month",
-        yaxis_title="Energy Difference (kWh)",
-        height=430
-    )
-    fig_gap.update_xaxes(categoryorder="array", categoryarray=MONTH_ORDER)
+            text="gap_kwh"
+        )
+        fig_gap.update_traces(texttemplate="%{text:,.0f}", textposition="outside")
+        fig_gap.update_layout(
+            xaxis_title="Month",
+            yaxis_title="Energy Difference (kWh)",
+            height=430
+        )
+        fig_gap.update_xaxes(categoryorder="array", categoryarray=MONTH_ORDER)
 
-    apply_plot_style(fig_gap)
-    st.plotly_chart(fig_gap, use_container_width=True)
+        apply_plot_style(fig_gap)
+        st.plotly_chart(fig_gap, width="stretch")
 
     st.markdown(
         """
@@ -1278,9 +1278,8 @@ with a1:
         </p>
     </div>
     """,
-    unsafe_allow_html=True,
+        unsafe_allow_html=True,
     )
-
 with a2:
     st.markdown(
         """
