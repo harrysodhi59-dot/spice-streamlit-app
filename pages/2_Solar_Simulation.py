@@ -477,19 +477,19 @@ def simulate_output(
 
 # ==== Start of changes made ================================================
 
-  # 🔧 FIX: ensure numeric inputs
+  #  FIX: ensure numeric inputs
     sim_df["tilt"] = float(tilt)
     sim_df["azimuth"] = float(azimuth)
 
     if baseline_model is None:
         raise ValueError("Baseline model file not found.")
 
-    # 🔧 FIX: ensure features exist
+    #  FIX: ensure features exist
     for col in BASELINE_FEATURES:
         if col not in sim_df.columns:
             sim_df[col] = 0
 
-    # 🔧 FIX: enforce numeric dtype
+    #  FIX: enforce numeric dtype
     sim_df[BASELINE_FEATURES] = sim_df[BASELINE_FEATURES].astype(float)
 
     # =====================
@@ -507,12 +507,12 @@ def simulate_output(
 
         sim_df = merge_weather(sim_df, climatology)
 
-        # 🔧 FIX: ensure correction features exist
+        #  FIX: ensure correction features exist
         for col in CORRECTION_FEATURES:
             if col not in sim_df.columns:
                 sim_df[col] = 0
 
-        # 🔧 FIX: enforce numeric
+        #  FIX: enforce numeric
         sim_df[CORRECTION_FEATURES] = sim_df[CORRECTION_FEATURES].astype(float)
 
         sim_df["correction_factor"] = correction_model.predict(
@@ -1357,7 +1357,7 @@ with h1:
         pivot_df = heat_surface.pivot(index="tilt", columns="azimuth", values="annual_kwh_est")
         fig_heatmap = px.imshow(pivot_df, aspect="auto", labels=dict(x="Azimuth (degrees)", y="Tilt (degrees)", color="Annual kWh"))
         apply_plot_style(fig_heatmap)
-        st.plotly_chart(fig_heatmap, use_container_width=True)
+        st.plotly_chart(fig_heatmap, width="stretch")
         st.markdown(
             """
             <p class="small-note">
@@ -1423,7 +1423,7 @@ with h2:
         )
 
         apply_plot_style(fig_tilt)
-        st.plotly_chart(fig_tilt, use_container_width=True)
+        st.plotly_chart(fig_tilt, width="stretch")
 
         # 🔥 Best tilt insight (keeps your original feature)
         best_tilt = float(tilt_summary.loc[tilt_summary["annual_kwh_est"].idxmax(), "tilt"])
