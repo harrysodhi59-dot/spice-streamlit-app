@@ -178,6 +178,8 @@ def detect_intent(query: str) -> str:
         return "environmental"
     if any(x in q for x in ["scale", "scalability", "larger system", "bigger system"]):
         return "scalability"
+    if any(x in q for x in ["good design", "strong design", "is this good", "recommend", "should", "best option", "attractive"]):
+        return "recommendation"
     return "general"
 
 def get_live_context():
@@ -248,6 +250,42 @@ def build_live_answer(query: str, context: dict):
                 f"{solar['expected_scenario_kwh']:,.0f} kWh expected, and "
                 f"{solar['high_scenario_kwh']:,.0f} kWh high."
             )
+        
+        if "best scenario" in q or "high scenario" in q:
+            return (
+                f"The high scenario is approximately {solar['high_scenario_kwh']:,.0f} kWh. "
+                f"This represents stronger output under more favorable weather conditions."
+            )
+
+        if "worst scenario" in q or "low scenario" in q:
+            return (
+                f"The low scenario is approximately {solar['low_scenario_kwh']:,.0f} kWh. "
+                f"This reflects weaker output under less favorable weather conditions."
+            )
+
+        if "average scenario" in q or "expected scenario" in q:
+            return (
+                f"The expected scenario is approximately {solar['expected_scenario_kwh']:,.0f} kWh. "
+                f"This is the central planning estimate for the current design."
+            )
+
+        if "is this a good design" in q or "good design" in q or "strong design" in q or "recommend" in q:
+            if solar["comparison_pct"] > 15:
+                return (
+                    f"This looks like a strong design choice because it is producing "
+                    f"{solar['annual_output_kwh']:,.0f} kWh annually and is "
+                    f"{solar['comparison_pct']:+.1f}% better than the reference design."
+                )
+            elif solar["comparison_pct"] > 0:
+                return (
+                    f"This appears to be a reasonable design because it is performing "
+                    f"{solar['comparison_pct']:+.1f}% better than the reference design."
+                )
+            else:
+                return (
+                    f"This design may need improvement because it is currently "
+                    f"{abs(solar['comparison_pct']):.1f}% below the reference design."
+                )
 
         return (
             f"The current solar simulation setup is {solar['system_size_kw']} kW, "
@@ -307,6 +345,25 @@ def build_live_answer(query: str, context: dict):
 
         if "annual return" in q or "investment return" in q:
             return f"The current estimated annual return is {fin['annual_return_pct']:.2f}%."
+        
+        if "is this financially attractive" in q or "is this good financially" in q or "recommend" in q:
+            if fin["payback_years"] <= 8:
+                return (
+                    f"This looks financially attractive because the payback period is "
+                    f"{fin['payback_years']:.1f} years and annual savings are "
+                    f"${fin['annual_savings_cad']:,.0f}."
+                )
+            elif fin["payback_years"] <= 15:
+                return (
+                    f"This looks moderately attractive financially, with a payback period of "
+                    f"{fin['payback_years']:.1f} years and annual savings of "
+                    f"${fin['annual_savings_cad']:,.0f}."
+                )
+            else:
+                return (
+                    f"This looks more like a longer-term financial opportunity because the payback period "
+                    f"is {fin['payback_years']:.1f} years."
+                )
 
         return (
             f"On the Financial Impact page, the selected project is {fin['selected_project']}. "
@@ -329,6 +386,23 @@ def build_live_answer(query: str, context: dict):
                 f"The current annual carbon value is ${env['annual_carbon_value_cad']:,.0f}, "
                 f"and the lifetime carbon value is ${env['lifetime_carbon_value_cad']:,.0f}."
             )
+        
+        if "is this environmentally strong" in q or "recommend" in q or "is this good environmentally" in q:
+            if env["annual_co2_tonnes"] >= 20:
+                return (
+                    f"This is a strong environmental case because it avoids about "
+                    f"{env['annual_co2_tonnes']:,.2f} tonnes of CO₂ per year."
+                )
+            elif env["annual_co2_tonnes"] >= 8:
+                return (
+                    f"This is a meaningful environmental case because it avoids about "
+                    f"{env['annual_co2_tonnes']:,.2f} tonnes of CO₂ per year."
+                )
+            else:
+                return (
+                    f"This is a modest but still positive environmental case, with about "
+                    f"{env['annual_co2_tonnes']:,.2f} tonnes of CO₂ avoided annually."
+                )
 
         return (
             f"You are on the Environmental Impact page. The current setup avoids about "
@@ -342,7 +416,13 @@ def build_live_answer(query: str, context: dict):
         current_page == "Scalability & Business Impact" or any(x in q for x in ["scalability", "system size", "larger", "bigger", "scale"])
     ):
         scale = context["scalability"]
-
+        if "should spice scale this up" in q or "is scaling worth it" in q or "recommend" in q:
+            return (
+                f"Scaling up appears beneficial here because the current {scale['selected_system_size_kw']:.0f} kW case "
+                f"produces about {scale['annual_production_kwh']:,.0f} kWh annually, saves "
+                f"${scale['annual_savings_cad']:,.0f}, and avoids "
+                f"{scale['annual_co2_avoided_tonnes']:.2f} tonnes of CO₂."
+            )
         return (
             f"You are on the Scalability & Business Impact page. The selected system size is "
             f"{scale['selected_system_size_kw']:.0f} kW under the {scale['irradiance_scenario']} irradiance scenario. "
@@ -395,8 +475,10 @@ kb_items = load_knowledge_base()
 vectorizer, matrix = build_vector_store(kb_items)
 live_context = get_live_context()
 
+if "chat_history" not in st.session_state:
+    st.session_state["chat_history"] = []
+
 example_questions = [
-    "What is normalized output?",
     "What is happening on this page right now?",
     "How is the current solar design performing?",
     "What is the current payback period?",
@@ -409,37 +491,62 @@ for q in example_questions:
     st.markdown(f'<span class="question-chip">{q}</span>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
+if st.button("Clear Chat"):
+    st.session_state["chat_history"] = []
+    st.rerun()
+
 user_query = st.text_input("Ask a question about the dashboard")
 
 if user_query:
-    live_answer = build_live_answer(user_query, live_context)
-    retrieved = retrieve_chunks(user_query, kb_items, vectorizer, matrix, top_k=3)
+    with st.spinner("SPICE Assistant is thinking..."):
+        live_answer = build_live_answer(user_query, live_context)
+        retrieved = retrieve_chunks(user_query, kb_items, vectorizer, matrix, top_k=3)
 
-    if live_answer:
-        answer = live_answer
-        answer_mode = "Live dashboard context"
-    else:
-        answer = build_retrieval_answer(user_query, retrieved)
-        answer_mode = "Knowledge base"
+        if live_answer:
+            answer = live_answer
+            answer_mode = "Live dashboard context"
+        else:
+            answer = build_retrieval_answer(user_query, retrieved)
+            answer_mode = "Knowledge base"
 
-    st.markdown(
-        f'<div class="answer-box"><strong>Answer:</strong> {answer}<br><br><em>Response source: {answer_mode}</em></div>',
-        unsafe_allow_html=True
-    )
+    # Save to history
+    st.session_state["chat_history"].append({
+        "question": user_query,
+        "answer": answer,
+        "mode": answer_mode,
+        "sources": retrieved
+    })
 
-    st.markdown('<div class="card"><div class="card-title">Retrieved Knowledge</div>', unsafe_allow_html=True)
-    for item in retrieved:
+# Display history
+if st.session_state["chat_history"]:
+    for chat in reversed(st.session_state["chat_history"]):
+
         st.markdown(
-            f"""
-            <div class="source-box">
-                <strong>{item['page']} • {item['title']}</strong><br>
-                {item['text']}<br>
-                <em>Similarity score: {item['score']:.3f}</em>
-            </div>
-            """,
+            f'<div class="card"><div class="card-title">You asked</div><div class="card-text">{chat["question"]}</div></div>',
             unsafe_allow_html=True
         )
-    st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown(
+            f'<div class="answer-box"><strong>Answer:</strong> {chat["answer"]}<br><br><em>Response source: {chat["mode"]}</em></div>',
+            unsafe_allow_html=True
+        )
+
+        st.markdown('<div class="card"><div class="card-title">Retrieved Knowledge</div>', unsafe_allow_html=True)
+
+        for item in chat["sources"]:
+            st.markdown(
+                f"""
+                <div class="source-box">
+                    <strong>{item['page']} • {item['title']}</strong><br>
+                    {item['text']}<br>
+                    <em>Similarity score: {item['score']:.3f}</em>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
 else:
     st.markdown("""
     <div class="card">
