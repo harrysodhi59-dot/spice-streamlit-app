@@ -208,32 +208,51 @@ def build_live_answer(query: str, context: dict):
 
     # Solar Simulation
     if context.get("solar") and (
-        current_page == "Solar Simulation" or any(x in q for x in ["tilt", "azimuth", "simulation", "reference", "peak month", "scenario range"])
+        current_page == "Solar Simulation" or any(x in q for x in [
+            "tilt", "azimuth", "simulation", "reference", "peak month",
+            "scenario range", "annual output", "normalized output"
+        ])
     ):
         solar = context["solar"]
 
+        if "annual output" in q or ("output" in q and "normalized" not in q):
+            return f"The current estimated annual output is {solar['annual_output_kwh']:,.0f} kWh."
+
+        if "normalized output" in q:
+            return f"The current normalized output is {solar['normalized_output_kwh_per_kw']:,.0f} kWh per kW installed."
+
+        if "tilt" in q and "azimuth" in q:
+            return f"The current design uses {solar['tilt_deg']}° tilt and {solar['azimuth_deg']}° azimuth."
+
+        if "tilt" in q:
+            return f"The current tilt is {solar['tilt_deg']}°."
+
+        if "azimuth" in q:
+            return f"The current azimuth is {solar['azimuth_deg']}°."
+
         if "peak month" in q:
-            return f"The current peak month on the Solar Simulation page is {solar['best_month']}."
+            return f"The current peak month is {solar['best_month']}."
+
+        if "worst month" in q:
+            return f"The current lowest-output month is {solar['worst_month']}."
 
         if "reference" in q or "compare" in q or "comparison" in q:
             return (
-                f"The current solar design differs from the reference by {solar['comparison_gap_kwh']:,.0f} kWh, "
+                f"The current design differs from the reference by {solar['comparison_gap_kwh']:,.0f} kWh, "
                 f"which is {solar['comparison_pct']:+.1f}%."
             )
 
         if "scenario" in q or "range" in q:
             return (
-                f"The current solar scenario range is approximately {solar['low_scenario_kwh']:,.0f} kWh low, "
+                f"The current scenario range is {solar['low_scenario_kwh']:,.0f} kWh low, "
                 f"{solar['expected_scenario_kwh']:,.0f} kWh expected, and "
                 f"{solar['high_scenario_kwh']:,.0f} kWh high."
             )
 
         return (
-            f"You are on the Solar Simulation page. The current setup is {solar['system_size_kw']} kW, "
-            f"{solar['tilt_deg']}° tilt, and {solar['azimuth_deg']}° azimuth. Estimated annual output is "
-            f"{solar['annual_output_kwh']:,.0f} kWh, with normalized output of "
-            f"{solar['normalized_output_kwh_per_kw']:,.0f} kWh per kW. "
-            f"The peak month is {solar['best_month']}."
+            f"The current solar simulation setup is {solar['system_size_kw']} kW, "
+            f"{solar['tilt_deg']}° tilt, and {solar['azimuth_deg']}° azimuth. "
+            f"Estimated annual output is {solar['annual_output_kwh']:,.0f} kWh."
         )
 
     # Real Site Validation
@@ -258,27 +277,41 @@ def build_live_answer(query: str, context: dict):
 
     # Financial Impact
     if context.get("financial") and (
-        current_page == "Financial Impact" or any(x in q for x in ["payback", "financial", "savings", "project", "investment", "net value"])
+        current_page == "Financial Impact" or any(x in q for x in [
+            "payback", "financial", "savings", "project", "investment",
+            "net value", "cap rate", "return"
+        ])
     ):
         fin = context["financial"]
+
+        if "project" in q:
+            return f"The selected project is {fin['selected_project']}."
+
+        if "annual savings" in q or ("savings" in q and "lifetime" not in q):
+            return f"The current annual savings estimate is ${fin['annual_savings_cad']:,.0f}."
+
+        if "lifetime savings" in q:
+            return f"The current lifetime savings estimate is ${fin['lifetime_savings_cad']:,.0f}."
 
         if "payback" in q:
             return f"The current estimated payback period is {fin['payback_years']:.1f} years."
 
-        if "savings" in q:
-            return (
-                f"The current annual savings estimate is ${fin['annual_savings_cad']:,.0f}, "
-                f"and the lifetime savings estimate is ${fin['lifetime_savings_cad']:,.0f}."
-            )
-
         if "net value" in q:
             return f"The current estimated net value after cost recovery is ${fin['net_value_cad']:,.0f}."
 
+        if "cap rate" in q:
+            return f"The current cap rate is {fin['cap_rate_pct']:.1f}%."
+
+        if "return multiple" in q:
+            return f"The current return multiple is {fin['return_multiple']:.2f}x."
+
+        if "annual return" in q or "investment return" in q:
+            return f"The current estimated annual return is {fin['annual_return_pct']:.2f}%."
+
         return (
-            f"You are on the Financial Impact page. The selected project is {fin['selected_project']}. "
-            f"Annual savings are estimated at ${fin['annual_savings_cad']:,.0f}, "
-            f"payback is about {fin['payback_years']:.1f} years, and lifetime savings are "
-            f"${fin['lifetime_savings_cad']:,.0f}."
+            f"On the Financial Impact page, the selected project is {fin['selected_project']}. "
+            f"Annual savings are ${fin['annual_savings_cad']:,.0f}, payback is {fin['payback_years']:.1f} years, "
+            f"and net value is ${fin['net_value_cad']:,.0f}."
         )
 
     # Environmental Impact
@@ -325,21 +358,25 @@ def build_retrieval_answer(query, retrieved):
         return "I could not find a strong match in the dashboard knowledge base."
 
     intent = detect_intent(query)
-    top_texts = [item["text"] for item in retrieved[:3]]
+    top = retrieved[0]["text"]
+    second = retrieved[1]["text"] if len(retrieved) > 1 else ""
 
     if intent == "definition":
-        return top_texts[0]
+        return top
 
     if intent == "comparison":
-        return " ".join(top_texts[:2])
+        return f"{top} {second}".strip()
 
     if intent == "financial":
-        return " ".join(top_texts[:2])
+        return f"{top} {second}".strip()
 
     if intent == "environmental":
-        return " ".join(top_texts[:2])
+        return f"{top} {second}".strip()
 
-    return " ".join(top_texts[:3])
+    if intent == "general":
+        return top
+
+    return top
 
 # =========================================================
 # Page content
