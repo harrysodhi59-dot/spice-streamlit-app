@@ -536,6 +536,34 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+# =========================================================
+# Live dashboard context for chatbot
+# =========================================================
+st.session_state["current_page"] = "Financial Impact"
+st.session_state["financial_impact_context"] = {
+    "page": "Financial Impact",
+    "selected_project": selected_project,
+    "annual_energy_kwh": annual_energy,
+    "lifetime_years": lifetime_years,
+    "annual_escalation_pct": annual_escalation,
+    "electricity_rate_cad_per_kwh": rate_dollars,
+    "annual_savings_cad": annual_savings,
+    "payback_years": payback_years,
+    "cap_rate_pct": cap_rate,
+    "return_multiple": return_multiple,
+    "annual_return_pct": annual_return,
+    "lifetime_savings_cad": float(cumulative_savings.iloc[-1]),
+    "net_value_cad": float(net_value),
+    "system_size_kw": float(system_size) if pd.notna(system_size) else 0.0,
+    "total_cost_cad": float(total_cost) if pd.notna(total_cost) else 0.0,
+    "cost_per_watt_cad": float(cost_per_watt) if pd.notna(cost_per_watt) else 0.0,
+    "lease_payment_cad": float(lease_payment) if pd.notna(lease_payment) else 0.0,
+    "lease_years": float(lease_years) if pd.notna(lease_years) else 0.0,
+    "financing_type": financing_type,
+    "spice_investment_cad": float(spice_investment) if pd.notna(spice_investment) else 0.0,
+    "compared_projects": selected_compare_projects,
+}
+
 # -----------------------------
 # Project overview cards
 # -----------------------------

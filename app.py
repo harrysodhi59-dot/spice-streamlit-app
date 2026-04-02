@@ -391,55 +391,6 @@ else:
     """, unsafe_allow_html=True)
 
 # =========================================================
-# Executive Overview
-# =========================================================
-st.markdown('<div class="section-title">Executive Overview</div>', unsafe_allow_html=True)
-st.markdown(
-    '<div class="section-subtext">A premium snapshot of the business value this platform can communicate to SPICE stakeholders, investors, and decision-makers.</div>',
-    unsafe_allow_html=True
-)
-
-k1, k2, k3, k4 = st.columns(4)
-
-with k1:
-    st.markdown("""
-    <div class="kpi-card">
-        <div class="kpi-label">Estimated Energy Output</div>
-        <div class="kpi-value">5.24 MWh</div>
-        <div class="kpi-delta">Operational performance insight</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with k2:
-    st.markdown("""
-    <div class="kpi-card">
-        <div class="kpi-label">Projected Revenue</div>
-        <div class="kpi-value">$18.5K</div>
-        <div class="kpi-delta">Investor-facing financial value</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with k3:
-    st.markdown("""
-    <div class="kpi-card">
-        <div class="kpi-label">CO₂ Reduction</div>
-        <div class="kpi-value">2,150 kg</div>
-        <div class="kpi-delta">Measured sustainability outcome</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with k4:
-    st.markdown("""
-    <div class="kpi-card">
-        <div class="kpi-label">Payback Outlook</div>
-        <div class="kpi-value">6.5 yrs</div>
-        <div class="kpi-delta">Investment decision support</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-# =========================================================
 # Problem + Value Framing
 # =========================================================
 left, right = st.columns([1.05, 0.95])
@@ -666,6 +617,36 @@ st.markdown("""
     </p>
 </div>
 """, unsafe_allow_html=True)
+
+# =========================================================
+# Live dashboard context for chatbot
+# =========================================================
+st.session_state["current_page"] = "Home"
+st.session_state["home_context"] = {
+    "page": "Home",
+    "dashboard_title": "SPICE Solar Analytics Dashboard",
+    "team_name": "Team Data Alchemists",
+    "organization": "NorQuest College",
+    "project_partner": "SPICE",
+    "core_value_areas": [
+        "Financial Feasibility",
+        "Operational Performance",
+        "Environmental Reporting"
+    ],
+    "primary_stakeholders": [
+        "Community solar investors",
+        "SPICE project stakeholders",
+        "Sustainability-focused decision-makers",
+        "Planning and operations discussions",
+        "Applied analytics and academic project teams"
+    ],
+    "strategic_question": "Which solar configuration delivers the strongest balance of return, efficiency, and environmental impact?",
+    "dashboard_summary": (
+        "A business-focused solar analytics dashboard designed to help stakeholders "
+        "evaluate solar design choices through energy generation, projected financial "
+        "return, sustainability impact, and strategic decision support."
+    ),
+}
 
 # =========================================================
 # Footer

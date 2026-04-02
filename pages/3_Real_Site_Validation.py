@@ -412,6 +412,30 @@ else:
 
 st.markdown(insight_html, unsafe_allow_html=True)
 
+# =========================================================
+# Live dashboard context for chatbot
+# =========================================================
+leader_site = None
+production_gap_pct = None
+
+if len(summary) == 2:
+    leader_site = leader
+    production_gap_pct = gap_pct
+
+st.session_state["current_page"] = "Real Site Validation"
+st.session_state["real_site_validation_context"] = {
+    "page": "Real Site Validation",
+    "selected_years": selected_years,
+    "selected_sites": selected_sites,
+    "electricity_rate_cad_per_kwh": electricity_rate,
+    "total_energy_kwh": float(df_filtered["energy_kwh"].sum()),
+    "total_revenue_cad": float(df_filtered["revenue_cad"].sum()),
+    "average_monthly_kwh": float(df_filtered["energy_kwh"].mean()),
+    "leader_site": leader_site,
+    "production_gap_pct": production_gap_pct,
+    "site_summary": summary.to_dict(orient="records"),
+}
+
 # ---------------------------------------------------
 # KPI strips
 # ---------------------------------------------------

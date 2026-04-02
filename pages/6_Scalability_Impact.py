@@ -359,6 +359,41 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------
+# Live dashboard context for chatbot
+# ---------------------------------------------------
+st.session_state["current_page"] = "Scalability & Business Impact"
+st.session_state["scalability_impact_context"] = {
+    "page": "Scalability & Business Impact",
+    "selected_system_size_kw": float(selected_row["System Size (kW)"]),
+    "performance_ratio_pct": performance_ratio,
+    "electricity_rate_cad_per_kwh": electricity_rate,
+    "co2_factor_kg_per_kwh": co2_factor,
+    "irradiance_scenario": irradiance_option,
+    "irradiance_multiplier": irradiance_multiplier,
+    "annual_production_kwh": float(selected_row["Annual Production (kWh)"]),
+    "annual_savings_cad": float(selected_row["Annual Savings ($)"]),
+    "annual_co2_avoided_tonnes": float(selected_row["CO2 Avoided (tonnes)"]),
+    "small_scale_summary": {
+        "system_size_kw": float(small_row["System Size (kW)"]),
+        "annual_production_kwh": float(small_row["Annual Production (kWh)"]),
+        "annual_savings_cad": float(small_row["Annual Savings ($)"]),
+        "annual_co2_avoided_tonnes": float(small_row["CO2 Avoided (tonnes)"]),
+    },
+    "medium_scale_summary": {
+        "system_size_kw": float(medium_row["System Size (kW)"]),
+        "annual_production_kwh": float(medium_row["Annual Production (kWh)"]),
+        "annual_savings_cad": float(medium_row["Annual Savings ($)"]),
+        "annual_co2_avoided_tonnes": float(medium_row["CO2 Avoided (tonnes)"]),
+    },
+    "large_scale_summary": {
+        "system_size_kw": float(large_row["System Size (kW)"]),
+        "annual_production_kwh": float(large_row["Annual Production (kWh)"]),
+        "annual_savings_cad": float(large_row["Annual Savings ($)"]),
+        "annual_co2_avoided_tonnes": float(large_row["CO2 Avoided (tonnes)"]),
+    },
+}
+
+# ---------------------------------------------------
 # DATA TABLE
 # ---------------------------------------------------
 with st.expander("View Scalability Data Table"):

@@ -536,6 +536,27 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+# =========================================================
+# Live dashboard context for chatbot
+# =========================================================
+st.session_state["current_page"] = "Environmental Impact"
+st.session_state["environmental_impact_context"] = {
+    "page": "Environmental Impact",
+    "annual_energy_kwh": annual_energy,
+    "selected_emissions_year": selected_year,
+    "selected_carbon_year": selected_carbon_year,
+    "emission_factor_kg_per_kwh": emission_factor,
+    "carbon_price_cad_per_tonne": carbon_price,
+    "annual_co2_tonnes": co2_tonnes,
+    "annual_carbon_value_cad": carbon_value,
+    "lifetime_years": planning_horizon,
+    "lifetime_co2_tonnes": lifetime_co2,
+    "lifetime_carbon_value_cad": lifetime_carbon_value,
+    "trees_equivalent": trees_equivalent,
+    "cars_removed_equivalent": cars_removed_equivalent,
+    "homes_powered_equivalent": homes_powered_equivalent,
+}
+
 # -----------------------------
 # Interpretation cards
 # -----------------------------

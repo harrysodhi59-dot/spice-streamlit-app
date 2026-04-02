@@ -1,70 +1,104 @@
 [
   {
+    "page": "Home",
     "title": "Project Overview",
+    "keywords": ["dashboard", "overview", "stakeholders", "decision making", "solar analytics"],
     "text": "The SPICE Solar Analytics Dashboard helps stakeholders evaluate solar projects using simulation models, real site data, and business-focused visual insights. It supports planning, comparison, and decision-making."
   },
   {
+    "page": "Solar Simulation",
     "title": "Solar Simulation",
+    "keywords": ["solar simulation", "tilt", "azimuth", "system size", "monthly output", "reference design"],
     "text": "The Solar Simulation page shows how system size, tilt, and azimuth affect projected solar production. It provides monthly, quarterly, and annual output views and compares a selected design against a reference design."
   },
   {
+    "page": "Solar Simulation",
     "title": "Normalized Output",
+    "keywords": ["normalized output", "kwh per kw", "efficiency", "performance"],
     "text": "Normalized output means annual energy production in kWh per kW installed. It helps compare different system sizes fairly by showing performance efficiency instead of only total energy."
   },
   {
+    "page": "Solar Simulation",
     "title": "Reference Comparison",
+    "keywords": ["reference comparison", "baseline design", "difference", "percent improvement"],
     "text": "Reference comparison shows whether the selected design performs better or worse than the baseline design. It helps measure annual output difference and percentage improvement."
   },
   {
+    "page": "Solar Simulation",
     "title": "Scenario Range",
+    "keywords": ["scenario range", "low", "expected", "high", "weather conditions"],
     "text": "Scenario range shows low, expected, and high energy outcomes. It helps stakeholders understand how stable or variable performance may be under different weather conditions."
   },
   {
+    "page": "Solar Simulation",
     "title": "Monthly Output",
+    "keywords": ["monthly output", "seasonality", "solar production", "winter", "summer"],
     "text": "Monthly output shows seasonal production patterns. Solar energy is usually lower in winter and higher in spring and summer because sunlight availability changes across the year."
   },
   {
+    "page": "Solar Simulation",
     "title": "Quarterly Output",
+    "keywords": ["quarterly output", "seasonal trend", "q1", "q2", "q3", "q4"],
     "text": "Quarterly output groups production into Q1, Q2, Q3, and Q4. This makes the seasonal trend easier to explain in business discussions."
   },
   {
+    "page": "Solar Simulation",
     "title": "Weather-Year Distribution",
+    "keywords": ["weather-year distribution", "historical weather", "planning confidence", "stability"],
     "text": "Weather-year distribution compares annual output across historical weather years. It helps assess production stability and planning confidence."
   },
   {
+    "page": "Solar Simulation",
     "title": "Design Heatmap",
+    "keywords": ["heatmap", "tilt", "azimuth", "design combinations", "stronger zones"],
     "text": "The tilt and azimuth heatmap shows how performance changes across design combinations. It helps identify stronger and weaker design zones."
   },
   {
+    "page": "Solar Simulation",
     "title": "Tilt Response",
+    "keywords": ["tilt response", "tilt range", "annual energy", "azimuth"],
     "text": "Tilt response shows how annual energy changes when tilt changes within a similar azimuth range. It helps identify a stronger tilt range for planning."
   },
   {
+    "page": "Real Site Validation",
     "title": "Real Site Validation",
+    "keywords": ["real site validation", "bissell", "visser", "operational data", "site comparison"],
     "text": "The Real Site Validation page compares production across Bissell and Visser using operational data. It helps validate site performance patterns and translate output into stakeholder-friendly insights."
   },
   {
+    "page": "Financial Impact",
     "title": "Financial Impact",
+    "keywords": ["financial impact", "savings", "payback", "investment", "cost benchmarks"],
     "text": "The Financial Impact page converts solar production into financial value using electricity rates and project cost benchmarks. It helps explain annual savings, payback logic, and investment attractiveness."
   },
   {
+    "page": "Environmental Impact",
     "title": "Environmental Impact",
+    "keywords": ["environmental impact", "avoided emissions", "carbon value", "sustainability"],
     "text": "The Environmental Impact page translates solar output into avoided emissions and carbon value. It helps communicate sustainability outcomes for reporting and stakeholder engagement."
   },
   {
+    "page": "Scalability & Business Impact",
     "title": "Scalability Impact",
-    "text": "The Scalability Impact page shows how increasing system size can increase production, savings, and avoided emissions. It supports planning for larger-scale solar adoption."
+    "keywords": ["scalability", "system size", "larger scale", "production", "savings", "co2"],
+    "text": "The Scalability & Business Impact page shows how increasing system size can increase production, savings, and avoided emissions. It supports planning for larger-scale solar adoption."
   },
   {
+    "page": "Home",
     "title": "Decision Support",
+    "keywords": ["decision support", "recommendations", "trade-offs", "comparison", "stakeholders"],
     "text": "Decision support means turning analysis into recommendations. The dashboard helps identify stronger configurations, compare options, and explain trade-offs in simple terms."
   },
   {
+    "page": "Solar Simulation",
     "title": "Peak Month",
+    "keywords": ["peak month", "highest output", "late spring", "summer"],
     "text": "Peak month is the month with the highest projected energy output. In many solar systems this occurs in late spring or summer."
   },
   {
+    "page": "Home",
     "title": "Business Value",
+    "keywords": ["business value", "stakeholder communication", "investment understanding", "planning"],
     "text": "The dashboard is designed to translate technical outputs into business-focused insights. It supports investment understanding, planning decisions, and stakeholder communication."
   }
 ]

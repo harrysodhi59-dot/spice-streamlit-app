@@ -758,6 +758,33 @@ insight_html = summarize_design(
 )
 
 # =========================================================
+# Live dashboard context for chatbot
+# =========================================================
+st.session_state["current_page"] = "Solar Simulation"
+st.session_state["solar_simulation_context"] = {
+    "page": "Solar Simulation",
+    "method": engine_label,
+    "system_size_kw": system_size,
+    "tilt_deg": tilt,
+    "azimuth_deg": azimuth,
+    "simulation_year": sim_year,
+    "weather_adjustment": use_weather_adjustment,
+    "reference_tilt_deg": baseline_tilt,
+    "reference_azimuth_deg": baseline_azimuth,
+    "annual_output_kwh": annual_selected_filtered,
+    "normalized_output_kwh_per_kw": normalized_selected_filtered,
+    "reference_annual_output_kwh": annual_baseline_filtered,
+    "reference_normalized_output_kwh_per_kw": normalized_baseline_filtered,
+    "comparison_gap_kwh": comparison_gap,
+    "comparison_pct": comparison_pct,
+    "best_month": str(best_month),
+    "worst_month": str(worst_month),
+    "low_scenario_kwh": low_energy,
+    "expected_scenario_kwh": avg_energy,
+    "high_scenario_kwh": high_energy,
+}
+
+# =========================================================
 # Hero
 # =========================================================
 hero_left, hero_right = st.columns([1.4, 1], gap="large")
